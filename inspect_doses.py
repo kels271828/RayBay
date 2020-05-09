@@ -37,10 +37,10 @@ for k in range(len(dose_vec)):
 # Plot results
 fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 ax[0].plot(dose_vec, lung_avg, 'o')
-ax[0].set_xlabel('Lung Weight')
+ax[0].set_xlabel('Lung Dose')
 ax[0].set_ylabel('Lung Average')
 ax[1].plot(dose_vec, ptv_d95, 'o')
-ax[1].set_xlabel('Lung Weight')
+ax[1].set_xlabel('Lung Dose')
 ax[1].set_ylabel('PTV D95')
 ax[2].plot(lung_avg, ptv_d95, 'o')
 ax[2].set_xlabel('Lung Average')
