@@ -9,7 +9,7 @@
 1. Create a new tab in the RayStation console
 2. Create virtual environment: ``python -m venv C:\Users\kmaass\Documents\virtual_environment
 3. Activate virtual environment: ``C:\Users\kmaass\Documents\virtual_environment\Scripts\activate.bat``
-4. Install packages: ``pip install numpy spyder``
+4. Install packages: ``pip install numpy spyder pythonnet``
 
 ## Run Spyder and connect to RayStation
 1. Start Spyder kernel: ``python -m spyder_kernels.console``
