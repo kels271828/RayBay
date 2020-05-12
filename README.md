@@ -10,12 +10,13 @@ Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/mast
 1. Log into RayStation
 2. Select patient
 3. In Scripting tab, run script `run_console` (may need to de-select "Show only validated scripts" in Settings)
+4. Create a new tab in the RayStation console
 
 ## Set up virtual environment
-1. Create a new tab in the RayStation console
-2. Create virtual environment: ``python -m venv fpath\virtual_environment``
-3. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
-4. Install packages: ``pip install matplotlib numpy pythonnet spyder`` or ``pip install -r requirements.txt``
+
+1. Create virtual environment: ``python -m venv fpath\virtual_environment``
+2. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
+3. Install packages: ``pip install matplotlib numpy pythonnet spyder`` or ``pip install -r requirements.txt``
 
 Note: Setting up the virtual environment only needs to be done once.
 
