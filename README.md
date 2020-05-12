@@ -24,8 +24,8 @@ Note: Setting up the virtual environment only needs to be done once.
 1. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
 2. Run Spyder: ``spyder3``
 3. Start Spyder kernel: ``python -m spyder_kernels.console``
-4. Connect to Spyder to RayStation:
-    * Click options icon at the top left of the Spyder console
+4. Connect Spyder to RayStation:
+    * In Spyder, click options icon at the top left of the Spyder console
     * Click "Connect to existing kernel"
     * Browse to the json file created in the RayStation console
     
