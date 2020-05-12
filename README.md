@@ -33,3 +33,6 @@ Note: Setting up the virtual environment only needs to be done once.
 1. Open script in Spyder
     * To use scripts on local computer, may need to change read/write settings first
 2. Click "Run file" button, press F5 button, or use ``%run fpath\script.py`` in console
+
+Haven't tried, but assuming could also run in RayStation console with ``python fpath\script``.
+Wouldn't be good for debugging, but okay once script working.
