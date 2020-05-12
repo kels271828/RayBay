@@ -1,7 +1,10 @@
 # autoray
 Automatic parameter tuning for RayStation
 
-# Connecting Spyder to RayStation
+# Current Workflow
+
+Here is my current workflow for running Python scripts for RayStation in Spyder.
+Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/master/Raystation%20Virtual%20Environment.docx), but some things have been modified.
 
 ## Launch RayStation
 1. Log into RayStation
@@ -10,22 +13,22 @@ Automatic parameter tuning for RayStation
 
 ## Set up virtual environment
 1. Create a new tab in the RayStation console
-2. Create virtual environment: ``python -m venv C:\Users\kmaass\Documents\virtual_environment
-3. Activate virtual environment: ``C:\Users\kmaass\Documents\virtual_environment\Scripts\activate.bat``
-4. Install packages: ``pip install numpy spyder pythonnet``
+2. Create virtual environment: ``python -m venv fpath\virtual_environment``
+3. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
+4. Install packages: ``pip install matplotlib numpy pythonnet spyder``
+
+Note: Setting up the virtual environment only needs to be done once.
 
 ## Run Spyder and connect to RayStation
-1. Start Spyder kernel: ``python -m spyder_kernels.console``
-2. Create a new tab in the RayStation console
-3. Activate virtual environment: ``C:\Users\kmaass\Documents\virtual_environment\Scripts\activate.bat``
-4. Run Spyder: ``spyder3``
-5. Connect to RayStation:
-    * Click gear icon at the top left of the Spyder console
+1. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
+2. Run Spyder: ``spyder3``
+3. Start Spyder kernel: ``python -m spyder_kernels.console``
+4. Connect to Spyder to RayStation:
+    * Click options icon at the top left of the Spyder console
     * Click "Connect to existing kernel"
     * Browse to the json file created in the RayStation console
     
-# Notes
-    
-At the moment, the virtual environments I've created aren't saved after I log out of RayStation.
-One thing I might try is to make a bash script I can copy and paste into the console to automate the above steps.
-How do I save the plots or results I generate from a script? Can I use scp?
+## Run Python Script
+1. Open script in Spyder
+    * To use scripts on local computer, may need to change read/write settings first
+2. Click "Run file" button, press F5 button, or use ``%run 'fpath\script.py`` in console
