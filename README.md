@@ -15,7 +15,7 @@ Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/mast
 1. Create a new tab in the RayStation console
 2. Create virtual environment: ``python -m venv fpath\virtual_environment``
 3. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
-4. Install packages: ``pip install matplotlib numpy pythonnet spyder``
+4. Install packages: ``pip install matplotlib numpy pythonnet spyder`` or ``pip install -r requirements.txt``
 
 Note: Setting up the virtual environment only needs to be done once.
 
