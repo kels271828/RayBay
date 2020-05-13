@@ -19,7 +19,7 @@ defusedxml==0.6.0
 diff-match-patch==20181111
 docutils==0.16
 entrypoints==0.3
-flake8==3.7.9
+flake8==3.8.1
 helpdev==0.7.1
 idna==2.9
 imagesize==1.2.0
@@ -56,7 +56,7 @@ pluggy==0.13.1
 prompt-toolkit==3.0.5
 psutil==5.7.0
 ptyprocess==0.6.0
-pycodestyle==2.5.0
+pycodestyle==2.6.0
 pycparser==2.20
 pydocstyle==5.0.2
 pyflakes==2.1.1
@@ -78,7 +78,7 @@ pywin32-ctypes==0.2.0
 pyzmq==19.0.1
 QDarkStyle==2.8.1
 QtAwesome==0.7.2
-qtconsole==4.7.3
+qtconsole==4.7.4
 QtPy==1.9.0
 requests==2.23.0
 rope==0.17.0
