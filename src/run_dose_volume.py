@@ -3,7 +3,6 @@ import numpy as np
 
 import connect
 
-
 # Get RayStation objects
 patient = connect.get_current('Patient')
 case = connect.get_current('Case')
@@ -23,6 +22,7 @@ oar_avg = -np.ones((len(doses), len(volumes)))
 ptv_d95 = -np.ones((len(doses), len(volumes)))
 oar_avg_norm = -np.ones((len(doses), len(volumes)))
 ptv_d95_norm = -np.ones((len(doses), len(volumes)))
+fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
 for ii in range(len(doses)):
     print(f'Dose: {doses[ii]:e}')
     oar_term.DoseFunctionParameters.DoseLevel = doses[ii]
@@ -34,13 +34,14 @@ for ii in range(len(doses)):
             plan_opt.ResetOptimization()
             plan_opt.RunOptimization()
             
-            # Save results
+            # Store results
             oar_avg[ii, jj] = plan_dose.GetDoseStatistic(RoiName='Lungs',
-                                                          DoseType='Average')
+                                                         DoseType='Average')
             ptv_d95[ii, jj] = plan_dose.GetDoseAtRelativeVolumes(RoiName='PTV',
                                                                  RelativeVolumes=[0.95])[0]
+            print(f'OAR Avg: {oar_avg[ii, jj]:e}, PTV D95: {ptv_d95[ii, jj]:e}')
             
-            # Save normalized results
+            # Store normalized results
             beam_set.NormalizeToPrescription(RoiName='PTV', DoseValue=4800.0,
                                              DoseVolume=95.0,
                                              PrescriptionType='DoseAtVolume')
@@ -48,13 +49,13 @@ for ii in range(len(doses)):
                                                               DoseType='Average')
             ptv_d95_norm[ii, jj] = plan_dose.GetDoseAtRelativeVolumes(RoiName='PTV',
                                                                       RelativeVolumes=[0.95])[0]
-            print(f'OAR Avg: {oar_avg[ii, jj]:e}, PTV D95: {ptv_d95[ii, jj]:e}')
         except Exception as e:
             print('Something wrong: ' + str(e))
 
-# Save results
-fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
-np.save(fpath + 'doses_5_15.npy', doses)
-np.save(fpath + 'volumes_5_15.npy', volumes)
-np.save(fpath + 'oar_avg_5_15.npy', oar_avg)
-np.save(fpath + 'ptv_d95_5_15.npy', ptv_d95)
+    # Save results
+    np.save(fpath + 'doses_5_20.npy', doses)
+    np.save(fpath + 'volumes_5_20.npy', volumes)
+    np.save(fpath + 'oar_avg_5_20.npy', oar_avg)
+    np.save(fpath + 'ptv_d95_5_20.npy', ptv_d95)
+    np.save(fpath + 'oar_avg_norm_5_20.npy', oar_avg_norm)
+    np.save(fpath + 'ptv_d95_norm_5_20.npy', ptv_d95_norm)
