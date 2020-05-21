@@ -4,7 +4,8 @@ Automatic parameter tuning for RayStation
 # Current Workflow
 
 Here is my current workflow for running Python scripts for RayStation in Spyder.
-Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/master/Raystation%20Virtual%20Environment.docx), but some things have been modified.
+Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/master/docs/Raystation%20Virtual%20Environment.docx), but some things have been modified.
+Other scripting information can be found in the [RayStation documentation](https://github.com/kels271828/autoray/blob/master/docs/RSL-D-RS-8B-SG-EN-1.0-2018-12-20%20RayStation%208B%20Scripting%20Guideline.pdf).
 
 ## Launch RayStation
 1. Log into RayStation
