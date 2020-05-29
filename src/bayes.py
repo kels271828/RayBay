@@ -86,7 +86,7 @@ def score_plan(results):
         Treatment plan score.
 
     """
-    weight = 0.75
+    weight = 0.50
     app_avg = 318.459
     app_max = 6076.125
     oar_dec = (results[0] - app_avg)/app_avg
@@ -143,7 +143,7 @@ def save_results(plan, beam_set, pars, fpath, normalize=True):
 
 if __name__ == '__main__':
     start = time()
-    fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
+    fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\weight_50\\'
 
     # Get RayStation objects
     plan = connect.get_current('Plan')
@@ -159,7 +159,10 @@ if __name__ == '__main__':
     results = gp_minimize(lambda pars: objective(plan, pars),
                           dimensions=[(100, 2000), (0, 10)], x0=x0, y0 = y0,
                           random_state=0, n_calls=25)
-   #np.save(fpath + 'results.npy', results) # doesn't work!
+    np.save(fpath + 'x.npy', results.x)
+    np.save(fpath + 'x_iters.npy', results.x_iters)
+    np.save(fpath + 'fun.npy', results.fun)
+    np.save(fpath + 'func_vals.npy', results.func_vals)
     
     # Save plan results
     print('\nSaving results')
