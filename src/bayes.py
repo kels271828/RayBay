@@ -86,7 +86,7 @@ def score_plan(results):
         Treatment plan score.
 
     """
-    weight = 0.50
+    weight = 0.25
     app_avg = 318.459
     app_max = 6076.125
     oar_dec = (results[0] - app_avg)/app_avg
@@ -143,7 +143,7 @@ def save_results(plan, beam_set, pars, fpath, normalize=True):
 
 if __name__ == '__main__':
     start = time()
-    fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\weight_50\\'
+    fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\weight_25\\'
 
     # Get RayStation objects
     plan = connect.get_current('Plan')
@@ -171,5 +171,5 @@ if __name__ == '__main__':
     
     # Print total time
     total_time = time() - start
-    print('Total time: {total_time} seconds')
+    print(f'Total time: {total_time} seconds')
  
