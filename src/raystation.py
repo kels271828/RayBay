@@ -13,6 +13,7 @@ def save_results(roi_names, fpath):
         Regions of interest to include in results.
     fpath : str
         File path to save results.
+
     """
     np.save(fpath + 'stats.npy', get_stats(roi_names))
     np.save(fpath + 'dvh.npy', get_dvh(roi_names))
@@ -30,6 +31,7 @@ def get_stats(roi_names):
     -------
     dict
         Dose statistics for given regions of interest.
+
     """
     stats = {}
     dose = connect.get_current('Plan').TreatmentCourse.TotalDose
@@ -59,6 +61,7 @@ def get_dvh(roi_names):
     -------
     dict
         Dose and volumes for given regions of interest.
+
     """
     dose = connect.get_current('Plan').TreatmentCourse.TotalDose
     max_dose = max([dose.GetDoseStatistic(RoiName=roi, DoseType='Max')
@@ -77,6 +80,7 @@ def plot_dvh(roi_names):
     ----------
     roi_names : list
         Regions of interest to include in results.
+        
     """
     dvh = get_dvh(roi_names)
     for roi in roi_names:

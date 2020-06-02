@@ -1,12 +1,11 @@
 """Solve treatment plan with Bayesian optimization."""
-import numpy as np
-from skopt import gp_minimize
 from time import time
 
+import numpy as np
+from skopt import gp_minimize
+
 import connect
-
-
-# What if RayStation can't calculate a plan? Need try/except statements.
+import raystation
 
 
 def objective(plan, pars):
@@ -94,51 +93,80 @@ def score_plan(results):
     return (1 - weight)*oar_dec + weight*ptv_inc
 
 
-def save_results(plan, beam_set, pars, fpath, normalize=True):
-    """Save treatment plan results.
+def save_results(roi_names, fpath, normalize=False):
+    """Save dose statistics and dvh curves from current plan.
 
     Parameters
     ----------
-    plan : connect.connect_cpytyon.PyScriptObject
-        Current RayStation treatment plan.
-    beam_set : connect.connect_cpytyon.PyScriptObject
-        Current RayStation beam set.
-    pars : list
-        OAR dose level and percent volume parameters.
+    roi_names : list
+        Regions of interest to include in results.
     fpath : str
-        File path to results directory.
+        File path to save results.
     normalize : bool, optional
-        If True, normalized dose to PTV D85 = 4800 cGy. 
+        If True, normalized dose to PTV D95 = 4800 cGy. 
 
     """
-    plan_dose = plan.PlanOptimizations[0].PlanningPhaseDose
-
-    # Calculate plan
-    [oar_avg, ptv_max] = calc_plan(plan, pars, normalize=normalize)
     if normalize:
         beam_set.NormalizeToPrescription(RoiName='PTV', DoseValue=4800.0,
                                          DoseVolume=95.0,
                                          PrescriptionType='DoseAtVolume')
-        oar_avg = plan_dose.GetDoseStatistic(RoiName='Lungs',
-                                             DoseType='Average')
-        ptv_max = plan_dose.GetDoseStatistic(RoiName='PTV', DoseType='Max')
-    
-    # Get dose-volume histogram curves
-    oar_max = plan_dose.GetDoseStatistic(RoiName='Lungs', DoseType='Max')
-    max_dose = max(ptv_max, oar_max)
-    dvh_dose = np.linspace(0, max_dose, num=100)
-    dvh_oar = plan_dose.GetRelativeVolumeAtDoseValues(RoiName='Lungs',
-                                                      DoseValues=dvh_dose)
-    dvh_ptv = plan_dose.GetRelativeVolumeAtDoseValues(RoiName='PTV',
-                                                      DoseValues=dvh_dose)
+    fend = fend = ('.npy', '_norm.npy')[normalize]
+    np.save(fpath + 'stats' + fend, get_stats(roi_names))
+    np.save(fpath + 'dvh' + fend, get_dvh(roi_names))
 
-    # Save results
-    fend = ('.npy', '_norm.npy')[normalize]
-    np.save(fpath + 'oar_avg' + fend, oar_avg)
-    np.save(fpath + 'ptv_max' + fend, ptv_max)
-    np.save(fpath + 'dvh_dose' + fend, dvh_dose)
-    np.save(fpath + 'dvh_oar' + fend, dvh_oar)
-    np.save(fpath + 'dvh_ptv' + fend, dvh_ptv)
+
+def get_stats(roi_names):
+    """Get dose statistics from current plan.
+
+    Parameters
+    ----------
+    roi_names : list
+        Regions of interest to include in results.
+
+    Returns
+    -------
+    dict
+        Dose statistics for given regions of interest.
+
+    """
+    stats = {}
+    dose = connect.get_current('Plan').TreatmentCourse.TotalDose
+    volumes = [0.99, 0.98, 0.95, 0.5, 0.05, 0.02, 0.01]
+    volume_names = ['D99', 'D98', 'D95', 'D50', 'D5', 'D2', 'D1']
+    for roi in roi_names:
+        stats[roi] = {'Min': dose.GetDoseStatistic(RoiName=roi, DoseType='Min'),
+                      'Average': dose.GetDoseStatistic(RoiName=roi,
+                                                       DoseType='Average'),
+                      'Max': dose.GetDoseStatistic(RoiName=roi, DoseType='Max')}
+        doses = dose.GetDoseAtRelativeVolumes(RoiName=roi,
+                                              RelativeVolumes=volumes)
+        for ii in range(len(volumes)):
+            stats[roi][volume_names[ii]] = doses[ii]
+    return stats
+
+
+def get_dvh(roi_names):
+    """Get dvh curves from current plan.
+
+    Parameters
+    ----------
+    roi_names : list
+        Regions of interest to include in results.
+
+    Returns
+    -------
+    dict
+        Dose and volumes for given regions of interest.
+
+    """
+    dose = connect.get_current('Plan').TreatmentCourse.TotalDose
+    max_dose = max([dose.GetDoseStatistic(RoiName=roi, DoseType='Max')
+                    for roi in roi_names])
+    dvh = {'Dose': np.linspace(0, max_dose, 100)}
+    for roi in roi_names:
+        dvh[roi] = dose.GetRelativeVolumeAtDoseValues(RoiName=roi,
+                                                      DoseValues=dvh['Dose'])
+    return dvh
 
 
 if __name__ == '__main__':
