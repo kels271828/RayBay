@@ -35,10 +35,10 @@ for roi in roi_names:
         stats[roi][volume_names[ii]] = doses[ii]
 
 # Get dvh curves
-dvh = {'Doses': np.linspace(0, max_dose, 100)}
+dvh = {'Dose': np.linspace(0, max_dose, 100)}
 for roi in roi_names:
     dvh[roi] = plan_dose.GetRelativeVolumeAtDoseValues(RoiName=roi,
-                                                       DoseValues=dvh['Doses'])
+                                                       DoseValues=dvh['Dose'])
 
 # Save result
 fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
