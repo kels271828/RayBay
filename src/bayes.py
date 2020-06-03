@@ -5,7 +5,6 @@ import numpy as np
 from skopt import gp_minimize
 
 import connect
-import raystation
 
 
 def objective(plan, pars):
@@ -71,13 +70,13 @@ def calc_plan(plan, pars, normalize=True):
     return [oar_avg, ptv_max]
 
 
-def score_plan(results):
+def score_plan(roi_names):
     """Score treatment plan.
 
     Parameters
     ----------
-    results : list
-        OAR average and PTV max doses.
+    roi_names : list
+        Regions of interest to include in results.
 
     Returns
     -------
@@ -85,12 +84,16 @@ def score_plan(results):
         Treatment plan score.
 
     """
-    weight = 0.25
-    app_avg = 318.459
-    app_max = 6076.125
-    oar_dec = (results[0] - app_avg)/app_avg
-    ptv_inc = (results[1] - app_max)/app_max
-    return (1 - weight)*oar_dec + weight*ptv_inc
+    score = 0
+    plan = connect.get_current('Plan')
+    clinical_goals = plan.TreatmentCourse.EvaluationSetup.EvaluationFunctions
+    for goal in clinical_goals:
+        if goal.ForRegionOfInterest.Name in roi_names:
+            criteria = goal.PlanningGoal.GoalCriteria
+            level = goal.PlanningGoal.AcceptanceLevel
+            value = goal.GetClinicalGoalValue()
+            score += (-1)**(criteria == 'AtMost')*(level - value)/level
+    return score
 
 
 def save_results(roi_names, fpath, normalize=False):
@@ -107,6 +110,7 @@ def save_results(roi_names, fpath, normalize=False):
 
     """
     if normalize:
+        beam_set = connect.get_current('BeamSet')
         beam_set.NormalizeToPrescription(RoiName='PTV', DoseValue=4800.0,
                                          DoseVolume=95.0,
                                          PrescriptionType='DoseAtVolume')
