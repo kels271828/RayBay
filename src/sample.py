@@ -1,4 +1,6 @@
 """Sample treatment plans to discover correlations."""
+import copy
+
 import numpy as np
 
 import connect
@@ -259,9 +261,9 @@ if __name__ == '__main__':
         flag = calc_plan(plan, beam_set)
         print(f'Success: {flag}\n')
         if flag == 0:
-            results.append([par_dict, get_stats(plan, roi_list),
+            results.append([copy.deepcopy(par_dict), get_stats(plan, roi_list),
                             get_goals(plan, roi_list)])
         else:
-            results.append([par_dict, flag])
-        np.save(fpath + 'samples_6_4.npy', results)
+            results.append([copy.deepcopy(par_dict), flag])
+        np.save(fpath + 'samples_6_5.npy', results)
  
