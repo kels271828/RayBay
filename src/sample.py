@@ -250,7 +250,7 @@ if __name__ == '__main__':
     prev_pars = set()
     prev_pars.add(get_pars(par_dict))
     fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
-    for ii in range(5):
+    for ii in range(100):
         print(f'Iteration: {ii}')
         if ii > 0:
             sample_pars(par_dict, prev_pars)
