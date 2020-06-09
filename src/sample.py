@@ -92,7 +92,7 @@ def calc_plan(plan, beam_set):
     Results
     -------
     int
-        0 = success, 1 = normalization failed, 2 = optimizatio failed  
+        0 = success, 1 = normalization failed, 2 = optimization failed  
 
     """
     # Calculate plan
@@ -239,12 +239,12 @@ if __name__ == '__main__':
     
     # Set objective function parameters
     par_dict = {
-        'SpinalCanal': [{'idx': 0, 'DoseLevel': 2080, 'Range': [1040, 2080]}],
-        'Heart': [{'idx': 2, 'DoseLevel': 2800, 'Range': [1400, 2800]}],
-        'Rib': [{'idx': 6, 'DoseLevel': 3200, 'Range': [1600, 3200]}],
+        'SpinalCanal': [{'idx': 0, 'DoseLevel': 2080, 'Range': [0, 2080]}],
+        'Heart': [{'idx': 2, 'DoseLevel': 2800, 'Range': [0, 2800]}],
+        'Rib': [{'idx': 6, 'DoseLevel': 3200, 'Range': [0, 3200]}],
         #'PTV': [{'idx': 8, 'DoseLevel': 6240, 'Range': [4801, 6240]}],
-        'Chestwall_L': [{'idx': 10, 'DoseLevel': 3000, 'Range': [1500, 3000]}],
-        'Lungs': [{'idx': 11, 'DoseLevel': 2000, 'Range': [1000, 2000]}]
+        'Chestwall_L': [{'idx': 10, 'DoseLevel': 3000, 'Range': [0, 3000]}],
+        'Lungs': [{'idx': 11, 'DoseLevel': 2000, 'Range': [0, 2000]}]
     }
 
     # Sample treatment plans
@@ -265,5 +265,5 @@ if __name__ == '__main__':
                             get_goals(plan, roi_list)])
         else:
             results.append([copy.deepcopy(par_dict), flag])
-        np.save(fpath + 'samples_6_5.npy', results)
+        np.save(fpath + 'samples_6_8.npy', results)
  
