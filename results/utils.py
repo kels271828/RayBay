@@ -16,11 +16,14 @@ def roi_stats(samples, roi, stat_type):
     """Get list of sampled ROI statistics."""
     return [samples[ii][1][roi][stat_type] for ii in range(len(samples))]
 
-def roi_goals(samples, roi):
+def roi_goals(samples, roi, percent=True):
     """Get list of sampled ROI clinical goal results."""
     goal_list = []
     for ii in range(len(samples[0][2][roi])):
-        goal_list.append([goal_percent(samples[jj][2][roi][ii]) for jj in range(len(samples))])
+        if percent:
+            goal_list.append([goal_percent(samples[jj][2][roi][ii]) for jj in range(len(samples))])
+        else:
+            goal_list.append([samples[jj][2][roi][ii]['GoalValue'] for jj in range(len(samples))])
     return goal_list
 
 def goal_percent(goal):
