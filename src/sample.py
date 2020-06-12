@@ -229,7 +229,7 @@ def get_objs(plan):
         'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Min')
     }, {
         'FunctionType': 'MaxDose',
-        'DoseValue': 6198,
+        'DoseValue': 6200,
         'PercentVolume': 0,
         'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Max')
     }]
@@ -287,12 +287,12 @@ if __name__ == '__main__':
     
     # Set objective function parameters
     par_dict = {
-        'PTV': [{'idx': 1, 'DoseLevel': 6200, 'Range': [5500, 6200]}],
-        'Rib': [{'idx': 2, 'DoseLevel': 3200, 'Range': [1600, 3200]}],
-        'SpinalCanal': [{'idx': 3, 'DoseLevel': 2080, 'Range': [1040, 2080]}],
-        'Heart': [{'idx': 4, 'DoseLevel': 2800, 'Range': [1400, 2800]}],
-        'Chestwall_L': [{'idx': 5, 'DoseLevel': 3000, 'Range': [1500, 3000]}],
-        'Lungs': [{'idx': 6, 'DoseLevel': 2000, 'Range': [1000, 2000]}]
+        'PTV': [{'idx': 1, 'DoseLevel': 6200, 'Range': [4801, 6200]}],
+        'Rib': [{'idx': 2, 'DoseLevel': 3200, 'Range': [0, 3200]}],
+        'SpinalCanal': [{'idx': 3, 'DoseLevel': 2080, 'Range': [0, 2080]}],
+        'Heart': [{'idx': 4, 'DoseLevel': 2800, 'Range': [0, 2800]}],
+        'Chestwall_L': [{'idx': 5, 'DoseLevel': 3000, 'Range': [0, 3000]}],
+        'Lungs': [{'idx': 6, 'DoseLevel': 2000, 'Range': [0, 2000]}]
     }
 
     # Sample treatment plans
@@ -301,20 +301,20 @@ if __name__ == '__main__':
     prev_pars = set()
     prev_pars.add(get_pars(par_dict))
     fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
-    for ii in range(500):
+    for ii in range(1000):
         print(f'Iteration: {ii}')
         if ii > 0:
             sample_pars(par_dict, prev_pars)
         print(get_pars(par_dict))
         set_pars(plan, par_dict)
         flag = calc_plan(plan, beam_set)
-        n_success = n_success + 1 if flag < 2 else n_success
+        n_success = n_success + 1 if flag == 0 else n_success
         print(f'Success: {flag}, n_success: {n_success}\n')
         if flag < 2:
             results.append([flag, copy.deepcopy(par_dict), get_stats(plan, roi_list),
                             get_goals(plan, roi_list), get_objs(plan)])
         else:
             results.append([flag, copy.deepcopy(par_dict)])
-        np.save(fpath + 'samples_6_10.npy', results)
-        if n_success >= 100:
+        np.save(fpath + 'samples_6_11.npy', results)
+        if n_success >= 250:
             break

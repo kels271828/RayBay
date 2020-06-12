@@ -8,8 +8,8 @@ import seaborn as sns
 def roi_pars(samples, roi):
     """Create list of sampled ROI DoseLevel parameters."""
     par_list = []
-    for ii in range(len(samples[0][0][roi])):
-        par_list.append([samples[jj][0][roi][ii]['DoseLevel'] for jj in range(len(samples))])
+    for ii in range(len(samples[0][1][roi])):
+        par_list.append([samples[jj][1][roi][ii]['DoseLevel'] for jj in range(len(samples))])
     return par_list
 
 def roi_stats(samples, roi, stat_type):
