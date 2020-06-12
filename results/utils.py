@@ -152,8 +152,14 @@ def heatmap(x, y, **kwargs):
         ax.set_yticks(np.linspace(min(bar_y), max(bar_y), 3)) # Show vertical ticks for min, middle and max
         ax.yaxis.tick_right() # Show vertical ticks on the right 
         
-def corrplot(data, title, size_scale=100, marker='s'):
-    corr = pd.melt(data.reset_index(), id_vars='index').replace(np.nan, 0)
+def corrplot(data, title, size_scale=100, marker='s', x_labels=None, y_labels=None):
+    data = pd.DataFrame(data=data)
+    corr = data.corr()
+    if x_labels is not None:
+        corr = corr[x_labels]
+    if y_labels is not None:
+        corr = corr.loc[y_labels]
+    corr = pd.melt(corr.reset_index(), id_vars='index').replace(np.nan, 0)
     corr.columns = ['x', 'y', 'value']
     heatmap(
         corr['x'], corr['y'],
@@ -161,13 +167,17 @@ def corrplot(data, title, size_scale=100, marker='s'):
         palette=sns.diverging_palette(20, 220, n=256),
         size=corr['value'].abs(), size_range=[0, 1],
         marker=marker,
-        x_order=data.columns,
-        y_order=data.columns[::-1],
+        #x_order=data.columns,
+        #y_order=data.columns[::-1],
         size_scale=size_scale,
         title=title
     )
     
-def covplot(data, title, size_scale=100, marker='s'):
+def covplot(data, title, size_scale=100, marker='s', x_labels=None, y_labels=None):
+    if x_labels is not None:
+        data = data[x_labels]
+    if y_labels is not None:
+        data = data.loc[y_labels]
     cov = pd.melt(data.reset_index(), id_vars='index').replace(np.nan, 0)
     cov.columns = ['x', 'y', 'value']
     max_val = max(abs((cov['value'])))
