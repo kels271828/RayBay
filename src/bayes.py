@@ -6,30 +6,6 @@ from skopt import gp_minimize
 
 import connect
 
-
-# Eventually will need a better way to do objective, but for now maybe just
-# need to stick with objective function terms indices...
-# 0 SpinalCanal MaxDose
-# 1 Esophagus MaxDose
-# 2 Heart MaxDose
-# 3 GreatVes MaxDose
-# 4 Trachea MaxDose
-# 5 Bronchus MaxDose
-# 6 Rib MaxDose
-# 7 Skin MaxDose
-# 8 PTV MaxDose
-# 9 PTV MinDose
-# 10 Chestwall_L MaxDvh
-# 11 Lungs MaxDvh
-# 12 D2cm MaxDose
-# 13 Pericardium MaxDose
-# 14 R1 MaxDose
-# 15 R2 MaxDose
-# 16 D2cm_CD MaxDose
-# 17 D2cm_CD2 MaxDose
-
-# Need to make sure PTV MaxDose >= MinDose to avoid errors
-
 def objective(plan, beam_set, roi_names, pars):
     """Objective function for Bayesian optimization.
 
@@ -52,7 +28,10 @@ def objective(plan, beam_set, roi_names, pars):
     """
     set_pars(plan, pars)
     norm = calc_plan(plan, beam_set)
-    return score_plan(plan, roi_names) + [1e6, 0][norm]
+    if norm:
+        return score_plan(plan, roi_names)
+    else:
+        return 1e2
 
 
 def set_pars(plan, pars):
@@ -60,15 +39,12 @@ def set_pars(plan, pars):
 
     Hardcoded for now:
     pars = [
-        0 SpinalCanal, MaxDose, DoseLevel, 2080
-        2 Heart MaxDose, DoseLevel, 2800
-        6 Rib MaxDose, DoseLevel, 3200
-        8 PTV MaxDose, DoseLevel, 6240
-        9 PTV MinDose, DoseLevel, 4800
-        10 Chestwall_L, MaxDvh, DoseLevel, 3000
-        11 Lungs, MaxDvh, DoseLevel, 2000
-        10 Chestwall_L, MaxDvh, PercentVolume, 1.5
-        11 Lungs, MaxDvh, PercentVolume, 10
+        1, PTV, MinDose, DoseLevel, 6200
+        2, Rib, MaxDvh, DoseLevel, 3200
+        3, SpinalCanal, MaxDvh, DoseLevel, 2080
+        4, Heart, MaxDvh, DoseLevel, 2800
+        5, Chestwall_L, MaxDvh, DoseLevel, 3000
+        6, Lungs, MaxDvh, DoseLevel, 2000
     ]
 
     Parameters
@@ -80,12 +56,9 @@ def set_pars(plan, pars):
 
     """
     funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
-    # roi_idx = [0, 2, 6, 8, 9, 10, 11]
-    roi_idx = [0, 2, 6, 10, 11]
+    roi_idx = [1, 2, 3, 4, 5, 6]
     for ii in range(len(roi_idx)):
         funcs[roi_idx[ii]].DoseFunctionParameters.DoseLevel = pars[ii]
-    #funcs[10].DoseFunctionParameters.PercentVolume = pars[-2]
-    #funcs[11].DoseFunctionParameters.PercentVolume = pars[-1]
 
 
 def calc_plan(plan, beam_set):
@@ -142,17 +115,79 @@ def score_plan(plan, roi_names):
 
     """
     score = 0
-    clinical_goals = plan.TreatmentCourse.EvaluationSetup.EvaluationFunctions
-    for goal in clinical_goals:
-        if goal.ForRegionOfInterest.Name in roi_names:
-            criteria = goal.PlanningGoal.GoalCriteria
-            level = goal.PlanningGoal.AcceptanceLevel
-            try:
-                value = goal.GetClinicalGoalValue()
-                score += (-1)**(criteria == 'AtMost')*(level - value)/level
-            except:
-                return 0
+    vals = get_objs(plan)
+    for roi in roi_names:
+        level = vals[roi][-1]['DoseValue']
+        value = vals[roi][-1]['ResultValue']
+        score += (value - level)/level
     return score
+
+
+def get_objs(plan):
+    """Get values related to objective terms.
+
+    Totally hard-coded for now.
+
+    Parameters
+    ----------
+    dose : connect.connect_cpython.PyScriptObject
+        Total dose for current treatment plan.
+
+    Returns
+    -------
+    dict
+        Values related to objective terms.
+
+    """
+    dose = plan.TreatmentCourse.TotalDose
+    values = {}
+    values['PTV'] = [{
+        'FunctionType': 'MinDose',
+        'DoseValue': 4800,
+        'PercentVolume': 0,
+        'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Min')
+    }, {
+        'FunctionType': 'MaxDose',
+        'DoseValue': 6200,
+        'PercentVolume': 0,
+        'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Max')
+    }]
+    values['Rib'] = [{
+        'FunctionType': 'MaxDvh',
+        'DoseValue': 3200, 
+        'PercentVolume': 0.27,
+        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Rib',
+            RelativeVolumes=[0.0027])[0]
+    }]
+    values['SpinalCanal'] = [{
+        'FunctionType': 'MaxDvh',
+        'DoseValue': 2080,
+        'PercentVolume': 0.67,
+        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='SpinalCanal',
+            RelativeVolumes=[0.0067])[0]
+    }]
+    values['Heart'] = [{
+        'FunctionType': 'MaxDvh',
+        'DoseValue': 2800,
+        'PercentVolume': 1.84,
+        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Heart',
+            RelativeVolumes=[0.0184])[0]
+    }]
+    values['Chestwall_L'] = [{
+        'FunctionType': 'MaxDvh',
+        'DoseValue': 3000,
+        'PercentVolume': 2.04,
+        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Chestwall_L',
+            RelativeVolumes=[0.0204])[0]
+    }]
+    values['Lungs'] = [{
+        'FunctionType': 'MaxDvh',
+        'DoseValue': 2000,
+        'PercentVolume': 10,
+        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Lungs',
+            RelativeVolumes=[0.1])[0]
+    }]
+    return values
 
 
 def save_results(plan, roi_names, fpath):
@@ -190,8 +225,8 @@ def get_stats(plan, roi_names):
     """
     stats = {}
     dose = plan.TreatmentCourse.TotalDose
-    volumes = [0.99, 0.98, 0.95, 0.5, 0.05, 0.02, 0.01]
-    volume_names = ['D99', 'D98', 'D95', 'D50', 'D5', 'D2', 'D1']
+    volumes = [0.99, 0.98, 0.95, 0.9, 0.5, 0.1, 0.05, 0.02, 0.01]
+    volume_names = ['D99', 'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2', 'D1']
     for roi in roi_names:
         stats[roi] = {'Min': dose.GetDoseStatistic(RoiName=roi, DoseType='Min'),
                       'Max': dose.GetDoseStatistic(RoiName=roi, DoseType='Max'),
@@ -234,15 +269,12 @@ if __name__ == '__main__':
     """
     Hardcoded for now:
     pars = [
-        0 SpinalCanal, MaxDose, DoseLevel, 2080
-        2 Heart MaxDose, DoseLevel, 2800
-        6 Rib MaxDose, DoseLevel, 3200
-        8 PTV MaxDose, DoseLevel, 6240
-        9 PTV MinDose, DoseLevel, 4800
-        10 Chestwall_L, MaxDvh, DoseLevel, 3000
-        11 Lungs, MaxDvh, DoseLevel, 2000
-        10 Chestwall_L, MaxDvh, PercentVolume, 1.5
-        11 Lungs, MaxDvh, PercentVolume, 10
+        1, PTV, MinDose, DoseLevel, 6200
+        2, Rib, MaxDvh, DoseLevel, 3200
+        3, SpinalCanal, MaxDvh, DoseLevel, 2080
+        4, Heart, MaxDvh, DoseLevel, 2800
+        5, Chestwall_L, MaxDvh, DoseLevel, 3000
+        6, Lungs, MaxDvh, DoseLevel, 2000
     ]
     """
     start = time()
@@ -252,12 +284,10 @@ if __name__ == '__main__':
     beam_set = connect.get_current('BeamSet')
 
     # Set ROIs
-    roi_names = ['SpinalCanal', 'Heart', 'Rib', 'PTV', 'Chestwall_L', 'Lungs']
-    # x0 = [2080, 2800, 3200, 6240, 4800, 3000, 2000, 1.5, 10]
-    x0 =  [2080, 2800, 3200, 3000, 2000] #, 1.5, 10]
-    dimensions = [(1040, 2080), (1400, 2800), (1600, 3200), (1500, 3000),
-                  (1000, 2000)]
-                #  (0, 1.5), (0, 10)]
+    roi_names = ['PTV', 'Rib', 'SpinalCanal', 'Heart', 'Chestwall_L', 'Lungs']
+    x0 =  [6200, 3200, 2080, 2800, 3000, 2000]
+    dimensions = [(5500, 6200), (1600, 3200), (1040, 2080),
+                  (1400, 2800), (1500, 3000), (1000, 2000)]
     
     # Get initial point
     print('Getting initial point')   
@@ -278,6 +308,7 @@ if __name__ == '__main__':
     np.save(fpath + 'x_iters.npy', results.x_iters)
     np.save(fpath + 'fun.npy', results.fun)
     np.save(fpath + 'func_vals.npy', results.func_vals)
+    set_pars(plan, results.x)
     calc_plan(plan, beam_set);
     save_results(plan, roi_names, fpath)
     
