@@ -122,7 +122,12 @@ def score_plan(plan, roi_names):
     for roi in roi_names:
         level = vals[roi][-1]['DoseValue']
         value = vals[roi][-1]['ResultValue']
-        score += 100*(value - level)/level
+        if value <= level:
+            score += 100*(value - level)/level
+        else:
+            dx = -level/200
+            dy = -1/4
+            score += (100*(value - level - dx)/level)**2 + dy
     return score
 
 
@@ -281,20 +286,27 @@ if __name__ == '__main__':
     roi_names = ['PTV 4/7/20', 'Lungs', 'SpinalCord (Thorax)',
                  'Esophagus', 'Heart']
     x0 =  [7550, 2000, 5000, 6930, 3500]
-    dimensions = [(6590, 7550), (500, 2000), (1250, 5000),
-                  (1732.5, 6930), (875, 3500)]
+    dimensions = [(6910, 7550), (1000, 2000), (2500, 5000),
+                  (3465, 6930), (1750, 3500)]
+    #dimensions = [(6590., 7550.), (500., 2000.), (1250., 5000.),
+    #              (1732.5, 6930.), (875., 3500.)]
     
     # Get initial point
     print('Getting initial point')   
     y0 = objective(plan, beam_set, roi_names, x0)
+    #fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
+    #temp = np.load(fpath + '6_16_quarter\\x_iters.npy')
+    #x0 = [list(temp[ii]) for ii in range(temp.shape[0])]
+    #y0 = list(np.load(fpath + '6_16_quarter\\func_vals.npy'))
 
     # Optimize
     print('\nStarting optimization')
     obj = lambda pars: objective(plan, beam_set, roi_names, pars)
     results = gp_minimize(obj, dimensions=dimensions, x0=x0, y0=y0,
                           random_state=0, n_calls=50, verbose=True)
-    
-    # need a callback to save progress if something goes wrong!
+    #results = gp_minimize(obj, dimensions=dimensions, x0=x0, y0=y0,
+    #                      random_state=0, n_calls=50, verbose=True,
+    #                      n_random_starts=0)
     
     # Save plan results
     print('\nSaving results')
