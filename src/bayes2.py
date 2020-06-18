@@ -1,6 +1,5 @@
 """Solve treatment plan with Bayesian optimization (patient 2)."""
 from time import time
-import sys
 
 import numpy as np
 from skopt import gp_minimize
@@ -32,7 +31,7 @@ def objective(plan, beam_set, roi_names, pars):
     if norm:
         return score_plan(plan, roi_names)
     else:
-        return 1e2
+        return 1e6
 
 
 def set_pars(plan, pars):
@@ -111,10 +110,6 @@ def score_plan(plan, roi_names):
     -------
     float
         Treatment plan score.
-        
-        
-        assuming that reason GetClinicalGoalValue() wouldn't work
-        is that calc_dose didn't work, so already 1e6
 
     """
     score = 0
@@ -122,12 +117,13 @@ def score_plan(plan, roi_names):
     for roi in roi_names:
         level = vals[roi][-1]['DoseValue']
         value = vals[roi][-1]['ResultValue']
-        if value <= level:
-            score += 100*(value - level)/level
+        if roi == 'PTV 4/7/20':
+            if value < level:
+                score += 1/(level - value)
+            else:
+                return 1e6
         else:
-            dx = -level/200
-            dy = -1/4
-            score += (100*(value - level - dx)/level)**2 + dy
+            score += 100*(value - level)/level
     return score
 
 
@@ -285,9 +281,11 @@ if __name__ == '__main__':
     # Set ROIs
     roi_names = ['PTV 4/7/20', 'Lungs', 'SpinalCord (Thorax)',
                  'Esophagus', 'Heart']
-    x0 =  [7550, 2000, 5000, 6930, 3500]
-    dimensions = [(6910, 7550), (1000, 2000), (2500, 5000),
-                  (3465, 6930), (1750, 3500)]
+    x0 =  [6271, 2000, 5000, 6930, 3500]
+    dimensions = [(6271, 6590), (1875, 3125), (3750, 6250),
+                  (5197.5, 8662.5), (2625, 4375)]
+    #dimensions = [(6910, 7550), (1000, 2000), (2500, 5000),
+    #              (3465, 6930), (1750, 3500)]
     #dimensions = [(6590., 7550.), (500., 2000.), (1250., 5000.),
     #              (1732.5, 6930.), (875., 3500.)]
     
