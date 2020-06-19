@@ -122,6 +122,13 @@ def score_plan(plan, roi_names):
                 score += 1/(level - value)
             else:
                 return 1e6
+        elif roi == 'Lungs':
+            if value < level:
+                score += 100*(value - level)/level
+            else:
+                dx = -level/200
+                dy = -1/4
+                score += (100*(value - level - dx)/level)**2 + dy
         else:
             score += 100*(value - level)/level
     return score
