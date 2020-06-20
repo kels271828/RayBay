@@ -1,72 +1,99 @@
-"""Sample treatment plans to discover correlations."""
+"""Sample treatment plans to discover correlations.
+
+The constituent functions DataFrame should have columns 'Roi',
+'DoseLevel', 'PercentVolume', 'EudParameterA', and 'Weight'. Rows
+should be in the order that they appear in the objective function.
+Fixed parameters should be a single value, and tunable parameters
+should be a list containting the minimum and maximum allowable values.
+
+The parameter DataFrame has columns 'Sample', 'Term', 'Roi',
+'DoseLevel', 'PercentVolume', 'EudParameterA', and 'Weight'.
+
+The clinical goals DataFrame has columns 'Roi', 'Type', 'GoalCriteria',
+'AcceptanceLevel', and 'ParameterValue'.
+
+The results DataFrame has columns 'Sample', 'Flag', and indices
+corresponding to each clinical goal.
+
+The stats DataFrame has columns 'Sample', 'Roi', 'Min', 'Average',
+'Max', 'D99', 'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2, and 'D1'.
+
+"""
 import copy
 
 import numpy as np
+import pandas as pd
 
 import connect
 
 
-def sample_pars(par_dict, prev_pars):
-    """Sample objective function parameters with no repeats.
-
-    Parameters should have the form
-
-    { Name : [{ idx, DoseLevel }] }
-
-    where idx is the index of the objective function term.
-
+def init_pars(funcs):
+    """Initialize constituent function parameters to maximum values.
+    
     Parameters
     ----------
-    par_dict : dict
-        Objective function parameters.
-    prev_pars : set
-        Results from previous samples.
-
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    
     Returns
     -------
-    None.
-
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    
     """
-    while get_pars(par_dict) in prev_pars:
-        for roi in par_dict:
-            for term in par_dict[roi]:
-                term['DoseLevel'] = np.random.randint(term['Range'][0],
-                                                      term['Range'][1])
-    prev_pars.add(get_pars(par_dict))
+    data = [{
+        'Sample': 0,
+        'Term': ii,
+        'Roi': funcs.iloc[ii]['Roi'],
+        'DoseLevel': np.max(funcs.iloc[ii]['DoseLevel']),
+        'PercentVolume': np.max(funcs.iloc[ii]['PercentVolume']),
+        'EudParameterA': np.max(funcs.iloc[ii]['EudParameterA']),
+        'Weight': np.max(funcs.iloc[ii]['Weight'])
+    } for ii in range(6)]
+    columns = ['Sample', 'Term', 'Roi', 'DoseLevel', 'PercentVolume',
+               'EudParameterA', 'Weight']
+    return pd.DataFrame(data=data, columns=columns)
 
 
-def get_pars(par_dict):
-    """Get tuple of parameters from dictionary.
-
+def sample_pars(funcs, pars):
+    """Sample constituent function parameters.
+    
     Parameters
     ----------
-    par_dict : dict
-        Objective function parameters.
-
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    pars : pandas.DataFrame
+        Sampled constituent function parameters.
+    
     Returns
     -------
-    par_tuple : tuple
-        Objective function parameters.
-
+    pandas.DataFrame
+        Updated sampled constituent function parameters.
+    
     """
-    return tuple(term['DoseLevel'] for roi in par_dict for term in par_dict[roi])
+    names = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    sample = max(pars['Sample']) + 1
+    new_pars = []
+    for idx, row in funcs.iterrows():
+        new_row = {'Sample': sample, 'Term': idx, 'Roi': row['Roi']}
+        for ii in range(len(names)):
+            if isinstance(row[names[ii]], list):
+                new_row[names[ii]] = np.random.randint(*row[names[ii]])
+            else:
+                new_row[names[ii]] = row[names[ii]]
+        new_pars.append(new_row)
+    return pars.append(new_pars, ignore_index=True)
 
 
-def set_pars(plan, par_dict):
+def set_pars(plan, pars):
     """Set objective function parameters.
-    
-    Parameters should have the form
-    
-    { Name : [{ idx, DoseLevel }] }
-
-    where idx is the index of the objective function term.   
 
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.        
-    par_dict : dict
-        Objective function parameters.
+    pars : pandas.DataFrame
+        Constituent function parameters.
 
     Returns
     -------
@@ -74,12 +101,17 @@ def set_pars(plan, par_dict):
 
     """
     funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
-    for roi in par_dict:
-        for term in par_dict[roi]:
-            funcs[term['idx']].DoseFunctionParameters.DoseLevel = term['DoseLevel']
+    for _, row in pars[pars['Sample'] == max(pars['Sample'])].iterrows():
+        func = funcs[row['Term']].DoseFunctionParameteres
+        func.DoseLevel = row['DoseLevel']
+        func.Weight = row['Weight']
+        if func.FunctionType == 'MaxEud':
+            func.EudParameterA = row['EudParameterA']
+        else:
+            func.PercentVolume = row['PercentVolume']
 
 
-def calc_plan(plan, beam_set):
+def calc_plan(plan, beam_set, RoiName, DoseValue, DoseVolume):
     """Calculate and normalize treatment plan.
 
     Parameters
@@ -88,6 +120,12 @@ def calc_plan(plan, beam_set):
         Current treatment plan.
     beam_set : connect.connect_cpython.PyScriptObject
         Current beam set.
+    RoiName : str
+        ROI to normalize plan.
+    DoseValue : float
+        Dose value to normalize plan.
+    DoseVolume : float
+        Dose volume to normalize plan.
         
     Results
     -------
@@ -104,14 +142,16 @@ def calc_plan(plan, beam_set):
 
     # Normalize plan
     try:
-        beam_set.NormalizeToPrescription(RoiName='PTV', DoseValue=4800.0,
-                                         DoseVolume=95.0,
+        beam_set.NormalizeToPrescription(RoiName=RoiName,
+                                         DoseValue=DoseValue,
+                                         DoseVolume=DoseVolume,
                                          PrescriptionType='DoseAtVolume')
         return 0
     except:
         return 1
 
 
+# Update functions below
 def get_stats(plan, roi_list):
     """Get dose statistics for given regions of interest.
     
@@ -159,49 +199,6 @@ def get_roi_stats(dose, roi):
     for ii in range(len(volumes)):
         stats[volume_names[ii]] = doses[ii]
     return stats
-
-
-def get_goals(plan, roi_list):
-    """Get clinical goals for given regions of interest.
-    
-    Results have the form
-    
-    { Name : [{ idx, AcceptanceLevel, GoalCriteria, GoalValue }] }
-    
-    where idx is the index of the evaluation function term.
-    
-    Parameters
-    ----------
-    plan : connect.connect_cpython.PyScriptObject
-        Current treatment plan.
-    roi_list : list
-        Regions of interest to evaluate.
-        
-    Returns
-    -------
-    dict
-        Clinical goals for given regions of interest.
-    
-    """
-    # Initialize results
-    results = {}
-    for roi in roi_list:
-        results[roi] = []
-        
-    # Get clinical goals    
-    goals = plan.TreatmentCourse.EvaluationSetup.EvaluationFunctions
-    for ii in range(len(goals)):
-        roi = goals[ii].ForRegionOfInterest.Name
-        if roi in roi_list:
-            level = goals[ii].PlanningGoal.AcceptanceLevel
-            criteria = goals[ii].PlanningGoal.GoalCriteria
-            try:
-                value = goals[ii].GetClinicalGoalValue()
-            except:
-                value = -1
-            results[roi].append({'AcceptanceLevel': level, 'GoalValue': value,
-                                 'GoalCriteria': criteria, 'idx': ii})
-    return results
 
 
 def get_objs(plan):
