@@ -55,6 +55,35 @@ def init_pars(funcs):
     return pd.DataFrame(data=data, columns=columns)
 
 
+def init_goals(funcs):
+    """Initialize clinical goals based on constituent functions.
+    
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    
+    Returns
+    -------
+    pandas.DataFrame
+        Clinical goal specifications.
+    
+    """
+    data = [{
+        'Roi': funcs.iloc[ii]['Roi'],
+        'Type': funcs.iloc[ii]['FunctionType'],
+        'GoalCriteria': ('AtLeast', 'AtMost')\
+                        ['Max' in funcs.iloc[ii]['FunctionType']],
+        'AcceptanceLevel': np.max(funcs.iloc[ii]['DoseLevel']),
+        'ParameterValue': (funcs.iloc[ii]['PercentVolume'],
+                           funcs.iloc[ii]['EudParameterA'])\
+                          ['Eud' in funcs.iloc[ii]['FunctionType']]
+    } for ii in range(6)]
+    columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
+               'ParameterValue']
+    return pd.DataFrame(data=data, columns=columns)
+
+
 def sample_pars(funcs, pars):
     """Sample constituent function parameters.
     
@@ -111,7 +140,7 @@ def set_pars(plan, pars):
             func.PercentVolume = row['PercentVolume']
 
 
-def calc_plan(plan, beam_set, RoiName, DoseValue, DoseVolume):
+def calc_plan(plan, beam_set, roi, dose, volume):
     """Calculate and normalize treatment plan.
 
     Parameters
@@ -120,11 +149,11 @@ def calc_plan(plan, beam_set, RoiName, DoseValue, DoseVolume):
         Current treatment plan.
     beam_set : connect.connect_cpython.PyScriptObject
         Current beam set.
-    RoiName : str
+    roi : str
         ROI to normalize plan.
-    DoseValue : float
+    dose : float
         Dose value to normalize plan.
-    DoseVolume : float
+    volume : float
         Dose volume to normalize plan.
         
     Results
@@ -142,9 +171,8 @@ def calc_plan(plan, beam_set, RoiName, DoseValue, DoseVolume):
 
     # Normalize plan
     try:
-        beam_set.NormalizeToPrescription(RoiName=RoiName,
-                                         DoseValue=DoseValue,
-                                         DoseVolume=DoseVolume,
+        beam_set.NormalizeToPrescription(RoiName=roi, DoseValue=dose, 
+                                         DoseVolume=volume,
                                          PrescriptionType='DoseAtVolume')
         return 0
     except:
