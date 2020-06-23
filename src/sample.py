@@ -33,13 +33,13 @@ Goal Results
 ------------
 The clinical goal results are stored in a DataFrame with columns
 Sample, Flag, and indices corresponding to the rows in the clinical
-goals DataFrame. 
+goals DataFrame.
 
 Dose statistics
 ---------------
 Dose statistics for a given list of ROIs are stored in a DataFrame with
 columms Sample, Roi, Min, Average, Max, D99, D98, D95, D90, D50, D10,
-D5, D2, and D1. 
+D5, D2, and D1.
 
 """
 import copy
@@ -48,7 +48,7 @@ import re
 import numpy as np
 import pandas as pd
 
-import connect
+#import connect
 
 
 def load_funcs(fpath):
@@ -79,14 +79,22 @@ def load_funcs(fpath):
             # Tunable parameters are read in as strings '[min, max]',
             # so we need to convert them back to a list of floats.
             if isinstance(row[col], str):
-                temp = [float(par) for par 
+                pars = [float(par) for par
                         in re.findall(r'\d+\.\d+|\d+', row[col])]
-                funcs.loc[index, col] = (temp, temp[0])[len(temp) == 1]
+                funcs.loc[index, col] = pars if len(pars) > 1 else pars[0]
     return funcs
 
 
 def init_pars(funcs):
-    """Initialize constituent function parameters to maximum values.
+    """Initialize constituent function parameters.
+
+    Constituent function parameters are specified by columns Sample,
+    Term, Roi, DoseLevel, PercentVolume, EudParameterA, and Weight. The
+    term columnn corresponds to the rows in the constituent function
+    DataFrame.
+
+    DoseLevel, PercentVolume, and EudParameterA are assigned to min or
+    max value based on FunctionType. Weight is assigned to min value.
 
     Parameters
     ----------
@@ -101,20 +109,31 @@ def init_pars(funcs):
     """
     data = [{
         'Sample': 0,
-        'Term': ii,
-        'Roi': funcs.iloc[ii]['Roi'],
-        'DoseLevel': np.max(funcs.iloc[ii]['DoseLevel']),
-        'PercentVolume': np.max(funcs.iloc[ii]['PercentVolume']),
-        'EudParameterA': np.max(funcs.iloc[ii]['EudParameterA']),
-        'Weight': np.max(funcs.iloc[ii]['Weight'])
-    } for ii in range(6)]
+        'Term': index,
+        'Roi': row['Roi'],
+        'DoseLevel': _get_par(row['DoseLevel'], row['FunctionType']),
+        'PercentVolume': _get_par(row['PercentVolume'], row['FunctionType']),
+        'EudParameterA': _get_par(row['EudParameterA'], row['FunctionType']),
+        'Weight': np.min(row['Weight'])
+    } for index, row in funcs.iterrows()]
     columns = ['Sample', 'Term', 'Roi', 'DoseLevel', 'PercentVolume',
                'EudParameterA', 'Weight']
     return pd.DataFrame(data=data, columns=columns)
 
 
+def _get_par(par, func_type):
+    """Get min or max parameter value based on function type."""
+    return np.max(par) if 'Max' in func_type else np.min(par)
+
+
 def init_goals(funcs):
     """Initialize clinical goals based on constituent functions.
+
+    Clinical goals are specified by columns Roi, Type, GoalCriteria,
+    AcceptanceLevel, and ParameterValue. The function get_results() is
+    currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh,
+    and MaxDvh clinical goals. All other clinical goals are not
+    evaluated, and results are set to NaN.
 
     Parameters
     ----------
@@ -128,15 +147,14 @@ def init_goals(funcs):
 
     """
     data = [{
-        'Roi': funcs.iloc[ii]['Roi'],
-        'Type': funcs.iloc[ii]['FunctionType'],
-        'GoalCriteria': ('AtLeast', 'AtMost')
-                        ['Max' in funcs.iloc[ii]['FunctionType']],
-        'AcceptanceLevel': np.max(funcs.iloc[ii]['DoseLevel']),
-        'ParameterValue': (funcs.iloc[ii]['PercentVolume'],
-                           funcs.iloc[ii]['EudParameterA'])
-                           ['Eud' in funcs.iloc[ii]['FunctionType']]
-    } for ii in range(6)]
+        'Roi': row['Roi'],
+        'Type': row['FunctionType'],
+        'GoalCriteria': 'AtMost' if 'Max' in row['FunctionType'] else 'AtLeast',
+        'AcceptanceLevel': _get_par(row['DoseLevel'], row['FunctionType']),
+        'ParameterValue': _get_par(row['EudParameterA'], row['FunctionType'])
+                          if 'Eud' in row['FunctionType'] else
+                          _get_par(row['PercentVolume'], row['FunctionType'])
+    } for index, row in funcs.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
