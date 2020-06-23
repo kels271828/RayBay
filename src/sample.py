@@ -109,6 +109,39 @@ def init_goals(funcs):
     return pd.DataFrame(data=data, columns=columns)
 
 
+def init_results(goals):
+    """Initialize clinical goal results.
+
+    Parameters
+    ----------
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Clinical goal results.
+
+    """
+    columns = ['Sample', 'Flag']
+    columns += list(np.arange(len(goals)))
+    return pd.DataFrame(columns=columns)
+
+
+def init_stats():
+    """Initialize dose statistics.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    columns = ['Sample', 'Roi', 'Min', 'Average', 'Max', 'D99',
+               'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2', 'D1']
+    return pd.DataFrame(columns=columns)
+
+
 def sample_pars(funcs, pars):
     """Sample constituent function parameters.
     
@@ -125,18 +158,26 @@ def sample_pars(funcs, pars):
         Updated sampled constituent function parameters.
     
     """
-    names = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
     sample = _get_sample_num(pars)
     new_pars = []
     for idx, row in funcs.iterrows():
         new_row = {'Sample': sample, 'Term': idx, 'Roi': row['Roi']}
-        for ii in range(len(names)):
-            if isinstance(row[names[ii]], list):
-                new_row[names[ii]] = np.random.randint(*row[names[ii]])
-            else:
-                new_row[names[ii]] = row[names[ii]]
+        new_row.update(_sample_func_pars, row)
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
+
+
+def _sample_func_pars(func):
+    """Sample constituent function parameters."""
+    pars = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    for par in pars:
+        if isinstance(func[par], list):
+            low = func[par][0]
+            high = func[par][1] + 1
+            new_row[par] = np.random.randint(low, high)
+        else:
+            new_row[par] = func[par]
+    return new_row
 
 
 def _get_sample_num(df):
@@ -249,26 +290,32 @@ def _get_roi_result(dose, goal):
         return np.nan
 
 
-# Old functions, not using
-def get_stats(plan, roi_list):
+def get_stats(plan, roi_names, stats):
     """Get dose statistics for given regions of interest.
     
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
-    roi_list : list
+    roi_names : iterable
         Regions of interest to evaluate.
+    stats : pandas.DataFrame
+        Dose statistics.
+
     Returns
     -------
-    dict
-        Dose statistics for given regions of interest.
+    pandas.DataFrame
+        Updated dose statistics.
+
     """
-    stats = {}
     dose = plan.TreatmentCourse.TotalDose
+    sample = _get_sample_num(stats)
+    new_stats = []
     for roi in roi_list:
-        stats[roi] = _get_roi_stats(dose, roi)
-    return stats
+        new_row = {'Sample': sample, 'Roi': roi}
+        new_row.update(_get_roi_stats(dose, roi))
+        new_stats.append(new_row)
+    return stats.append(new_stats, ignore_index=True)
 
 
 def _get_roi_stats(dose, roi):
