@@ -1,11 +1,15 @@
 """Sample treatment plans for patient 2."""
+import sys
+
 import pandas as pd
 
 import connect
+
+repo_path = '\\\\client\\C$\\Users\Kelsey\\Dropbox (uwamath)\\autoray\\'
+sys.path.append(repo_path + 'src\\')
 import sample
 
 # Inputs
-repo_path = '\\\\client\\C$\\Users\Kelsey\\Dropbox (uwamath)\\autoray\\'
 funcs_path = repo_path + 'results\\patient2\\funcs_full.csv'
 goals_path = repo_path + 'results\\patient2\\goals.csv'
 save_path = repo_path + 'results\\patient2\\'
