@@ -27,6 +27,31 @@ import pandas as pd
 import connect
 
 
+def init_funcs(fpath):
+    """Initialize constituent functions from CSV.
+    
+    Parameters
+    ----------
+    fpath : str
+        File path to CSV file.
+    
+    Returns
+    -------
+    pandas.DataFrame
+        Constituent function specifications.
+    
+    """
+    funcs = pd.read_csv(fpath)
+    funcs = funcs.astype(object)
+    col_names = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    for index, row in funcs.iterrows():
+        for col in col_names:
+            if isinstance(row[col], str):
+                temp = [float(s) for s in re.findall(r'\d+\.\d+|\d+', row[col])]
+                funcs.loc[index, col] = (temp, temp[0])[len(temp) == 1]
+    return funcs
+
+
 def init_pars(funcs):
     """Initialize constituent function parameters to maximum values.
     
@@ -101,7 +126,7 @@ def sample_pars(funcs, pars):
     
     """
     names = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
-    sample = max(pars['Sample']) + 1
+    sample = _get_sample_num(pars)
     new_pars = []
     for idx, row in funcs.iterrows():
         new_row = {'Sample': sample, 'Term': idx, 'Roi': row['Roi']}
@@ -112,6 +137,14 @@ def sample_pars(funcs, pars):
                 new_row[names[ii]] = row[names[ii]]
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
+
+
+def _get_sample_num(df):
+    """Get current sample number."""
+    if len(df) == 0:
+        return 0
+    else:
+        return max(df['Sample']) + 1
 
 
 def set_pars(plan, pars):
@@ -159,7 +192,7 @@ def calc_plan(plan, beam_set, roi, dose, volume):
     Results
     -------
     int
-        0 = success, 1 = normalization failed, 2 = optimization failed  
+        0 = success, 1 = normalization failed, 2 = optimization failed
 
     """
     # Calculate plan
@@ -179,7 +212,44 @@ def calc_plan(plan, beam_set, roi, dose, volume):
         return 1
 
 
-# Update functions below
+def get_results(plan, flag, goals, results):
+    """Get clinical goal results.
+
+    Parameters
+    ----------
+    flag : int
+        0 = success, 1 = normalization failed, 2 = optimization failed
+    pandas.DataFrame
+        Clinical goal specifications.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Clinical goal results.
+
+    """
+    dose = plan.TreatmentCourse.TotalDose
+    sample = _get_sample_num(results)
+    new_results = {'Sample': sample, 'Flag': flag}
+    for index, row in goals.iterrows():
+        new_results[index] = _get_roi_result(dose, row)
+    return results.append(new_results, ignore_index=True)
+
+
+def _get_roi_result(dose, goal):
+    """Get result for given clinical goal."""
+    if 'Dose' in goal['Type']:
+        dose = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
+        return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose)
+    elif 'Dvh' in goal['Type']:
+        volume = 0.01*row['ParameterValue']
+        return dose.GetDoseAtRelativeVolumes(RoiName=goal['Roi'],
+                                             RelativeVolumes=[volume])[0]
+    else:
+        return np.nan
+
+
+# Old functions, not using
 def get_stats(plan, roi_list):
     """Get dose statistics for given regions of interest.
     
@@ -197,26 +267,12 @@ def get_stats(plan, roi_list):
     stats = {}
     dose = plan.TreatmentCourse.TotalDose
     for roi in roi_list:
-        stats[roi] = get_roi_stats(dose, roi)
+        stats[roi] = _get_roi_stats(dose, roi)
     return stats
 
 
-def get_roi_stats(dose, roi):
-    """Get dose statistics for given region of interest.
-
-    Parameters
-    ----------
-    dose : connect.connect_cpython.PyScriptObject
-        Total dose for current treatment plan.
-    roi : str
-        Region of interest to evaluate.
-
-    Returns
-    -------
-    dict
-        Dose statistics for given region of interest.
-
-    """
+def _get_roi_stats(dose, roi):
+    """Get dose statistics for given region of interest."""
     volumes = [0.99, 0.98, 0.95, 0.9, 0.5, 0.1, 0.05, 0.02, 0.01]
     volume_names = ['D99', 'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2', 'D1']
     stats = {'Min': dose.GetDoseStatistic(RoiName=roi, DoseType='Min'),
@@ -227,73 +283,6 @@ def get_roi_stats(dose, roi):
     for ii in range(len(volumes)):
         stats[volume_names[ii]] = doses[ii]
     return stats
-
-
-def get_objs(plan):
-    """Get values related to objective terms.
-
-    Totally hard-coded for now.
-
-    Parameters
-    ----------
-    dose : connect.connect_cpython.PyScriptObject
-        Total dose for current treatment plan.
-
-    Returns
-    -------
-    dict
-        Values related to objective terms.
-
-    """
-    dose = plan.TreatmentCourse.TotalDose
-    values = {}
-    values['PTV'] = [{
-        'FunctionType': 'MinDose',
-        'DoseValue': 4800,
-        'PercentVolume': 0,
-        'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Min')
-    }, {
-        'FunctionType': 'MaxDose',
-        'DoseValue': 6200,
-        'PercentVolume': 0,
-        'ResultValue': dose.GetDoseStatistic(RoiName='PTV', DoseType='Max')
-    }]
-    values['Rib'] = [{
-        'FunctionType': 'MaxDvh',
-        'DoseValue': 3200, 
-        'PercentVolume': 0.27,
-        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Rib',
-            RelativeVolumes=[0.0027])[0]
-    }]
-    values['SpinalCanal'] = [{
-        'FunctionType': 'MaxDvh',
-        'DoseValue': 2080,
-        'PercentVolume': 0.67,
-        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='SpinalCanal',
-            RelativeVolumes=[0.0067])[0]
-    }]
-    values['Heart'] = [{
-        'FunctionType': 'MaxDvh',
-        'DoseValue': 2800,
-        'PercentVolume': 1.84,
-        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Heart',
-            RelativeVolumes=[0.0184])[0]
-    }]
-    values['Chestwall_L'] = [{
-        'FunctionType': 'MaxDvh',
-        'DoseValue': 3000,
-        'PercentVolume': 2.04,
-        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Chestwall_L',
-            RelativeVolumes=[0.0204])[0]
-    }]
-    values['Lungs'] = [{
-        'FunctionType': 'MaxDvh',
-        'DoseValue': 2000,
-        'PercentVolume': 10,
-        'ResultValue': dose.GetDoseAtRelativeVolumes(RoiName='Lungs',
-            RelativeVolumes=[0.1])[0]
-    }]
-    return values
 
 
 if __name__ == '__main__':
