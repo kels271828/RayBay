@@ -1,22 +1,45 @@
-"""Sample treatment plans to discover correlations.
+"""Sample treatment plans on RayStation.
 
-The constituent functions DataFrame should have columns 'Roi',
-'DoseLevel', 'PercentVolume', 'EudParameterA', and 'Weight'. Rows
-should be in the order that they appear in the objective function.
-Fixed parameters should be a single value, and tunable parameters
-should be a list containting the minimum and maximum allowable values.
+Constituent Functions
+---------------------
+The constituent function specifications are stored in a DataFrame with
+columns corresponding to each function parameter: Roi, FunctionType,
+DoseLevel, PercentVolume, EudParameterA, and Weight. The row index
+within the DataFrame should correspond to the function index in the
+RayStation objective function. Fixed parameters should be a single
+value, tunable parameteres should be a list containing the minimum and
+maximum values, and irrelevant parameters can be left blank. The
+DataFrame can be built manually or from a CSV file using load_funcs().
 
-The parameter DataFrame has columns 'Sample', 'Term', 'Roi',
-'DoseLevel', 'PercentVolume', 'EudParameterA', and 'Weight'.
+Sampled Parameters
+------------------
+The sampled parameter values are stored in a DataFrame with columns
+corresponding to each sample and function parameter: Sample, Term, Roi,
+DoseLevel, PercentVolume, EudParameterA, and Weight. The term column
+corresponds to the rows in the constituent function DataFrame.
 
-The clinical goals DataFrame has columns 'Roi', 'Type', 'GoalCriteria',
-'AcceptanceLevel', and 'ParameterValue'.
+Clinical Goals
+--------------
+The clinical goal specifications are stored in a DataFrame with columns
+corresponding to each goal parameter: Roi, Type, GoalCriteria,
+AcceptanceLevel, and ParameterValue. The DataFrame can be built
+manually, based on the maximum parameter values in the funcs DataFrame
+with init_goals(), or from a CSV file. The function get_results() is
+currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh, and
+MaxDvh clinical goals. All other clinical goals are not evaluated, and
+results are set to NaN.
 
-The results DataFrame has columns 'Sample', 'Flag', and indices
-corresponding to each clinical goal.
+Goal Results
+------------
+The clinical goal results are stored in a DataFrame with columns
+Sample, Flag, and indices corresponding to the rows in the clinical
+goals DataFrame. 
 
-The stats DataFrame has columns 'Sample', 'Roi', 'Min', 'Average',
-'Max', 'D99', 'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2, and 'D1'.
+Dose statistics
+---------------
+Dose statistics for a given list of ROIs are stored in a DataFrame with
+columms Sample, Roi, Min, Average, Max, D99, D98, D95, D90, D50, D10,
+D5, D2, and D1. 
 
 """
 import copy
@@ -30,42 +53,51 @@ import connect
 
 def load_funcs(fpath):
     """Load constituent functions from CSV.
-    
+
+    Constituent function parameters should be specified by columns
+    Roi, FunctionType, DoseLevel, PercentVolume, EudParameterA, and
+    Weight. The row index within the CSV should correspond to the
+    constituent function in the RayStation objective. Fixed parameters
+    should be a single value, tunable parameteres should be a list
+    containing the minimum and maximum values, and irrelevant
+    parameters can be left blank.
+
     Parameters
     ----------
     fpath : str
         File path to CSV file.
-    
+
     Returns
     -------
     pandas.DataFrame
         Constituent function specifications.
-    
+
     """
-    funcs = pd.read_csv(fpath)
-    funcs = funcs.astype(object)
-    col_names = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    funcs = pd.read_csv(fpath).astype(object)
     for index, row in funcs.iterrows():
-        for col in col_names:
+        for col in ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']:
+            # Tunable parameters are read in as strings '[min, max]',
+            # so we need to convert them back to a list of floats.
             if isinstance(row[col], str):
-                temp = [float(s) for s in re.findall(r'\d+\.\d+|\d+', row[col])]
+                temp = [float(par) for par 
+                        in re.findall(r'\d+\.\d+|\d+', row[col])]
                 funcs.loc[index, col] = (temp, temp[0])[len(temp) == 1]
     return funcs
 
 
 def init_pars(funcs):
     """Initialize constituent function parameters to maximum values.
-    
+
     Parameters
     ----------
     funcs : pandas.DataFrame
         Constituent function specifications.
-    
+
     Returns
     -------
     pandas.DataFrame
         Sampled constituent function parameters.
-    
+
     """
     data = [{
         'Sample': 0,
@@ -83,27 +115,27 @@ def init_pars(funcs):
 
 def init_goals(funcs):
     """Initialize clinical goals based on constituent functions.
-    
+
     Parameters
     ----------
     funcs : pandas.DataFrame
         Constituent function specifications.
-    
+
     Returns
     -------
     pandas.DataFrame
         Clinical goal specifications.
-    
+
     """
     data = [{
         'Roi': funcs.iloc[ii]['Roi'],
         'Type': funcs.iloc[ii]['FunctionType'],
-        'GoalCriteria': ('AtLeast', 'AtMost')\
+        'GoalCriteria': ('AtLeast', 'AtMost')
                         ['Max' in funcs.iloc[ii]['FunctionType']],
         'AcceptanceLevel': np.max(funcs.iloc[ii]['DoseLevel']),
         'ParameterValue': (funcs.iloc[ii]['PercentVolume'],
-                           funcs.iloc[ii]['EudParameterA'])\
-                          ['Eud' in funcs.iloc[ii]['FunctionType']]
+                           funcs.iloc[ii]['EudParameterA'])
+                           ['Eud' in funcs.iloc[ii]['FunctionType']]
     } for ii in range(6)]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
@@ -145,7 +177,7 @@ def init_stats():
 
 def sample_pars(sample, funcs, pars):
     """Sample constituent function parameters.
-    
+
     Parameters
     ----------
     sample : int
@@ -154,12 +186,12 @@ def sample_pars(sample, funcs, pars):
         Constituent function specifications.
     pars : pandas.DataFrame
         Sampled constituent function parameters.
-    
+
     Returns
     -------
     pandas.DataFrame
         Updated sampled constituent function parameters.
-    
+
     """
     new_pars = []
     for idx, row in funcs.iterrows():
@@ -189,7 +221,7 @@ def set_pars(plan, pars):
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
-        Current treatment plan.        
+        Current treatment plan.
     pars : pandas.DataFrame
         Constituent function parameters.
 
@@ -224,7 +256,7 @@ def calc_plan(plan, beam_set, roi, dose, volume):
         Dose value to normalize plan.
     volume : float
         Dose volume to normalize plan.
-        
+
     Results
     -------
     int
@@ -240,7 +272,7 @@ def calc_plan(plan, beam_set, roi, dose, volume):
 
     # Normalize plan
     try:
-        beam_set.NormalizeToPrescription(RoiName=roi, DoseValue=dose, 
+        beam_set.NormalizeToPrescription(RoiName=roi, DoseValue=dose,
                                          DoseVolume=volume,
                                          PrescriptionType='DoseAtVolume')
         return 0
@@ -290,7 +322,7 @@ def _get_roi_result(dose, goal):
 
 def get_stats(plan, sample, roi_names, stats):
     """Get dose statistics for given regions of interest.
-    
+
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
@@ -332,19 +364,18 @@ def _get_roi_stats(dose, roi):
 
 
 if __name__ == '__main__':
+    """Redo with command line arguments?
+
+    Write function to do the sampling...
+
     """
-    Objective terms = { Name : [{ idx, DoseLevel }] }
-    Dose stats = { Name : { blah, blah, blah } }
-    Clinical goals = { Name : [{ idx, AcceptanceLevel, GoalCriteria, GoalValue }] }
-    Obj values = { Name : [{ FunctionType, DoseValue, PercentVolume, ResultValue }]}
-    """    
     # Get RayStation objects
     plan = connect.get_current('Plan')
     beam_set = connect.get_current('BeamSet')
 
     # Set ROIs
     roi_list = ['SpinalCanal', 'Heart', 'Rib', 'PTV', 'Chestwall_L', 'Lungs']
-    
+
     # Set objective function parameters
     par_dict = {
         'PTV': [{'idx': 1, 'DoseLevel': 6200, 'Range': [4801, 6200]}],
