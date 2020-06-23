@@ -20,6 +20,7 @@ The stats DataFrame has columns 'Sample', 'Roi', 'Min', 'Average',
 
 """
 import copy
+import re
 
 import numpy as np
 import pandas as pd
@@ -27,8 +28,8 @@ import pandas as pd
 import connect
 
 
-def init_funcs(fpath):
-    """Initialize constituent functions from CSV.
+def load_funcs(fpath):
+    """Load constituent functions from CSV.
     
     Parameters
     ----------
@@ -142,11 +143,13 @@ def init_stats():
     return pd.DataFrame(columns=columns)
 
 
-def sample_pars(funcs, pars):
+def sample_pars(sample, funcs, pars):
     """Sample constituent function parameters.
     
     Parameters
     ----------
+    sample : int
+        Current sample number.
     funcs : pandas.DataFrame
         Constituent function specifications.
     pars : pandas.DataFrame
@@ -158,11 +161,10 @@ def sample_pars(funcs, pars):
         Updated sampled constituent function parameters.
     
     """
-    sample = _get_sample_num(pars)
     new_pars = []
     for idx, row in funcs.iterrows():
         new_row = {'Sample': sample, 'Term': idx, 'Roi': row['Roi']}
-        new_row.update(_sample_func_pars, row)
+        new_row.update(_sample_func_pars(row))
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
 
@@ -170,6 +172,7 @@ def sample_pars(funcs, pars):
 def _sample_func_pars(func):
     """Sample constituent function parameters."""
     pars = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    new_row = {}
     for par in pars:
         if isinstance(func[par], list):
             low = func[par][0]
@@ -178,14 +181,6 @@ def _sample_func_pars(func):
         else:
             new_row[par] = func[par]
     return new_row
-
-
-def _get_sample_num(df):
-    """Get current sample number."""
-    if len(df) == 0:
-        return 0
-    else:
-        return max(df['Sample']) + 1
 
 
 def set_pars(plan, pars):
@@ -205,7 +200,7 @@ def set_pars(plan, pars):
     """
     funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
     for _, row in pars[pars['Sample'] == max(pars['Sample'])].iterrows():
-        func = funcs[row['Term']].DoseFunctionParameteres
+        func = funcs[row['Term']].DoseFunctionParameters
         func.DoseLevel = row['DoseLevel']
         func.Weight = row['Weight']
         if func.FunctionType == 'MaxEud':
@@ -253,11 +248,15 @@ def calc_plan(plan, beam_set, roi, dose, volume):
         return 1
 
 
-def get_results(plan, flag, goals, results):
+def get_results(plan, sample, flag, goals, results):
     """Get clinical goal results.
 
     Parameters
     ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    sample : int
+        Current sample number.
     flag : int
         0 = success, 1 = normalization failed, 2 = optimization failed
     pandas.DataFrame
@@ -270,7 +269,6 @@ def get_results(plan, flag, goals, results):
 
     """
     dose = plan.TreatmentCourse.TotalDose
-    sample = _get_sample_num(results)
     new_results = {'Sample': sample, 'Flag': flag}
     for index, row in goals.iterrows():
         new_results[index] = _get_roi_result(dose, row)
@@ -280,23 +278,25 @@ def get_results(plan, flag, goals, results):
 def _get_roi_result(dose, goal):
     """Get result for given clinical goal."""
     if 'Dose' in goal['Type']:
-        dose = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
-        return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose)
+        dose_type = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
+        return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose_type)
     elif 'Dvh' in goal['Type']:
-        volume = 0.01*row['ParameterValue']
+        volume = 0.01*goal['ParameterValue']
         return dose.GetDoseAtRelativeVolumes(RoiName=goal['Roi'],
                                              RelativeVolumes=[volume])[0]
     else:
         return np.nan
 
 
-def get_stats(plan, roi_names, stats):
+def get_stats(plan, sample, roi_names, stats):
     """Get dose statistics for given regions of interest.
     
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
+    sample : int
+        Current sample number.
     roi_names : iterable
         Regions of interest to evaluate.
     stats : pandas.DataFrame
@@ -309,9 +309,8 @@ def get_stats(plan, roi_names, stats):
 
     """
     dose = plan.TreatmentCourse.TotalDose
-    sample = _get_sample_num(stats)
     new_stats = []
-    for roi in roi_list:
+    for roi in roi_names:
         new_row = {'Sample': sample, 'Roi': roi}
         new_row.update(_get_roi_stats(dose, roi))
         new_stats.append(new_row)
