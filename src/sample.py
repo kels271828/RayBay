@@ -44,7 +44,7 @@ D5, D2, and D1.
 """
 import copy
 import re
-
+c
 import numpy as np
 import pandas as pd
 
@@ -163,6 +163,11 @@ def init_goals(funcs):
 def init_results(goals):
     """Initialize clinical goal results.
 
+    Clinical goal results are specified by Sample, Flag, and indices
+    corresponding to the rows in the clinical goals DataFrame. Only
+    MinDose, AverageDose, MaxDose, MinDvh, and MaxDvh are evaluated.
+    All other clinical goals are set to NaN.
+
     Parameters
     ----------
     goals : pandas.DataFrame
@@ -174,13 +179,15 @@ def init_results(goals):
         Clinical goal results.
 
     """
-    columns = ['Sample', 'Flag']
-    columns += list(np.arange(len(goals)))
+    columns = ['Sample', 'Flag'] + list(np.arange(len(goals)))
     return pd.DataFrame(columns=columns)
 
 
 def init_stats():
     """Initialize dose statistics.
+
+    Dose statistics are specified by Sample, Roi, Min, Average, Max,
+    D99, D98, D95, D90, D50, D10, D5, D2, and D1.
 
     Returns
     -------
@@ -212,8 +219,8 @@ def sample_pars(sample, funcs, pars):
 
     """
     new_pars = []
-    for idx, row in funcs.iterrows():
-        new_row = {'Sample': sample, 'Term': idx, 'Roi': row['Roi']}
+    for index, row in funcs.iterrows():
+        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
         new_row.update(_sample_func_pars(row))
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
@@ -301,6 +308,9 @@ def calc_plan(plan, beam_set, roi, dose, volume):
 def get_results(plan, sample, flag, goals, results):
     """Get clinical goal results.
 
+    Only MinDose, AverageDose, MaxDose, MinDvh, and MaxDvh are
+    evaluated. All other clinical goals are set to NaN.
+
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
@@ -309,13 +319,15 @@ def get_results(plan, sample, flag, goals, results):
         Current sample number.
     flag : int
         0 = success, 1 = normalization failed, 2 = optimization failed
-    pandas.DataFrame
+    goals : pandas.DataFrame
         Clinical goal specifications.
+    results : pandas.DataFrame
+        Clinical goal results.
 
     Returns
     -------
     pandas.DataFrame
-        Clinical goal results.
+        Updated clinical goal results.
 
     """
     dose = plan.TreatmentCourse.TotalDose
