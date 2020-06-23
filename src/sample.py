@@ -44,11 +44,11 @@ D5, D2, and D1.
 """
 import copy
 import re
-c
+
 import numpy as np
 import pandas as pd
 
-#import connect
+import connect
 
 
 def load_funcs(fpath):
@@ -393,49 +393,74 @@ def _get_roi_stats(dose, roi):
     return stats
 
 
-if __name__ == '__main__':
-    """Redo with command line arguments?
+def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
+                 roi_names=None, max_iter=1000, n_success=100):
+    """Sample treatment plans and save results.
 
-    Write function to do the sampling...
+    Results are saved after each iteration in case connection to
+    RayStation times out.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    roi : str
+        ROI to normalize plans.
+    dose : float
+        Dose value to normalize plans.
+    volume : float
+        Dose volume to normalize plans.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+        If None, goals are based on constituent functions.
+    fpath : str, optional
+        Path to save results.
+        If not specified, results are saved to the current directory.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+        If None, based on ROIs in clinical goals.
+    max_iter : int, optional
+        Maximum number of treatment plans to sample.
+    n_success : int, optional
+        Number of successfull treatment plans to sample.
+
+    Returns
+    -------
+    None.
 
     """
     # Get RayStation objects
     plan = connect.get_current('Plan')
     beam_set = connect.get_current('BeamSet')
 
-    # Set ROIs
-    roi_list = ['SpinalCanal', 'Heart', 'Rib', 'PTV', 'Chestwall_L', 'Lungs']
-
-    # Set objective function parameters
-    par_dict = {
-        'PTV': [{'idx': 1, 'DoseLevel': 6200, 'Range': [4801, 6200]}],
-        'Rib': [{'idx': 2, 'DoseLevel': 3200, 'Range': [0, 3200]}],
-        'SpinalCanal': [{'idx': 3, 'DoseLevel': 2080, 'Range': [0, 2080]}],
-        'Heart': [{'idx': 4, 'DoseLevel': 2800, 'Range': [0, 2800]}],
-        'Chestwall_L': [{'idx': 5, 'DoseLevel': 3000, 'Range': [0, 3000]}],
-        'Lungs': [{'idx': 6, 'DoseLevel': 2000, 'Range': [0, 2000]}]
-    }
+    # Define functions and goals
+    if isinstance(funcs, str):
+        funcs = load_funcs(funcs)
+    if goals is None:
+        goals = init_goals(funcs)
+    elif isinstance(goals, str):
+        goals = pd.read_csv(goals)
+    if roi_names is None:
+        roi_names = set(goals['Roi'])
+    pars = init_pars(funcs)
+    results = init_results(goals)
+    stats = init_stats()
 
     # Sample treatment plans
-    n_success = 0
-    results = []
-    prev_pars = set()
-    prev_pars.add(get_pars(par_dict))
-    fpath = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\results\\'
-    for ii in range(1000):
-        print(f'Iteration: {ii}')
+    count = 0
+    for ii in range(max_iter):
+        print(f'Iteration: {ii}', end='')
         if ii > 0:
-            sample_pars(par_dict, prev_pars)
-        print(get_pars(par_dict))
-        set_pars(plan, par_dict)
-        flag = calc_plan(plan, beam_set)
-        n_success = n_success + 1 if flag == 0 else n_success
-        print(f'Success: {flag}, n_success: {n_success}\n')
-        if flag < 2:
-            results.append([flag, copy.deepcopy(par_dict), get_stats(plan, roi_list),
-                            get_goals(plan, roi_list), get_objs(plan)])
-        else:
-            results.append([flag, copy.deepcopy(par_dict)])
-        np.save(fpath + 'samples_6_11.npy', results)
-        if n_success >= 250:
+            pars = sample_pars(ii, funcs, pars)
+            pars.to_pickle(fpath + 'pars.npy')
+        set_pars(plan, pars)
+        flag = calc_plan(plan, beam_set, roi, dose, volume)
+        print(f'Flag: {flag}')
+        if flag == 0:
+            count += 1
+            results = get_results(plan, ii, flag, goals, results)
+            results.to_pickle(fpath + 'results.npy')
+            stats = get_stats(plan, ii, roi_names, stats)
+            stats.to_pickle(fpath + 'stats.npy')
+        if count == n_success:
             break
