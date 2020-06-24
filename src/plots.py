@@ -6,7 +6,33 @@ import seaborn as sns
 sns.set(color_codes=True, font_scale=1.2)
 
 
-def boxplot(specs, values, data_type, title=None):
+def filter_flag(data, results, flag, keep=True):
+    """Filter data by flag.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Either sampled constituent function parameters
+        or clinical goal results.
+    results : pandas.DataFrame
+        Clinical goal results.
+    flag : {0, 1, 2}
+        0 = success, 1 = normalization failed, 2 = optimization failed
+    keep : bool, optional
+        If True, keep values with given flag.
+        If False, remove values with given flag.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Data filtered by flag.
+
+    """
+    samples = results[results['Flag'] == flag]['Sample'].values
+    return data[data['Sample'].isin(samples) == keep]
+
+
+def boxplot(specs, values, data_type, title=None, ax=None):
     """Visualize parameter and goal value ranges with a boxplot.
 
     Parameters
@@ -28,14 +54,16 @@ def boxplot(specs, values, data_type, title=None):
 
     """
     data, labels = _format_data(specs, values, data_type)
-    plt.boxplot(data)
-    plt.xticks(ticks=np.arange(1, len(labels) + 1), labels=labels, rotation=90)
+    if ax is None:
+        fig, ax = plt.subplots(1, 1)
+    ax.boxplot(data)
+    ax.set_xticklabels(labels, rotation=90)
     if data_type == 'pars':
-        plt.ylabel('Parameter Values')
+        ax.set_ylabel('Parameter Values')
     else:
-        plt.ylabel('Goal Vaues')
+        ax.set_ylabel('Goal Vaues')
     if title is not None:
-        plt.title(title)
+        ax.set_title(title)
 
 
 def _format_data(specs, values, data_type):
@@ -60,15 +88,13 @@ def _get_tune_pars(funcs):
     pars = []
     for idx, row in funcs.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
-            if isinstance(row[par], str) and '[' in row[par]:
+            if isinstance(row[par], list) or \
+               (isinstance(row[par], str) and '[' in row[par]):
                 pars.append({'Term': idx, 'Roi': row['Roi'], 'Par': par})
     return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
 
 
-def _filter(results, data, flag):
-    """Filter data by flag."""
-    samples = results[results['Flag'] == flag]['Sample'].values
-    return data[data['Sample'].isin(samples)]
+
 
 
 def plot_goals_pars(funcs, pars, goals, results, flag=0):
