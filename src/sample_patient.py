@@ -8,4 +8,4 @@ sys.path.append(repo_path + 'src\\')
 funcs_path = repo_path + 'results\\patient2\\funcs_half.csv'
 goals_path = repo_path + 'results\\patient2\\goals.csv'
 save_path = repo_path + 'results\\patient2\\'
-sample.sample_plans(funcs_path, 'PTV 4/7/20', 6270, 99, goals_path, repo_path)
+sample.sample_plans(funcs_path, 'PTV 4/7/20', 6270, 99, goals_path, save_path)

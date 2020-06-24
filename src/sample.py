@@ -472,16 +472,16 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         print(f'Iteration: {ii}', end='')
         if ii > 0:
             pars = sample_pars(ii, funcs, pars)
-            pars.to_pickle(fpath + 'pars.npy', pars)
+            pars.to_pickle(fpath + 'pars.npy')
         set_pars(plan, pars)
         flag = calc_plan(plan, beam_set, roi, dose, volume)
         count = count + 1 if flag == 0 else count
         print(f', Flag: {flag}, Successes: {count}')
         results = get_results(plan, ii, flag, goals, results)
-        results.to_pickle(fpath + 'results.npy', results)
+        results.to_pickle(fpath + 'results.npy')
         if flag < 2:
             stats = get_stats(plan, ii, roi_names, stats)
-            stats.to_pickle(fpath + 'stats.npy', stats)
+            stats.to_pickle(fpath + 'stats.npy')
         if count == n_success:
             break
     return pars, results, stats
