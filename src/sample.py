@@ -42,7 +42,6 @@ columms Sample, Roi, Min, Average, Max, D99, D98, D95, D90, D50, D10,
 D5, D2, and D1.
 
 """
-import copy
 import re
 
 import numpy as np
@@ -203,6 +202,11 @@ def init_stats():
 def sample_pars(sample, funcs, pars):
     """Sample constituent function parameters.
 
+    Constituent function parameters are specified by columns Sample,
+    Term, Roi, DoseLevel, PercentVolume, EudParameterA, and Weight. The
+    term columnn corresponds to the rows in the constituent function
+    DataFrame.
+
     Parameters
     ----------
     sample : int
@@ -242,6 +246,11 @@ def _sample_func_pars(func):
 
 def set_pars(plan, pars):
     """Set objective function parameters.
+
+    Constituent function parameters are specified by columns Sample,
+    Term, Roi, DoseLevel, PercentVolume, EudParameterA, and Weight. The
+    term columnn corresponds to the rows in the constituent function
+    DataFrame.
 
     Parameters
     ----------
@@ -308,8 +317,10 @@ def calc_plan(plan, beam_set, roi, dose, volume):
 def get_results(plan, sample, flag, goals, results):
     """Get clinical goal results.
 
-    Only MinDose, AverageDose, MaxDose, MinDvh, and MaxDvh are
-    evaluated. All other clinical goals are set to NaN.
+    Clinical goals are specified by columns Roi, Type, GoalCriteria,
+    AcceptanceLevel, and ParameterValue. Only MinDose, AverageDose,
+    MaxDose, MinDvh, and MaxDvh are evaluated. All other clinical goals
+    are set to NaN.
 
     Parameters
     ----------
@@ -332,8 +343,9 @@ def get_results(plan, sample, flag, goals, results):
     """
     dose = plan.TreatmentCourse.TotalDose
     new_results = {'Sample': sample, 'Flag': flag}
-    for index, row in goals.iterrows():
-        new_results[index] = _get_roi_result(dose, row)
+    if flag < 2:
+        for index, row in goals.iterrows():
+            new_results[index] = _get_roi_result(dose, row)
     return results.append(new_results, ignore_index=True)
 
 
@@ -352,6 +364,9 @@ def _get_roi_result(dose, goal):
 
 def get_stats(plan, sample, roi_names, stats):
     """Get dose statistics for given regions of interest.
+
+    Dose statistics are specified by Sample, Roi, Min, Average, Max,
+    D99, D98, D95, D90, D50, D10, D5, D2, and D1.
 
     Parameters
     ----------
@@ -426,7 +441,12 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
 
     Returns
     -------
-    None.
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
 
     """
     # Get RayStation objects
@@ -452,15 +472,16 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         print(f'Iteration: {ii}', end='')
         if ii > 0:
             pars = sample_pars(ii, funcs, pars)
-            pars.to_pickle(fpath + 'pars.npy')
+            pars.to_pickle(fpath + 'pars.npy', pars)
         set_pars(plan, pars)
         flag = calc_plan(plan, beam_set, roi, dose, volume)
-        print(f'Flag: {flag}')
-        if flag == 0:
-            count += 1
-            results = get_results(plan, ii, flag, goals, results)
-            results.to_pickle(fpath + 'results.npy')
+        count = count + 1 if flag == 0 else count
+        print(f', Flag: {flag}, Successes: {count}')
+        results = get_results(plan, ii, flag, goals, results)
+        results.to_pickle(fpath + 'results.npy', results)
+        if flag < 2:
             stats = get_stats(plan, ii, roi_names, stats)
-            stats.to_pickle(fpath + 'stats.npy')
+            stats.to_pickle(fpath + 'stats.npy', stats)
         if count == n_success:
             break
+    return pars, results, stats
