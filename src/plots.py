@@ -3,90 +3,72 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+sns.set(color_codes=True, font_scale=1.2)
 
 
-def plot_pars(funcs, pars, results, flag=0):
-    """Plot parameter values as boxplots.
+def boxplot(specs, values, data_type, title=None):
+    """Visualize parameter and goal value ranges with a boxplot.
 
     Parameters
     ----------
-    funcs : pandas.DataFrame
-        Constituent function specifications.
-    pars : pandas.DataFrame
-        Sampled constituent function parameters.
-    results : pandas.DataFrame
-        Clinical goal results.
-    flag : int, optional
-        0 = success, 1 = normalization failed, 2 = optimization failed
+    specs : pandas.DataFrame
+        Either constituent function specifications or
+        clinical goal specifications.
+    values : pandas.DataFrame
+        Either sampled constituent function parameters or
+        clinical goal results.
+    data_type : {'pars', 'goals'}
+        Type of boxplot to create.
+    title: str, optional
+        Figure title.
 
     Returns
     -------
     None.
 
     """
-    data, labels = _get_par_data(funcs, _filter(results, pars, flag))
+    data, labels = _format_data(specs, values, data_type)
     plt.boxplot(data)
     plt.xticks(ticks=np.arange(1, len(labels) + 1), labels=labels, rotation=90)
-    plt.ylabel('Parameter Value')
+    if data_type == 'pars':
+        plt.ylabel('Parameter Values')
+    else:
+        plt.ylabel('Goal Vaues')
+    if title is not None:
+        plt.title(title)
+
+
+def _format_data(specs, values, data_type):
+    """Format data and labels for boxplot and scatterplot."""
+    if data_type not in ('pars', 'goals'):
+        raise ValueError(f'Invalid data_type: {data_type}')
+    data, labels = [], []
+    if data_type == 'pars':
+        pars = _get_tune_pars(specs)
+        for _, row in pars.iterrows():
+            data.append(values[values['Term'] == row['Term']][row['Par']])
+            labels.append(row['Roi'] + ' ' + row['Par'])
+    else:
+        for index, row in specs.iterrows():
+            data.append(values[index])
+            labels.append(row['Roi'] + ' ' + row['Type'])
+    return data, labels
+
+
+def _get_tune_pars(funcs):
+    """Get tunable parameters."""
+    pars = []
+    for idx, row in funcs.iterrows():
+        for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+            if isinstance(row[par], str) and '[' in row[par]:
+                pars.append({'Term': idx, 'Roi': row['Roi'], 'Par': par})
+    return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
 
 
 def _filter(results, data, flag):
     """Filter data by flag."""
     samples = results[results['Flag'] == flag]['Sample'].values
     return data[data['Sample'].isin(samples)]
-
-
-def _get_par_data(funcs, pars):
-    """Get data and labels for parameter boxplot."""
-    tune_pars = _get_tune_pars(funcs)
-    data = [pars[pars['Term'] == row['Term']][row['Parameter']]
-            for _, row in tune_pars.iterrows()]
-    labels = [row['Roi'] + ' ' + row['Parameter']
-              for _, row in tune_pars.iterrows()]
-    return data, labels
-
-
-def _get_tune_pars(funcs):
-    """Get tunable parameters."""
-    tune_pars = pd.DataFrame(columns=['Term', 'Parameter'])
-    for index, row in funcs.iterrows():
-        for col in ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']:
-            if isinstance(row[col], str) and '[' in row[col]:
-                tune_pars = tune_pars.append({'Term': index, 'Roi': row['Roi'],
-                                              'Parameter': col},
-                                             ignore_index=True)
-    return tune_pars
-
-
-def plot_goals(goals, results, flag=0):
-    """Plot goal values as boxplots.
-
-    Parameters
-    ----------
-    goals : pandas.DataFrame
-        Clinical goal specifications.
-    results : pandas.DataFrame
-        Clinical goal results.
-    flag : int, optional
-        0 = success, 1 = normalization failed
-
-    Returns
-    -------
-    None.
-
-    """
-    data, labels = _get_goal_data(goals, results[results['Flag'] == flag])
-    plt.boxplot(data)
-    plt.xticks(ticks=np.arange(1, len(labels) + 1), labels=labels, rotation=90)
-    plt.ylabel('Goal Value')
-
-
-def _get_goal_data(goals, results):
-    """Get data and labels for goal boxplot."""
-    data = [results[ii] for ii in range(len(goals))]
-    labels = [row['Roi'] + ' ' + row['Type']
-              for _, row in goals.iterrows()]
-    return data, labels
 
 
 def plot_goals_pars(funcs, pars, goals, results, flag=0):
