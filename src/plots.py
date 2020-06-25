@@ -6,32 +6,6 @@ import seaborn as sns
 sns.set(color_codes=True, font_scale=1.2)
 
 
-def filter_flag(data, results, flag, keep=True):
-    """Filter data by flag.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Either sampled constituent function parameters
-        or clinical goal results.
-    results : pandas.DataFrame
-        Clinical goal results.
-    flag : {0, 1, 2}
-        0 = success, 1 = normalization failed, 2 = optimization failed
-    keep : bool, optional
-        If True, keep values with given flag.
-        If False, remove values with given flag.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Data filtered by flag.
-
-    """
-    samples = results[results['Flag'] == flag]['Sample'].values
-    return data[data['Sample'].isin(samples) == keep]
-
-
 def boxplot(specs, values, data_type, title=None, ax=None):
     """Visualize parameter and goal value ranges with a boxplot.
 
@@ -67,72 +41,7 @@ def boxplot(specs, values, data_type, title=None, ax=None):
     ax.set_title(title)
 
 
-def format_data(specs, values, data_type):
-    """Format data and labels for boxplot and scatterplot.
-
-    Parameters
-    ----------
-    specs : pandas.DataFrame
-        Either constituent function specifications or
-        clinical goal specifications.
-    values : pandas.DataFrame
-        Either sampled constituent function parameters or
-        clinical goal results.
-    data_type : {'pars', 'goals'}
-        Type of data to format.
-
-    Returns
-    -------
-    list
-        Result values.
-    list
-        Result labels.
-
-    """
-    if data_type not in ('pars', 'goals'):
-        raise ValueError(f'Invalid data_type: {data_type}')
-    data, labels = [], []
-    if data_type == 'pars':
-        pars = get_tune_pars(specs)
-        for _, row in pars.iterrows():
-            data.append(values[values['Term'] == row['Term']][row['Par']])
-            labels.append(row['Roi'] + ' ' + row['Par'])
-    else:
-        for index, row in specs.iterrows():
-            data.append(values[index])
-            labels.append(row['Roi'] + ' ' + row['Type'])
-    return data, labels
-
-
-def get_tune_pars(funcs):
-    """Get tunable function parameters.
-
-    The tunable function parameters are returned as a DataFrame with
-    columns corresponding to each parameter: Term, Roi, and Par. The
-    term column corresponds to the rows in the constituent function
-    DataFrame.
-
-    Parameters
-    ----------
-    funcs : pandas.DataFrame
-        Constituent function specifications.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Sampled tunable function parameters.
-
-    """
-    pars = []
-    for idx, row in funcs.iterrows():
-        for par in ['DoseLevel', 'PercentVolume', 'Weight']:
-            if isinstance(row[par], list) or \
-               (isinstance(row[par], str) and '[' in row[par]):
-                pars.append({'Term': idx, 'Roi': row['Roi'], 'Par': par})
-    return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
-
-
-def corrplot(goals, results, funcs=None, pars=None, title=None):
+def corrplot(goals, results, funcs=None, pars=None, title=None, size=500):
     """Visualize goal and parameter correlations with a heatmap.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
@@ -153,6 +62,8 @@ def corrplot(goals, results, funcs=None, pars=None, title=None):
         Sampled constituent function parameters.
     title : str, optional
         Figure title.
+    size : int, optional
+        Size scale for boxes.
 
     Returns
     -------
@@ -174,7 +85,7 @@ def corrplot(goals, results, funcs=None, pars=None, title=None):
     for ii in range(len(xdata)):
         for jj in range(len(ydata)):
             corr = np.corrcoef(xdata[ii], ydata[jj])[0, 1]
-            ax.scatter(ii, jj, marker='s', s=1e3*abs(corr),
+            ax.scatter(ii, jj, marker='s', s=size*abs(corr),
                        c=[palette[int(255/2*(corr + 1))]])
 
     # Initialize tick labels
@@ -242,3 +153,94 @@ def scatterplot(goals, results, funcs=None, pars=None):
             corr = f'Corr: {np.corrcoef(xdata[jj], ydata[ii])[0, 1]:.2f}'
             ax[jj].set_title(corr)
         ax[0].set_ylabel(ylabels[ii])
+
+
+def format_data(specs, values, data_type):
+    """Format data and labels for boxplot and scatterplot.
+
+    Parameters
+    ----------
+    specs : pandas.DataFrame
+        Either constituent function specifications or
+        clinical goal specifications.
+    values : pandas.DataFrame
+        Either sampled constituent function parameters or
+        clinical goal results.
+    data_type : {'pars', 'goals'}
+        Type of data to format.
+
+    Returns
+    -------
+    list
+        Result values.
+    list
+        Result labels.
+
+    """
+    if data_type not in ('pars', 'goals'):
+        raise ValueError(f'Invalid data_type: {data_type}')
+    data, labels = [], []
+    if data_type == 'pars':
+        pars = get_tune_pars(specs)
+        for _, row in pars.iterrows():
+            data.append(values[values['Term'] == row['Term']][row['Par']])
+            labels.append(row['Roi'] + ' ' + row['Par'])
+    else:
+        for index, row in specs.iterrows():
+            data.append(values[index])
+            labels.append(row['Roi'] + ' ' + row['Type'])
+    return data, labels
+
+
+def get_tune_pars(funcs):
+    """Get tunable function parameters.
+
+    The tunable function parameters are returned as a DataFrame with
+    columns corresponding to each parameter: Term, Roi, and Par. The
+    term column corresponds to the rows in the constituent function
+    DataFrame.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled tunable function parameters.
+
+    """
+    pars = []
+    for idx, row in funcs.iterrows():
+        for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+            if isinstance(row[par], list) or \
+               (isinstance(row[par], str) and '[' in row[par]):
+                pars.append({'Term': idx, 'Roi': row['Roi'], 'Par': par})
+    return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
+
+
+def filter_flag(data, results, flag, keep=True):
+    """Filter data by flag.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Either sampled constituent function parameters
+        or clinical goal results.
+    results : pandas.DataFrame
+        Clinical goal results.
+    flag : {0, 1, 2}
+        0 = success, 1 = normalization failed, 2 = optimization failed
+    keep : bool, optional
+        If True, keep values with given flag.
+        If False, remove values with given flag.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Data filtered by flag.
+
+    """
+    samples = results[results['Flag'] == flag]['Sample'].values
+    return data[data['Sample'].isin(samples) == keep]
