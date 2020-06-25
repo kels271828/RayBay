@@ -132,102 +132,75 @@ def get_tune_pars(funcs):
     return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
 
 
-def corrplot(data, xlabels=None, ylabels=None, title=None):
-    """Plot correlations by color and size.
+def corrplot(goals, results, funcs=None, pars=None, title=None):
+    """Visualize goal and parameter correlations with a heatmap.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
 
+    If funcs and pars given, plots goals on the vertical axis and
+    parameters on the horizontal axis. Otherwise plots goals on both
+    vertical and horizontal axes.
+
     Parameters
     ----------
-    data : pandas.DataFrame
-        Results to include in plot.
-    xlabels : list, optional
-        Columns to appear on horizontal axis.
-        If none, all columns are included.
-    ylabels : list, optional
-        Columns to appear on vertical axis.
-        If none, all columns are included.
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+    results : pandas.DataFrame
+        Clinical goal results.
+    funcs : pandas.DataFrame, optional
+        Constituent function specifications.
+    pars : pandas.DataFrame, optional
+        Sampled constituent function parameters.
     title : str, optional
-        Plot title.
+        Figure title.
 
     Returns
     -------
     None.
 
     """
-    # Format and filter data
-    corr = data.corr()
-    if xlabels is not None:
-        corr = corr.loc[xlabels]
-    if ylabels is not None:
-        corr = corr[ylabels]
-    corr = pd.melt(corr.reset_index(), id_vars='index').replace(np.nan, 0)
-    x, y = corr['index'], corr['variable']
-    x_to_num = {name: idx for idx, name in enumerate(x.unique())}
-    y_to_num = {name: idx for idx, name in enumerate(y.unique())}
+    # Format data
+    ydata, ylabels = format_data(goals, results, 'goals')
+    if funcs is None:
+        xdata, xlabels = ydata, ylabels
+    else:
+        xdata, xlabels = format_data(funcs, pars, 'pars')
+    xdata, xlabels = xdata[::-1], xlabels[::-1]
 
+    # Plot boxes
     palette = sns.diverging_palette(20, 220, n=256)
-
-    def _value_to_size(val):
-        val_position = 0.99*val + 0.01
-        val_position = min(max(val_position, 0), 1)
-        return 100*val_position
-
-    def _value_to_color(val):
-        val_position = float((val + 1))/2
-        val_position = min(max(val_position, 0), 1)
-        ind = int(val_position*(len(palette) - 1))
-        return palette[ind]
-
-    # Plot squares
-    plot_grid = plt.GridSpec(1, 15, hspace=0.2, wspace=0.1)
+    plot_grid = plt.GridSpec(1, 15)
     ax = plt.subplot(plot_grid[:, :-1])
-    ax.scatter(
-        x=[x_to_num[v] for v in x],
-        y=[y_to_num[v] for v in y],
-        marker='s',
-        s=[_value_to_size(v) for v in corr['value'].abs()],
-        c=[_value_to_color(v) for v in corr['value']]
-    )
+    for ii in range(len(xdata)):
+        for jj in range(len(ydata)):
+            corr = np.corrcoef(xdata[ii], ydata[jj])[0, 1]
+            ax.scatter(ii, jj, marker='s', s=1e3*abs(corr),
+                       c=[palette[int(255/2*(corr + 1))]])
 
-    # Annotations
-    ax.set_xticks([v for k, v in x_to_num.items()])
-    ax.set_xticklabels([k for k in x_to_num], rotation=45,
-                       horizontalalignment='right')
-    ax.set_yticks([v for k, v in y_to_num.items()])
-    ax.set_yticklabels([k for k in y_to_num])
+    # Initialize tick labels
+    ax.set_xticks(range(len(xdata)))
+    ax.set_xticklabels(xlabels, rotation=90)
+    ax.set_yticks(range(len(ydata)))
+    ax.set_yticklabels(ylabels)
+    ax.set_title(title)
 
+    # Adjust grid lines relative to boxes
     ax.grid(False, 'major')
     ax.grid(True, 'minor')
     ax.set_xticks([t + 0.5 for t in ax.get_xticks()], minor=True)
     ax.set_yticks([t + 0.5 for t in ax.get_yticks()], minor=True)
-
-    ax.set_xlim([-0.5, max([v for v in x_to_num.values()]) + 0.5])
-    ax.set_ylim([-0.5, max([v for v in y_to_num.values()]) + 0.5])
-    ax.set_facecolor('#F1F1F1')
-
-    ax.set_title(title)
+    ax.set_xlim([-0.5, len(xlabels) - 0.5])
+    ax.set_ylim([-0.5, len(ylabels) - 0.5])
 
     # Legend
     ax = plt.subplot(plot_grid[:, -1])
-
-    col_x = [0]*len(palette)
     bar_y = np.linspace(-1, 1, len(palette))
-
-    bar_height = bar_y[1] - bar_y[0]
-    ax.barh(
-        y=bar_y,
-        width=[5]*len(palette),
-        left=col_x,
-        height=bar_height,
-        color=palette,
-        linewidth=0
-    )
-    ax.set_xlim(1, 2)
-    ax.grid(False)
-    ax.set_facecolor('white')
+    bar_h = bar_y[1] - bar_y[0]
+    ax.barh(y=bar_y, width=[1]*len(palette), height=bar_h, color=palette,
+            linewidth=0)
+    ax.set_facecolor('w')
     ax.set_xticks([])
-    ax.set_yticks(np.linspace(min(bar_y), max(bar_y), 3))
+    ax.set_yticks([-1, 0, 1])
     ax.yaxis.tick_right()
 
 
@@ -258,11 +231,13 @@ def scatterplot(goals, results, funcs=None, pars=None):
     if funcs is None:
         xdata, xlabels = ydata, ylabels
     else:
-        ydata, ylabels = format_data(funcs, pars, 'pars')
+        xdata, xlabels = format_data(funcs, pars, 'pars')
     for ii in range(len(ydata)):
+        level = goals.iloc[ii]['AcceptanceLevel']
         fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
         for jj in range(len(xdata)):
             ax[jj].plot(xdata[jj], ydata[ii], '.')
+            ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
             ax[jj].set_xlabel(xlabels[jj])
             corr = f'Corr: {np.corrcoef(xdata[jj], ydata[ii])[0, 1]:.2f}'
             ax[jj].set_title(corr)
