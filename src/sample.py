@@ -37,9 +37,9 @@ goals DataFrame.
 
 Dose statistics
 ---------------
-Dose statistics for a given list of ROIs are stored in a DataFrame with
-columms Sample, Roi, Min, Average, Max, D99, D98, D95, D90, D50, D10,
-D5, D2, and D1.
+Dose statistics for a given list of regions of interest are stored in a
+DataFrame with columms Sample, Roi, Min, Average, Max, D99, D98, D95,
+D90, D50, D10, sD5, D2, and D1.
 
 """
 import re
@@ -110,9 +110,11 @@ def init_pars(funcs):
         'Sample': 0,
         'Term': index,
         'Roi': row['Roi'],
-        'DoseLevel': _get_par(row['DoseLevel'], row['FunctionType']),
-        'PercentVolume': _get_par(row['PercentVolume'], row['FunctionType']),
-        'EudParameterA': _get_par(row['EudParameterA'], row['FunctionType']),
+        'DoseLevel': get_par_bound(row['DoseLevel'], row['FunctionType']),
+        'PercentVolume': get_par_bound(row['PercentVolume'],
+                                       row['FunctionType']),
+        'EudParameterA': get_par_bound(row['EudParameterA'],
+                                       row['FunctionType']),
         'Weight': np.min(row['Weight'])
     } for index, row in funcs.iterrows()]
     columns = ['Sample', 'Term', 'Roi', 'DoseLevel', 'PercentVolume',
@@ -120,8 +122,22 @@ def init_pars(funcs):
     return pd.DataFrame(data=data, columns=columns)
 
 
-def _get_par(par, func_type):
-    """Get min or max parameter value based on function type."""
+def get_par_bound(par, func_type):
+    """Get min or max parameter value based on function type.
+
+    Parameters
+    ----------
+    par : float or list
+        Parameter value or boundaries.
+    func_type : str
+        Constituent function type.
+
+    Returns
+    -------
+    float
+        Parameter boundary value.
+
+    """
     return np.max(par) if 'Max' in func_type else np.min(par)
 
 
@@ -149,10 +165,13 @@ def init_goals(funcs):
         'Roi': row['Roi'],
         'Type': row['FunctionType'],
         'GoalCriteria': 'AtMost' if 'Max' in row['FunctionType'] else 'AtLeast',
-        'AcceptanceLevel': _get_par(row['DoseLevel'], row['FunctionType']),
-        'ParameterValue': _get_par(row['EudParameterA'], row['FunctionType'])
+        'AcceptanceLevel': get_par_bound(row['DoseLevel'],
+                                         row['FunctionType']),
+        'ParameterValue': get_par_bound(row['EudParameterA'],
+                                        row['FunctionType'])
                           if 'Eud' in row['FunctionType'] else
-                          _get_par(row['PercentVolume'], row['FunctionType'])
+                          get_par_bound(row['PercentVolume'],
+                                        row['FunctionType'])
     } for index, row in funcs.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
@@ -225,13 +244,25 @@ def sample_pars(sample, funcs, pars):
     new_pars = []
     for index, row in funcs.iterrows():
         new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
-        new_row.update(_sample_func_pars(row))
+        new_row.update(sample_func_pars(row))
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
 
 
-def _sample_func_pars(func):
-    """Sample constituent function parameters."""
+def sample_func_pars(func):
+    """Sample constituent function parameters.
+
+    Parameters
+    ----------
+    func : pandas.core.series.Series
+        Row of constituent function specifications DataFrame.
+
+    Returns
+    -------
+    pandas.core.series.Series
+        Row of sampled constituent function parameter DataFrame.
+
+    """
     pars = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
     new_row = {}
     for par in pars:
@@ -285,7 +316,7 @@ def calc_plan(plan, beam_set, roi, dose, volume):
     beam_set : connect.connect_cpython.PyScriptObject
         Current beam set.
     roi : str
-        ROI to normalize plan.
+        Region of interest for normalization.
     dose : float
         Dose value to normalize plan.
     volume : float
@@ -345,12 +376,29 @@ def get_results(plan, sample, flag, goals, results):
     new_results = {'Sample': sample, 'Flag': flag}
     if flag < 2:
         for index, row in goals.iterrows():
-            new_results[index] = _get_roi_result(dose, row)
+            new_results[index] = get_goal_result(dose, row)
     return results.append(new_results, ignore_index=True)
 
 
-def _get_roi_result(dose, goal):
-    """Get result for given clinical goal."""
+def get_goal_result(dose, goal):
+    """Get result for given clinical goal.
+
+    Only MinDose, AverageDose, MaxDose, MinDvh, and MaxDvh are
+    evaluated. All other clinical goals are set to NaN.
+
+    Parameters
+    ----------
+    dose : connect.connect_cpython.PyScriptObject
+        Current treatment plan dose.
+    goal : pandas.core.series.Series
+        Row of clinical goal specification DataFrame.
+
+    Returns
+    -------
+    float
+        Clinical goal value.
+
+    """
     if 'Dose' in goal['Type']:
         dose_type = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
         return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose_type)
@@ -389,13 +437,30 @@ def get_stats(plan, sample, roi_names, stats):
     new_stats = []
     for roi in roi_names:
         new_row = {'Sample': sample, 'Roi': roi}
-        new_row.update(_get_roi_stats(dose, roi))
+        new_row.update(get_roi_stats(dose, roi))
         new_stats.append(new_row)
     return stats.append(new_stats, ignore_index=True)
 
 
-def _get_roi_stats(dose, roi):
-    """Get dose statistics for given region of interest."""
+def get_roi_stats(dose, roi):
+    """Get dose statistics for given region of interest.
+
+    Dose statistics are specified by Sample, Roi, Min, Average, Max,
+    D99, D98, D95, D90, D50, D10, D5, D2, and D1.
+
+    Parameters
+    ----------
+    dose : conect.connect_cpython.PyScriptObject
+        Current treatment plan dose.
+    roi : str
+        Region of interest to evaluate.
+
+    Results
+    -------
+    dict
+        Dose statistics.
+
+    """
     volumes = [0.99, 0.98, 0.95, 0.9, 0.5, 0.1, 0.05, 0.02, 0.01]
     volume_names = ['D99', 'D98', 'D95', 'D90', 'D50', 'D10', 'D5', 'D2', 'D1']
     stats = {'Min': dose.GetDoseStatistic(RoiName=roi, DoseType='Min'),
@@ -420,7 +485,7 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     funcs : pandas.DataFrame or str
         Constituent function specifications or path to CSV file.
     roi : str
-        ROI to normalize plans.
+        Region of interest for normalization.
     dose : float
         Dose value to normalize plans.
     volume : float
@@ -433,7 +498,7 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         If not specified, results are saved to the current directory.
     roi_names : iterable, optional
         Regions of interest to evaluate dose statistics.
-        If None, based on ROIs in clinical goals.
+        If None, based on regions of interest in clinical goals.
     max_iter : int, optional
         Maximum number of treatment plans to sample.
     n_success : int, optional
