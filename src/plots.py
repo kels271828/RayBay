@@ -47,13 +47,15 @@ def boxplot(specs, values, data_type, title=None, ax=None):
         Type of boxplot to create.
     title: str, optional
         Figure title.
+    ax : matploblib.axes.Axes, optional
+        Add the boxplot to the given axes.
 
     Returns
     -------
     None.
 
     """
-    data, labels = _format_data(specs, values, data_type)
+    data, labels = format_data(specs, values, data_type)
     if ax is None:
         fig, ax = plt.subplots(1, 1)
     ax.boxplot(data)
@@ -62,17 +64,36 @@ def boxplot(specs, values, data_type, title=None, ax=None):
         ax.set_ylabel('Parameter Values')
     else:
         ax.set_ylabel('Goal Vaues')
-    if title is not None:
-        ax.set_title(title)
+    ax.set_title(title)
 
 
-def _format_data(specs, values, data_type):
-    """Format data and labels for boxplot and scatterplot."""
+def format_data(specs, values, data_type):
+    """Format data and labels for boxplot and scatterplot.
+
+    Parameters
+    ----------
+    specs : pandas.DataFrame
+        Either constituent function specifications or
+        clinical goal specifications.
+    values : pandas.DataFrame
+        Either sampled constituent function parameters or
+        clinical goal results.
+    data_type : {'pars', 'goals'}
+        Type of data to format.
+
+    Returns
+    -------
+    list
+        Result values.
+    list
+        Result labels.
+
+    """
     if data_type not in ('pars', 'goals'):
         raise ValueError(f'Invalid data_type: {data_type}')
     data, labels = [], []
     if data_type == 'pars':
-        pars = _get_tune_pars(specs)
+        pars = get_tune_pars(specs)
         for _, row in pars.iterrows():
             data.append(values[values['Term'] == row['Term']][row['Par']])
             labels.append(row['Roi'] + ' ' + row['Par'])
@@ -83,8 +104,25 @@ def _format_data(specs, values, data_type):
     return data, labels
 
 
-def _get_tune_pars(funcs):
-    """Get tunable parameters."""
+def get_tune_pars(funcs):
+    """Get tunable function parameters.
+
+    The tunable function parameters are returned as a DataFrame with
+    columns corresponding to each parameter: Term, Roi, and Par. The
+    term column corresponds to the rows in the constituent function
+    DataFrame.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled tunable function parameters.
+
+    """
     pars = []
     for idx, row in funcs.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
@@ -94,45 +132,7 @@ def _get_tune_pars(funcs):
     return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
 
 
-
-
-
-def plot_goals_pars(funcs, pars, goals, results, flag=0):
-    """Plot goals v. parameters as scatter plots.
-
-    Parameters
-    ----------
-    funcs : pandas.DataFrame
-        Constituent function specifications.
-    pars : pandas.DataFrame
-        Sampled constituent function parameters.
-    goals : pandas.DataFrame
-        Clinical goal specifications.
-    results : pandas.DataFrame
-        Clinical goal results
-    flag : int, optional
-        0 = success, 1 = normalization failed
-    Returns
-    -------
-    None.
-
-    """
-    par_data, par_labels = _get_par_data(funcs, _filter(results, pars, flag))
-    goal_data, goal_labels = _get_goal_data(goals,
-                                            results[results['Flag'] == flag])
-    for ii in range(len(goal_data)):
-        fig, ax = plt.subplots(1, len(par_data), figsize=(25, 5))
-        level = goals.iloc[ii]['AcceptanceLevel']
-        for jj in range(len(par_data)):
-            ax[jj].plot(par_data[jj], goal_data[ii], '.')
-            ax[jj].plot([min(par_data[jj]), max(par_data[jj])], [level, level])
-            ax[jj].set_xlabel(par_labels[jj])
-            corr = f'Corr: {np.corrcoef(par_data[jj], goal_data[ii])[0, 1]:.2}'
-            ax[jj].set_title(corr)
-        ax[0].set_ylabel(goal_labels[ii])
-
-
-def plot_corr(data, title='', x_labels=None, y_labels=None):
+def corrplot(data, xlabels=None, ylabels=None, title=None):
     """Plot correlations by color and size.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
@@ -141,14 +141,14 @@ def plot_corr(data, title='', x_labels=None, y_labels=None):
     ----------
     data : pandas.DataFrame
         Results to include in plot.
-    title : str, optional
-        Plot title.
-    x_labels : list, optional
+    xlabels : list, optional
         Columns to appear on horizontal axis.
         If none, all columns are included.
-    y_labels : list, optional
+    ylabels : list, optional
         Columns to appear on vertical axis.
         If none, all columns are included.
+    title : str, optional
+        Plot title.
 
     Returns
     -------
@@ -157,18 +157,14 @@ def plot_corr(data, title='', x_labels=None, y_labels=None):
     """
     # Format and filter data
     corr = data.corr()
-    if x_labels is not None:
-        corr = corr[x_labels]
-    if y_labels is not None:
-        corr = corr.loc[y_labels]
+    if xlabels is not None:
+        corr = corr.loc[xlabels]
+    if ylabels is not None:
+        corr = corr[ylabels]
     corr = pd.melt(corr.reset_index(), id_vars='index').replace(np.nan, 0)
-    corr.columns = ['x', 'y', 'z']
-    x = corr['x']
-    y = corr['y']
-    x_names = [t for t in sorted(set([v for v in x]))]
-    x_to_num = {p[1]: p[0] for p in enumerate(x_names)}
-    y_names = [t for t in sorted(set([v for v in y]))]
-    y_to_num = {p[1]: p[0] for p in enumerate(y_names)}
+    x, y = corr['index'], corr['variable']
+    x_to_num = {name: idx for idx, name in enumerate(x.unique())}
+    y_to_num = {name: idx for idx, name in enumerate(y.unique())}
 
     palette = sns.diverging_palette(20, 220, n=256)
 
@@ -190,8 +186,8 @@ def plot_corr(data, title='', x_labels=None, y_labels=None):
         x=[x_to_num[v] for v in x],
         y=[y_to_num[v] for v in y],
         marker='s',
-        s=[_value_to_size(v) for v in corr['z'].abs()],
-        c=[_value_to_color(v) for v in corr['z']]
+        s=[_value_to_size(v) for v in corr['value'].abs()],
+        c=[_value_to_color(v) for v in corr['value']]
     )
 
     # Annotations
@@ -233,3 +229,41 @@ def plot_corr(data, title='', x_labels=None, y_labels=None):
     ax.set_xticks([])
     ax.set_yticks(np.linspace(min(bar_y), max(bar_y), 3))
     ax.yaxis.tick_right()
+
+
+def scatterplot(goals, results, funcs=None, pars=None):
+    """Visualize goal and parameter relationships with scatterplots.
+
+    If funcs and pars given, plots goals on the vertical axis and
+    parameters on the horizontal axis. Otherwise plots goals on both
+    vertical and horizontal axes.
+
+    Parameters
+    ----------
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+    results : pandas.DataFrame
+        Clinical goal results.
+    funcs : pandas.DataFrame, optional
+        Constituent function specifications.
+    pars : pandas.DataFrame, optional
+        Sampled constituent function parameters.
+
+    Returns
+    -------
+    None.
+
+    """
+    ydata, ylabels = format_data(goals, results, 'goals')
+    if funcs is None:
+        xdata, xlabels = ydata, ylabels
+    else:
+        ydata, ylabels = format_data(funcs, pars, 'pars')
+    for ii in range(len(ydata)):
+        fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
+        for jj in range(len(xdata)):
+            ax[jj].plot(xdata[jj], ydata[ii], '.')
+            ax[jj].set_xlabel(xlabels[jj])
+            corr = f'Corr: {np.corrcoef(xdata[jj], ydata[ii])[0, 1]:.2f}'
+            ax[jj].set_title(corr)
+        ax[0].set_ylabel(ylabels[ii])
