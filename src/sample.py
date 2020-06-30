@@ -519,17 +519,7 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     beam_set = connect.get_current('BeamSet')
 
     # Define functions and goals
-    if isinstance(funcs, str):
-        funcs = load_funcs(funcs)
-    if goals is None:
-        goals = init_goals(funcs)
-    elif isinstance(goals, str):
-        goals = pd.read_csv(goals)
-    if roi_names is None:
-        roi_names = set(goals['Roi'])
-    pars = init_pars(funcs)
-    results = init_results(goals)
-    stats = init_stats()
+    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
 
     # Sample treatment plans
     count = 0
@@ -550,3 +540,116 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         if count == n_success:
             break
     return pars, results, stats
+
+
+def init_prob(funcs, goals, roi_names):
+    """Initialize treatment plan sampling structures.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Constituent function specifications.
+    pandas.DataFrame
+        Clinical goal specifications.
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    if isinstance(funcs, str):
+        funcs = load_funcs(funcs)
+    if goals is None:
+        goals = init_goals(funcs)
+    elif isinstance(goals, str):
+        goals = pd.read_csv(goals)
+    if roi_names is None:
+        roi_names = set(goals['Roi'])
+    pars = init_pars(funcs)
+    results = init_results(goals)
+    stats = init_stats()
+    return funcs, goal, pars, results, stats
+
+
+def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
+                 roi_names=None):
+    """Perform grid search over treatment plans and save results.
+
+    Results are saved after each iteration in case connection to
+    RayStation times out.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    roi : str
+        Region of interest for normalization.
+    dose : float
+        Dose value to normalize plans.
+    volume : float
+        Dose volume to normalize plans.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+        If None, goals are based on constituent functions.
+    fpath : str, optional
+        Path to save results.
+        If not specified, results are saved to the current directory.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+        If None, based on regions of interest in clinical goals.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    # Get RayStation Objects
+    plan = connect.get_current('Plan')
+    beam_set = connect.get_current('BeamSet')
+
+    # Define functions and goals
+    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
+
+    # Sample treatment plans
+    # Divide into how many grid points???
+    # Log scale or linear scale???
+    for ii in range(max_iter):
+        print(f'Iteration: {ii}', end='')
+        if ii > 0:
+            pars = sample_pars(ii, funcs, pars)
+            pars.to_pickle(fpath + 'pars.npy')
+        set_pars(plan, pars)
+        flag = calc_plan(plan, beam_set, roi, dose, volume)
+        count = count + 1 if flag == 0 else count
+        print(f', Flag: {flag}, Successes: {count}')
+        results = get_results(plan, ii, flag, goals, results)
+        results.to_pickle(fpath + 'results.npy')
+        if flag < 2:
+            stats = get_stats(plan, ii, roi_names, stats)
+            stats.to_pickle(fpath + 'stats.npy')
+    return pars, results, stats
+
+
+
+
+
+
+
+
+
