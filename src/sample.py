@@ -47,10 +47,10 @@ import re
 import numpy as np
 import pandas as pd
 
-import connect
+#import connect
 
 
-def init_prob(funcs, goals, roi_names):
+def init_prob(funcs, goals, sample0=False, roi_names=None):
     """Initialize treatment plan sampling structures.
 
     Parameters
@@ -59,6 +59,8 @@ def init_prob(funcs, goals, roi_names):
         Constituent function specifications or path to CSV file.
     goals : pandas.DataFrame or str, optional
         Clinical goal specifications or path to CSV file.
+    sample0 : bool, optional
+        If True, initialize first row of parameter DataFrame.
     roi_names : iterable, optional
         Regions of interest to evaluate dose statistics.
 
@@ -84,10 +86,10 @@ def init_prob(funcs, goals, roi_names):
         goals = pd.read_csv(goals)
     if roi_names is None:
         roi_names = set(goals['Roi'])
-    pars = init_pars(funcs)
+    pars = init_pars(funcs, sample0)
     results = init_results(goals)
     stats = init_stats()
-    return funcs, goal, pars, results, stats
+    return funcs, goals, pars, results, stats
 
 
 def load_funcs(fpath):
@@ -124,7 +126,7 @@ def load_funcs(fpath):
     return funcs
 
 
-def init_pars(funcs):
+def init_pars(funcs, sample0=False):
     """Initialize constituent function parameters.
 
     Constituent function parameters are specified by columns Sample,
@@ -132,13 +134,17 @@ def init_pars(funcs):
     term columnn corresponds to the rows in the constituent function
     DataFrame.
 
-    DoseLevel and PercentVolume are assigned to min or max value based
-    on FunctionType. Weight is assigned to min value.
+    If sample0 is True, add row corresponding to min/max parameter
+    values. DoseLevel and PercentVolume are assigned to min or max
+    value based on FunctionType. Weight is assigned to min value.
 
     Parameters
     ----------
     funcs : pandas.DataFrame
         Constituent function specifications.
+    sample0 : bool, optional
+        If True, add row corresponding to min/max parameter values.
+        Otherwise only initialize column names.
 
     Returns
     -------
@@ -146,19 +152,22 @@ def init_pars(funcs):
         Sampled constituent function parameters.
 
     """
-    data = [{
-        'Sample': 0,
-        'Term': index,
-        'Roi': row['Roi'],
-        'DoseLevel': get_par_bound(row['DoseLevel'], row['FunctionType']),
-        'PercentVolume': get_par_bound(row['PercentVolume'],
-                                       row['FunctionType']),
-        'EudParameterA': row['EudParameterA'],
-        'Weight': np.min(row['Weight'])
-    } for index, row in funcs.iterrows()]
     columns = ['Sample', 'Term', 'Roi', 'DoseLevel', 'PercentVolume',
                'EudParameterA', 'Weight']
-    return pd.DataFrame(data=data, columns=columns)
+    if sample0:
+        data = [{
+            'Sample': 0,
+            'Term': index,
+            'Roi': row['Roi'],
+            'DoseLevel': get_par_bound(row['DoseLevel'], row['FunctionType']),
+            'PercentVolume': get_par_bound(row['PercentVolume'],
+                                           row['FunctionType']),
+            'EudParameterA': row['EudParameterA'],
+            'Weight': np.min(row['Weight'])
+        } for index, row in funcs.iterrows()]
+        return pd.DataFrame(data=data, columns=columns)
+    else:
+        return pd.DataFrame(columns=columns)
 
 
 def get_par_bound(par, func_type):
@@ -203,7 +212,8 @@ def init_goals(funcs):
     data = [{
         'Roi': row['Roi'],
         'Type': row['FunctionType'],
-        'GoalCriteria': 'AtMost' if 'Max' in row['FunctionType'] else 'AtLeast',
+        'GoalCriteria': 'AtMost'
+                        if 'Max' in row['FunctionType'] else 'AtLeast',
         'AcceptanceLevel': get_par_bound(row['DoseLevel'],
                                          row['FunctionType']),
         'ParameterValue': row['EudParameterA']
@@ -557,7 +567,8 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     beam_set = connect.get_current('BeamSet')
 
     # Define functions and goals
-    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
+    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names,
+                                                   sample0=True)
 
     # Sample treatment plans
     count = 0
@@ -580,4 +591,118 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     return pars, results, stats
 
 
+def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
+                roi_names=None, n_points=10):
+    """Perform 2D grid search over treatment plans and save results.
 
+    Results are saved after each iteration in case connection to
+    RayStation times out.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    roi : str
+        Region of interest for normalization.
+    dose : float
+        Dose value to normalize plans.
+    volume : float
+        Dose volume to normalize plans.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+        If None, goals are based on constituent functions.
+    fpath : str, optional
+        Path to save results.
+        If not specified, results are saved to the current directory.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+        If None, based on regions of interest in clinical goals.
+    n_points : int, optional
+        Number of points to sample per parameter.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    # Do somethign about 2D, like only tune first 2 vars it sees
+
+
+    # Get RayStation objects
+    plan = connect.get_current('Plan')
+    beam_set = connect.get_current('BeamSet')
+
+    # Define functions and goals
+    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
+
+    # Get vectors of pars to sample
+    grid_vals = {}
+    total_points = 1
+    pars = ['DoseLevel', 'PercentVolume', 'Weight']
+    for index, row in funcs.iterrows():
+        for par in pars:
+            if isinstance(row['par'], list):
+                low = row[par][0]
+                high = row[par][1]
+                if par == 'Weight':
+                    par_vals = np.logspace(low, high, n_points)
+                else:
+                    par_vals = np.linspace(low, high, n_points)
+                grid_vals[(row['Roi'], par)] = par_vals
+                total_points *= n_points
+
+    # Sample treatment plans
+    sample = 0
+    for ii in range(total_points):
+        print(f'Iteration: {ii}', end='')
+
+        # Sample parameters
+        new_pars = []
+        par_count = 0
+        for index, row in funcs.iterrows():
+            new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
+
+            for par in pars:
+                if isinstance(row[par], list):
+                    if par_count == 0:
+                        par_index = np.mod(ii, n_points)
+                    else:
+                        par_index = ii // n_points
+                    new_row[par] = grid_vals[(row['Roi'], par)][par_index]
+                    par_count += 1
+                else:
+                    new_row[par] = row[par]
+
+            new_pars.append(new_row)
+        pars = pars.append(new_pars, ignore_index=True)
+
+
+
+        sample += 1
+
+
+
+    # Sample treatment plans
+    count = 0
+    for ii in range(max_iter):
+        print(f'Iteration: {ii}', end='')
+        if ii > 0:
+            pars = sample_pars(ii, funcs, pars)
+            pars.to_pickle(fpath + 'pars.npy')
+        set_pars(plan, pars)
+        flag = calc_plan(plan, beam_set, roi, dose, volume)
+        count = count + 1 if flag == 0 else count
+        print(f', Flag: {flag}, Successes: {count}')
+        results = get_results(plan, ii, flag, goals, results)
+        results.to_pickle(fpath + 'results.npy')
+        if flag < 2:
+            stats = get_stats(plan, ii, roi_names, stats)
+            stats.to_pickle(fpath + 'stats.npy')
+        if count == n_success:
+            break
+    return pars, results, stats
