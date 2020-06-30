@@ -74,7 +74,7 @@ def load_funcs(fpath):
     """
     funcs = pd.read_csv(fpath).astype(object)
     for index, row in funcs.iterrows():
-        for col in ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']:
+        for col in ['DoseLevel', 'PercentVolume', 'Weight']:
             # Tunable parameters are read in as strings '[min, max]',
             # so we need to convert them back to a list of floats.
             if isinstance(row[col], str):
@@ -92,8 +92,8 @@ def init_pars(funcs):
     term columnn corresponds to the rows in the constituent function
     DataFrame.
 
-    DoseLevel, PercentVolume, and EudParameterA are assigned to min or
-    max value based on FunctionType. Weight is assigned to min value.
+    DoseLevel and PercentVolume are assigned to min or max value based
+    on FunctionType. Weight is assigned to min value.
 
     Parameters
     ----------
@@ -113,8 +113,7 @@ def init_pars(funcs):
         'DoseLevel': get_par_bound(row['DoseLevel'], row['FunctionType']),
         'PercentVolume': get_par_bound(row['PercentVolume'],
                                        row['FunctionType']),
-        'EudParameterA': get_par_bound(row['EudParameterA'],
-                                       row['FunctionType']),
+        'EudParameterA': row['EudParameterA'],
         'Weight': np.min(row['Weight'])
     } for index, row in funcs.iterrows()]
     columns = ['Sample', 'Term', 'Roi', 'DoseLevel', 'PercentVolume',
@@ -167,8 +166,7 @@ def init_goals(funcs):
         'GoalCriteria': 'AtMost' if 'Max' in row['FunctionType'] else 'AtLeast',
         'AcceptanceLevel': get_par_bound(row['DoseLevel'],
                                          row['FunctionType']),
-        'ParameterValue': get_par_bound(row['EudParameterA'],
-                                        row['FunctionType'])
+        'ParameterValue': row['EudParameterA']
                           if 'Eud' in row['FunctionType'] else
                           get_par_bound(row['PercentVolume'],
                                         row['FunctionType'])
@@ -263,7 +261,7 @@ def sample_func_pars(func):
         Row of sampled constituent function parameter DataFrame.
 
     """
-    pars = ['DoseLevel', 'PercentVolume', 'EudParameterA', 'Weight']
+    pars = ['DoseLevel', 'PercentVolume', 'Weight']
     new_row = {}
     for par in pars:
         if isinstance(func[par], list):
@@ -474,11 +472,14 @@ def get_roi_stats(dose, roi):
 
 
 def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
-                 roi_names=None, max_iter=1000, n_success=100):
+                 roi_names=None, max_iter=1000, n_success=100,
+                 grid_points=None):
     """Sample treatment plans and save results.
 
     Results are saved after each iteration in case connection to
     RayStation times out.
+
+    Parameters max_iter and n_success not used if grid_points is given.
 
     Parameters
     ----------
@@ -503,6 +504,8 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         Maximum number of treatment plans to sample.
     n_success : int, optional
         Number of successfull treatment plans to sample.
+    grid_points : int, optional
+        Number of grid points per parameter for grid search.
 
     Returns
     -------
@@ -526,7 +529,7 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     for ii in range(max_iter):
         print(f'Iteration: {ii}', end='')
         if ii > 0:
-            pars = sample_pars(ii, funcs, pars)
+            pars = sample_pars(ii, funcs, pars, grid_points)
             pars.to_pickle(fpath + 'pars.npy')
         set_pars(plan, pars)
         flag = calc_plan(plan, beam_set, roi, dose, volume)
@@ -579,77 +582,4 @@ def init_prob(funcs, goals, roi_names):
     pars = init_pars(funcs)
     results = init_results(goals)
     stats = init_stats()
-    return funcs, goal, pars, results, stats
-
-
-def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
-                 roi_names=None):
-    """Perform grid search over treatment plans and save results.
-
-    Results are saved after each iteration in case connection to
-    RayStation times out.
-
-    Parameters
-    ----------
-    funcs : pandas.DataFrame or str
-        Constituent function specifications or path to CSV file.
-    roi : str
-        Region of interest for normalization.
-    dose : float
-        Dose value to normalize plans.
-    volume : float
-        Dose volume to normalize plans.
-    goals : pandas.DataFrame or str, optional
-        Clinical goal specifications or path to CSV file.
-        If None, goals are based on constituent functions.
-    fpath : str, optional
-        Path to save results.
-        If not specified, results are saved to the current directory.
-    roi_names : iterable, optional
-        Regions of interest to evaluate dose statistics.
-        If None, based on regions of interest in clinical goals.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Sampled constituent function parameters.
-    pandas.DataFrame
-        Clinical goal results.
-    pandas.DataFrame
-        Dose statistics.
-
-    """
-    # Get RayStation Objects
-    plan = connect.get_current('Plan')
-    beam_set = connect.get_current('BeamSet')
-
-    # Define functions and goals
-    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
-
-    # Sample treatment plans
-    # Divide into how many grid points???
-    # Log scale or linear scale???
-    for ii in range(max_iter):
-        print(f'Iteration: {ii}', end='')
-        if ii > 0:
-            pars = sample_pars(ii, funcs, pars)
-            pars.to_pickle(fpath + 'pars.npy')
-        set_pars(plan, pars)
-        flag = calc_plan(plan, beam_set, roi, dose, volume)
-        count = count + 1 if flag == 0 else count
-        print(f', Flag: {flag}, Successes: {count}')
-        results = get_results(plan, ii, flag, goals, results)
-        results.to_pickle(fpath + 'results.npy')
-        if flag < 2:
-            stats = get_stats(plan, ii, roi_names, stats)
-            stats.to_pickle(fpath + 'stats.npy')
-    return pars, results, stats
-
-
-
-
-
-
-
-
-
+    return funcs, goals, pars, results, stats
