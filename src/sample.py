@@ -47,7 +47,7 @@ import re
 import numpy as np
 import pandas as pd
 
-#import connect
+import connect
 
 
 def init_prob(funcs, goals, sample0=False, roi_names=None):
@@ -307,13 +307,12 @@ def sample_func_pars(func):
 
     Returns
     -------
-    pandas.core.series.Series
-        Row of sampled constituent function parameter DataFrame.
+    dict
+        Sampled constituent function parameters.
 
     """
-    pars = ['DoseLevel', 'PercentVolume', 'Weight']
     new_row = {}
-    for par in pars:
+    for par in ['DoseLevel', 'PercentVolume', 'Weight']:
         if isinstance(func[par], list):
             low = func[par][0]
             high = func[par][1] + 1
@@ -321,6 +320,116 @@ def sample_func_pars(func):
         else:
             new_row[par] = func[par]
     return new_row
+
+
+def get_grid_vals(funcs, n_points):
+    """Get parameter values for grid search.
+
+    Returns dictionary formatted as {(Roi, Parameter): numpy.ndarray}.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    n_points : int
+        Number of points to sample per parameter.
+
+    Returns
+    -------
+    dict
+        Parameter values for grid search.
+
+    """
+    grid_vals = {}
+    for index, row in funcs.iterrows():
+        for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+            if isinstance(row[par], list):
+                low = row[par][0]
+                high = row[par][1]
+                if par == 'Weight':
+                    par_vals = np.logspace(np.log10(low), np.log10(high),
+                                           n_points)
+                else:
+                    par_vals = np.linspace(low, high, n_points)
+                grid_vals[(row['Roi'], par)] = par_vals
+    return grid_vals
+
+
+def grid_pars(sample, funcs, pars, grid_vals, n_points):
+    """Sample constituent function parameters for grid search.
+
+    Constituent function parameters are specified by columns Sample,
+    Term, Roi, DoseLevel, PercentVolume, EudParameterA, and Weight. The
+    term columnn corresponds to the rows in the constituent function
+    DataFrame.
+
+    Parameters
+    ----------
+    sample : int
+        Current sample number.
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    pars : pandas.DataFrame
+        Sampled constituent function parameters.
+    grid_vals : dict
+        Parameter values for grid search.
+    n_points : int
+        Number of points to sample per parameter.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Updated sampled constituent function parameters.
+
+    """
+    count = 0
+    new_pars = []
+    for index, row in funcs.iterrows():
+        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
+        func_pars, count = grid_func_pars(sample, row, grid_vals, n_points,
+                                          count)
+        new_row.update(func_pars)
+        new_pars.append(new_row)
+    return pars.append(new_pars, ignore_index=True)
+
+
+def grid_func_pars(sample, func, grid_vals, n_points, count):
+    """Sample constituent function parameters for grid search.
+
+    Parameters
+    ----------
+    sample : int
+        Current sample number.
+    func : pandas.DataFrame
+        Constituent function specifications.
+    grid_vals : dict
+        Parameter values for grid search.
+    n_points : int
+        Number of points to sample per parameter.
+    count : int
+        Sampled parameter count.
+
+    Returns
+    -------
+    dict
+        Sampled constituent function parameter.
+    int
+        Updated sampled parameter count
+
+    """
+    new_row = {}
+    for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+        if isinstance(func[par], list):
+            if count < 2:
+                index = np.mod(sample, n_points) \
+                        if count == 0 else sample // n_points
+                new_row[par] = grid_vals[(func['Roi'], par)][index]
+                count += 1
+            else:
+                new_row[par] = get_par_bound(func[par], func['FunctionType'])
+        else:
+            new_row[par] = func[par]
+    return new_row, count
 
 
 def set_pars(plan, pars):
@@ -595,6 +704,9 @@ def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
                 roi_names=None, n_points=10):
     """Perform 2D grid search over treatment plans and save results.
 
+    If more than two parameters in the given constituent functions are
+    tunable, only the first two will be included in the grid search.
+
     Results are saved after each iteration in case connection to
     RayStation times out.
 
@@ -630,9 +742,6 @@ def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
         Dose statistics.
 
     """
-    # Do somethign about 2D, like only tune first 2 vars it sees
-
-
     # Get RayStation objects
     plan = connect.get_current('Plan')
     beam_set = connect.get_current('BeamSet')
@@ -640,69 +749,20 @@ def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
     # Define functions and goals
     funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
 
-    # Get vectors of pars to sample
-    grid_vals = {}
-    total_points = 1
-    pars = ['DoseLevel', 'PercentVolume', 'Weight']
-    for index, row in funcs.iterrows():
-        for par in pars:
-            if isinstance(row['par'], list):
-                low = row[par][0]
-                high = row[par][1]
-                if par == 'Weight':
-                    par_vals = np.logspace(low, high, n_points)
-                else:
-                    par_vals = np.linspace(low, high, n_points)
-                grid_vals[(row['Roi'], par)] = par_vals
-                total_points *= n_points
+    # Get vectors of parameters to sample
+    grid_vals = get_grid_vals(funcs, n_points)
 
     # Sample treatment plans
-    sample = 0
-    for ii in range(total_points):
+    for ii in range(n_points**2):
         print(f'Iteration: {ii}', end='')
-
-        # Sample parameters
-        new_pars = []
-        par_count = 0
-        for index, row in funcs.iterrows():
-            new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
-
-            for par in pars:
-                if isinstance(row[par], list):
-                    if par_count == 0:
-                        par_index = np.mod(ii, n_points)
-                    else:
-                        par_index = ii // n_points
-                    new_row[par] = grid_vals[(row['Roi'], par)][par_index]
-                    par_count += 1
-                else:
-                    new_row[par] = row[par]
-
-            new_pars.append(new_row)
-        pars = pars.append(new_pars, ignore_index=True)
-
-
-
-        sample += 1
-
-
-
-    # Sample treatment plans
-    count = 0
-    for ii in range(max_iter):
-        print(f'Iteration: {ii}', end='')
-        if ii > 0:
-            pars = sample_pars(ii, funcs, pars)
-            pars.to_pickle(fpath + 'pars.npy')
+        pars = grid_pars(ii, funcs, pars, grid_vals, n_points)
+        pars.to_pickle(fpath + 'pars.npy')
         set_pars(plan, pars)
         flag = calc_plan(plan, beam_set, roi, dose, volume)
-        count = count + 1 if flag == 0 else count
-        print(f', Flag: {flag}, Successes: {count}')
+        print(f', Flag: {flag}')
         results = get_results(plan, ii, flag, goals, results)
         results.to_pickle(fpath + 'results.npy')
         if flag < 2:
             stats = get_stats(plan, ii, roi_names, stats)
             stats.to_pickle(fpath + 'stats.npy')
-        if count == n_success:
-            break
     return pars, results, stats
