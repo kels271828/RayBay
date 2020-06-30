@@ -50,6 +50,46 @@ import pandas as pd
 import connect
 
 
+def init_prob(funcs, goals, roi_names):
+    """Initialize treatment plan sampling structures.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Constituent function specifications.
+    pandas.DataFrame
+        Clinical goal specifications.
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    if isinstance(funcs, str):
+        funcs = load_funcs(funcs)
+    if goals is None:
+        goals = init_goals(funcs)
+    elif isinstance(goals, str):
+        goals = pd.read_csv(goals)
+    if roi_names is None:
+        roi_names = set(goals['Roi'])
+    pars = init_pars(funcs)
+    results = init_results(goals)
+    stats = init_stats()
+    return funcs, goal, pars, results, stats
+
+
 def load_funcs(fpath):
     """Load constituent functions from CSV.
 
@@ -472,14 +512,11 @@ def get_roi_stats(dose, roi):
 
 
 def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
-                 roi_names=None, max_iter=1000, n_success=100,
-                 grid_points=None):
+                 roi_names=None, max_iter=1000, n_success=100):
     """Sample treatment plans and save results.
 
     Results are saved after each iteration in case connection to
     RayStation times out.
-
-    Parameters max_iter and n_success not used if grid_points is given.
 
     Parameters
     ----------
@@ -504,8 +541,6 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
         Maximum number of treatment plans to sample.
     n_success : int, optional
         Number of successfull treatment plans to sample.
-    grid_points : int, optional
-        Number of grid points per parameter for grid search.
 
     Returns
     -------
@@ -529,7 +564,7 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     for ii in range(max_iter):
         print(f'Iteration: {ii}', end='')
         if ii > 0:
-            pars = sample_pars(ii, funcs, pars, grid_points)
+            pars = sample_pars(ii, funcs, pars)
             pars.to_pickle(fpath + 'pars.npy')
         set_pars(plan, pars)
         flag = calc_plan(plan, beam_set, roi, dose, volume)
@@ -545,41 +580,4 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     return pars, results, stats
 
 
-def init_prob(funcs, goals, roi_names):
-    """Initialize treatment plan sampling structures.
 
-    Parameters
-    ----------
-    funcs : pandas.DataFrame or str
-        Constituent function specifications or path to CSV file.
-    goals : pandas.DataFrame or str, optional
-        Clinical goal specifications or path to CSV file.
-    roi_names : iterable, optional
-        Regions of interest to evaluate dose statistics.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Constituent function specifications.
-    pandas.DataFrame
-        Clinical goal specifications.
-    pandas.DataFrame
-        Sampled constituent function parameters.
-    pandas.DataFrame
-        Clinical goal results.
-    pandas.DataFrame
-        Dose statistics.
-
-    """
-    if isinstance(funcs, str):
-        funcs = load_funcs(funcs)
-    if goals is None:
-        goals = init_goals(funcs)
-    elif isinstance(goals, str):
-        goals = pd.read_csv(goals)
-    if roi_names is None:
-        roi_names = set(goals['Roi'])
-    pars = init_pars(funcs)
-    results = init_results(goals)
-    stats = init_stats()
-    return funcs, goals, pars, results, stats
