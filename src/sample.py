@@ -50,7 +50,7 @@ import pandas as pd
 import connect
 
 
-def init_prob(funcs, goals, sample0=False, roi_names=None):
+def init_prob(funcs, goals, roi_names=None, sample0=False):
     """Initialize treatment plan sampling structures.
 
     Parameters
@@ -59,10 +59,11 @@ def init_prob(funcs, goals, sample0=False, roi_names=None):
         Constituent function specifications or path to CSV file.
     goals : pandas.DataFrame or str, optional
         Clinical goal specifications or path to CSV file.
-    sample0 : bool, optional
-        If True, initialize first row of parameter DataFrame.
     roi_names : iterable, optional
         Regions of interest to evaluate dose statistics.
+    sample0 : bool, optional
+        If True, initialize first row of parameter DataFrame.
+    
 
     Returns
     -------
@@ -70,6 +71,8 @@ def init_prob(funcs, goals, sample0=False, roi_names=None):
         Constituent function specifications.
     pandas.DataFrame
         Clinical goal specifications.
+    iterable
+        Regions of interest to evaluate dose statistics
     pandas.DataFrame
         Sampled constituent function parameters.
     pandas.DataFrame
@@ -89,7 +92,7 @@ def init_prob(funcs, goals, sample0=False, roi_names=None):
     pars = init_pars(funcs, sample0)
     results = init_results(goals)
     stats = init_stats()
-    return funcs, goals, pars, results, stats
+    return funcs, goals, roi_names, pars, results, stats
 
 
 def load_funcs(fpath):
@@ -291,7 +294,8 @@ def sample_pars(sample, funcs, pars):
     """
     new_pars = []
     for index, row in funcs.iterrows():
-        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
+        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi'],
+                   'EudParameterA': row['EudParameterA']}
         new_row.update(sample_func_pars(row))
         new_pars.append(new_row)
     return pars.append(new_pars, ignore_index=True)
@@ -385,7 +389,8 @@ def grid_pars(sample, funcs, pars, grid_vals, n_points):
     count = 0
     new_pars = []
     for index, row in funcs.iterrows():
-        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi']}
+        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi'], 
+                   'EudParameterA': row['EudParameterA']}
         func_pars, count = grid_func_pars(sample, row, grid_vals, n_points,
                                           count)
         new_row.update(func_pars)
@@ -457,7 +462,7 @@ def set_pars(plan, pars):
         func = funcs[row['Term']].DoseFunctionParameters
         func.DoseLevel = row['DoseLevel']
         func.Weight = row['Weight']
-        if func.FunctionType == 'MaxEud':
+        if 'Eud' in func.FunctionType:
             func.EudParameterA = row['EudParameterA']
         else:
             func.PercentVolume = row['PercentVolume']
@@ -676,8 +681,9 @@ def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
     beam_set = connect.get_current('BeamSet')
 
     # Define functions and goals
-    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names,
-                                                   sample0=True)
+    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
+                                                              roi_names,
+                                                              sample0=True)
 
     # Sample treatment plans
     count = 0
@@ -747,7 +753,8 @@ def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
     beam_set = connect.get_current('BeamSet')
 
     # Define functions and goals
-    funcs, goals, pars, results, stats = init_prob(funcs, goals, roi_names)
+    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
+                                                              roi_names)
 
     # Get vectors of parameters to sample
     grid_vals = get_grid_vals(funcs, n_points)
