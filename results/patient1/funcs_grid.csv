@@ -1,0 +1,8 @@
+﻿Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+PTV,MinDose,4800,0,,1
+PTV,MaxDose,6240,0,,1
+SpinalCanal,MaxDose,2080,0,,1
+Lungs,MaxDvh,2000,10,,1
+Heart,MaxDvh,2800,2,,1
+Chestwall_L,MaxDvh,3000,2,,1
+Rib,MaxDose,"[800, 3200]",0,,1
