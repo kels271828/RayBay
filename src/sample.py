@@ -50,6 +50,148 @@ import pandas as pd
 import connect
 
 
+def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
+                 roi_names=None, max_iter=1000, n_success=100, sample0=True):
+    """Sample treatment plans and save results.
+
+    Results are saved after each iteration in case connection to
+    RayStation times out.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    roi : str
+        Region of interest for normalization.
+    dose : float
+        Dose value for normalization.
+    volume : float
+        Dose volume for normalization.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+        If None, goals are based on constituent functions.
+    fpath : str, optional
+        Path to save results.
+        If not specified, results are saved to the current directory.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+        If None, based on regions of interest in clinical goals.
+    max_iter : int, optional
+        Maximum number of treatment plans to sample.
+    n_success : int, optional
+        Number of successfull treatment plans to sample.
+    samplel0 : bool, optional
+        If True, initialize first row of parameter DataFrame.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    # Get RayStation objects
+    plan = connect.get_current('Plan')
+    beam_set = connect.get_current('BeamSet')
+
+    # Define functions and goals
+    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
+                                                              roi_names,
+                                                              sample0=sample0)
+
+    # Sample treatment plans
+    count = 0
+    for ii in range(max_iter):
+        print(f'Iteration: {ii}', end='')
+        if ii > 0 or not sample0:
+            pars = sample_pars(ii, funcs, pars)
+            pars.to_pickle(fpath + 'pars.npy')
+        set_pars(plan, pars)
+        flag = calc_plan(plan, beam_set, roi, dose, volume)
+        count = count + 1 if flag == 0 else count
+        print(f', Flag: {flag}, Successes: {count}')
+        results = get_results(plan, ii, flag, goals, results)
+        results.to_pickle(fpath + 'results.npy')
+        if flag < 2:
+            stats = get_stats(plan, ii, roi_names, stats)
+            stats.to_pickle(fpath + 'stats.npy')
+        if count == n_success:
+            break
+    return pars, results, stats
+
+
+def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
+                roi_names=None, n_points=10):
+    """Perform 2D grid search over treatment plans and save results.
+
+    If more than two parameters in the given constituent functions are
+    tunable, only the first two will be included in the grid search.
+
+    Results are saved after each iteration in case connection to
+    RayStation times out.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame or str
+        Constituent function specifications or path to CSV file.
+    roi : str
+        Region of interest for normalization.
+    dose : float
+        Dose value for normalization.
+    volume : float
+        Dose volume for normalization.
+    goals : pandas.DataFrame or str, optional
+        Clinical goal specifications or path to CSV file.
+        If None, goals are based on constituent functions.
+    fpath : str, optional
+        Path to save results.
+        If not specified, results are saved to the current directory.
+    roi_names : iterable, optional
+        Regions of interest to evaluate dose statistics.
+        If None, based on regions of interest in clinical goals.
+    n_points : int, optional
+        Number of points to sample per parameter.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Sampled constituent function parameters.
+    pandas.DataFrame
+        Clinical goal results.
+    pandas.DataFrame
+        Dose statistics.
+
+    """
+    # Get RayStation objects
+    plan = connect.get_current('Plan')
+    beam_set = connect.get_current('BeamSet')
+
+    # Define functions and goals
+    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
+                                                              roi_names)
+
+    # Get vectors of parameters to sample
+    grid_vals = get_grid_vals(funcs, n_points)
+
+    # Sample treatment plans
+    for ii in range(n_points**2):
+        print(f'Iteration: {ii}', end='')
+        pars = grid_pars(ii, funcs, pars, grid_vals, n_points)
+        pars.to_pickle(fpath + 'pars.npy')
+        set_pars(plan, pars)
+        flag = calc_plan(plan, beam_set, roi, dose, volume)
+        print(f', Flag: {flag}')
+        results = get_results(plan, ii, flag, goals, results)
+        results.to_pickle(fpath + 'results.npy')
+        if flag < 2:
+            stats = get_stats(plan, ii, roi_names, stats)
+            stats.to_pickle(fpath + 'stats.npy')
+    return pars, results, stats
+
+
 def init_prob(funcs, goals, roi_names=None, sample0=False):
     """Initialize treatment plan sampling structures.
 
@@ -63,7 +205,6 @@ def init_prob(funcs, goals, roi_names=None, sample0=False):
         Regions of interest to evaluate dose statistics.
     sample0 : bool, optional
         If True, initialize first row of parameter DataFrame.
-    
 
     Returns
     -------
@@ -389,7 +530,7 @@ def grid_pars(sample, funcs, pars, grid_vals, n_points):
     count = 0
     new_pars = []
     for index, row in funcs.iterrows():
-        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi'], 
+        new_row = {'Sample': sample, 'Term': index, 'Roi': row['Roi'],
                    'EudParameterA': row['EudParameterA']}
         func_pars, count = grid_func_pars(sample, row, grid_vals, n_points,
                                           count)
@@ -633,143 +774,3 @@ def get_roi_stats(dose, roi):
     for ii in range(len(volumes)):
         stats[volume_names[ii]] = doses[ii]
     return stats
-
-
-def sample_plans(funcs, roi, dose, volume, goals=None, fpath='',
-                 roi_names=None, max_iter=1000, n_success=100):
-    """Sample treatment plans and save results.
-
-    Results are saved after each iteration in case connection to
-    RayStation times out.
-
-    Parameters
-    ----------
-    funcs : pandas.DataFrame or str
-        Constituent function specifications or path to CSV file.
-    roi : str
-        Region of interest for normalization.
-    dose : float
-        Dose value to normalize plans.
-    volume : float
-        Dose volume to normalize plans.
-    goals : pandas.DataFrame or str, optional
-        Clinical goal specifications or path to CSV file.
-        If None, goals are based on constituent functions.
-    fpath : str, optional
-        Path to save results.
-        If not specified, results are saved to the current directory.
-    roi_names : iterable, optional
-        Regions of interest to evaluate dose statistics.
-        If None, based on regions of interest in clinical goals.
-    max_iter : int, optional
-        Maximum number of treatment plans to sample.
-    n_success : int, optional
-        Number of successfull treatment plans to sample.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Sampled constituent function parameters.
-    pandas.DataFrame
-        Clinical goal results.
-    pandas.DataFrame
-        Dose statistics.
-
-    """
-    # Get RayStation objects
-    plan = connect.get_current('Plan')
-    beam_set = connect.get_current('BeamSet')
-
-    # Define functions and goals
-    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
-                                                              roi_names,
-                                                              sample0=True)
-
-    # Sample treatment plans
-    count = 0
-    for ii in range(max_iter):
-        print(f'Iteration: {ii}', end='')
-        if ii > 0:
-            pars = sample_pars(ii, funcs, pars)
-            pars.to_pickle(fpath + 'pars.npy')
-        set_pars(plan, pars)
-        flag = calc_plan(plan, beam_set, roi, dose, volume)
-        count = count + 1 if flag == 0 else count
-        print(f', Flag: {flag}, Successes: {count}')
-        results = get_results(plan, ii, flag, goals, results)
-        results.to_pickle(fpath + 'results.npy')
-        if flag < 2:
-            stats = get_stats(plan, ii, roi_names, stats)
-            stats.to_pickle(fpath + 'stats.npy')
-        if count == n_success:
-            break
-    return pars, results, stats
-
-
-def grid_search(funcs, roi, dose, volume, goals=None, fpath='',
-                roi_names=None, n_points=10):
-    """Perform 2D grid search over treatment plans and save results.
-
-    If more than two parameters in the given constituent functions are
-    tunable, only the first two will be included in the grid search.
-
-    Results are saved after each iteration in case connection to
-    RayStation times out.
-
-    Parameters
-    ----------
-    funcs : pandas.DataFrame or str
-        Constituent function specifications or path to CSV file.
-    roi : str
-        Region of interest for normalization.
-    dose : float
-        Dose value to normalize plans.
-    volume : float
-        Dose volume to normalize plans.
-    goals : pandas.DataFrame or str, optional
-        Clinical goal specifications or path to CSV file.
-        If None, goals are based on constituent functions.
-    fpath : str, optional
-        Path to save results.
-        If not specified, results are saved to the current directory.
-    roi_names : iterable, optional
-        Regions of interest to evaluate dose statistics.
-        If None, based on regions of interest in clinical goals.
-    n_points : int, optional
-        Number of points to sample per parameter.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Sampled constituent function parameters.
-    pandas.DataFrame
-        Clinical goal results.
-    pandas.DataFrame
-        Dose statistics.
-
-    """
-    # Get RayStation objects
-    plan = connect.get_current('Plan')
-    beam_set = connect.get_current('BeamSet')
-
-    # Define functions and goals
-    funcs, goals, roi_names, pars, results, stats = init_prob(funcs, goals,
-                                                              roi_names)
-
-    # Get vectors of parameters to sample
-    grid_vals = get_grid_vals(funcs, n_points)
-
-    # Sample treatment plans
-    for ii in range(n_points**2):
-        print(f'Iteration: {ii}', end='')
-        pars = grid_pars(ii, funcs, pars, grid_vals, n_points)
-        pars.to_pickle(fpath + 'pars.npy')
-        set_pars(plan, pars)
-        flag = calc_plan(plan, beam_set, roi, dose, volume)
-        print(f', Flag: {flag}')
-        results = get_results(plan, ii, flag, goals, results)
-        results.to_pickle(fpath + 'results.npy')
-        if flag < 2:
-            stats = get_stats(plan, ii, roi_names, stats)
-            stats.to_pickle(fpath + 'stats.npy')
-    return pars, results, stats
