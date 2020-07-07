@@ -52,11 +52,11 @@ if __name__ == '__main__':
                                                                  goals_path)
 
     # Rib Parameters
-    rib_pars = {'Rib': [1600.0, 1609.7507850014442, 1580.0282932223702,
-                        1561.8852225963185]}
+    rib_pars = {('Rib', 'DoseLevel'): [1600.0, 1609.7507850014442,
+                                       1580.0282932223702, 1561.8852225963185]}
 
     # Calculate plans
-    for ii in range(len(rib_pars['Rib'])):
+    for ii in range(4):
         pars = sample.grid_pars(ii, funcs, pars, rib_pars, 4)
         pars.to_pickle(save_path + 'pars.npy')
         sample.set_pars(plan, pars)
