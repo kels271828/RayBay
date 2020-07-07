@@ -1,8 +1,8 @@
 ﻿Roi,Type,GoalCriteria,AcceptanceLevel,ParameterValue
 PTV,MinDvh,AtLeast,4800,95
 PTV,MaxDose,AtMost,6240,
-SpinalCanal,MaxDose,AtMost,2080,
+SpinalCanal,MaxDvh,AtMost,2080,0.67
 Lungs,MaxDvh,AtMost,2000,10
-Heart,MaxDvh,AtMost,2800,2
-Chestwall_L,MaxDvh,AtMost,3000,2
-Rib,MaxDose,AtMost,3200,
+Heart,MaxDvh,AtMost,2800,1.84
+Chestwall_L,MaxDvh,AtMost,3000,2.04
+Rib,MaxDvh,AtMost,3200,0.27
