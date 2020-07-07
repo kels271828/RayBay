@@ -183,10 +183,10 @@ def get_dimensions(funcs):
 
     """
     dimensions = []
-    for idx, row in funcs.iterrows():
+    for _, row in funcs.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
             if isinstance(row[par], list):
-                dimensions.append(row['par'])
+                dimensions.append(row[par])
     return dimensions
 
 
@@ -218,7 +218,7 @@ def objective(plan, beam_set, funcs, goals, roi, dose, volume, pars):
         Treatment plan score.
 
     """
-    set_pars(plan, pars)
+    set_pars(plan, funcs, pars)
     flag = sample.calc_plan(plan, beam_set, roi, dose, volume)
     if flag == 0:
         return get_penalty(plan, goals)
@@ -235,7 +235,7 @@ def set_pars(plan, funcs, pars):
         Current treatment plan.
     funcs : pandas.DataFrame
         Constituent function specifications.
-    parameters : list
+    pars : list
         Constituent function parameters.
 
     Returns
@@ -244,9 +244,9 @@ def set_pars(plan, funcs, pars):
 
     """
     count = 0
-    funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
-    for _, row in funcs.iterrows():
-        func = funcs[row['Term']].DoseFunctionParameters
+    const_funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
+    for index, row in funcs.iterrows():
+        func = const_funcs[index].DoseFunctionParameters
         if isinstance(row['DoseLevel'], list):
             func.DoseLevel = pars[count]
             count += 1
@@ -284,7 +284,7 @@ def get_penalty(plan, goals):
     """
     penalty = 0
     results = get_results(plan, goals)
-    for index, row in goals:
+    for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
         value = results[index]
         penalty += (value - level)/level
@@ -315,5 +315,5 @@ def get_results(plan, goals):
     dose = plan.TreatmentCourse.TotalDose
     results = {}
     for index, row in goals.iterrows():
-        results[index] = sample.get_goal_results(dose, row)
+        results[index] = sample.get_goal_result(dose, row)
     return results
