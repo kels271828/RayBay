@@ -1,4 +1,6 @@
 """Solve treatment plan with Bayesian optimization."""
+import pickle
+
 import numpy as np
 import skopt
 
@@ -58,6 +60,7 @@ def gp_minimize(funcs, roi, dose, volume, goals=None, fpath='', random_state=0,
     np.save(fpath + 'x_iters.npy', results.x_iters)
     np.save(fpath + 'fun.npy', results.fun)
     np.save(fpath + 'func_vals.npy', results.func_vals)
+    pickle.dump(results.models, open(fpath + 'models.npy', 'wb'))
 
 
 def forest_minimize(funcs, roi, dose, volume, goals=None, fpath='',
@@ -112,6 +115,7 @@ def forest_minimize(funcs, roi, dose, volume, goals=None, fpath='',
     np.save(fpath + 'x_iters.npy', results.x_iters)
     np.save(fpath + 'fun.npy', results.fun)
     np.save(fpath + 'func_vals.npy', results.func_vals)
+    pickle.dump(results.models, open(fpath + 'models.npy', 'wb'))
 
 
 def dummy_minimize(funcs, roi, dose, volume, goals=None, fpath='',
