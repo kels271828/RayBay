@@ -52,16 +52,20 @@ if __name__ == '__main__':
                                                                  goals_path)
 
     # Rib Parameters
-    rib_pars = {('Rib', 'DoseLevel'): [1600.0, 1609.7507850014442,
-                                       1580.0282932223702, 1561.8852225963185]}
+    rib_pars = {('Rib', 'DoseLevel'): [
+        3200, # default
+        1400.0, # grid search
+        1454.3751069922719, # random search
+        1384.7830992256718 # bayesian search
+    ]}
 
     # Calculate plans
     for ii in range(4):
         pars = sample.grid_pars(ii, funcs, pars, rib_pars, 4)
-        pars.to_pickle(save_path + 'pars.npy')
+        pars.to_pickle(save_path + 'pars_opt.npy')
         sample.set_pars(plan, pars)
         flag = sample.calc_plan(plan, beam_set, 'PTV', 4800, 95)
         results = sample.get_results(plan, ii, flag, goals, results)
-        results.to_pickle(save_path + 'results.npy')
+        results.to_pickle(save_path + 'results_opt.npy')
         dvh = get_dvh(plan, roi_names)
         np.save(save_path + f'dvh_{ii}.npy', dvh)
