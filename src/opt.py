@@ -296,7 +296,7 @@ def get_penalty(plan, goals, flag):
     scale = 4800/results[0]
     for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
-        value = results[index] if flag == 0 else scale*result[index]
+        value = results[index] if flag == 0 else scale*results[index]
         penalty += (value - level)/level
     return penalty
 
