@@ -224,10 +224,8 @@ def objective(plan, beam_set, funcs, goals, roi, dose, volume, pars):
     """
     set_pars(plan, funcs, pars)
     flag = sample.calc_plan(plan, beam_set, roi, dose, volume)
-    if flag == 0:
-        return get_penalty(plan, goals)
-    else:
-        return 1e6
+    print(f'Flag: {flag}')
+    return get_penalty(plan, goals, flag)
 
 
 def set_pars(plan, funcs, pars):
@@ -270,8 +268,11 @@ def set_pars(plan, funcs, pars):
             func.Weight = row['Weight']
 
 
-def get_penalty(plan, goals):
+def get_penalty(plan, goals, flag):
     """
+
+    # need to fix this up!
+    # normalize if flag == 0
 
     Parameters
     ----------
@@ -279,6 +280,8 @@ def get_penalty(plan, goals):
         Current treatment plan.
     goals : pandas.DataFrame
         Clinical goal specifications.
+    flag : int
+        opt result
 
     Returns
     -------
@@ -286,11 +289,14 @@ def get_penalty(plan, goals):
         Plan penalty value.
 
     """
+    if flag == 2:
+        return 1e6
     penalty = 0
     results = get_results(plan, goals)
+    scale = 4800/results[0]
     for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
-        value = results[index]
+        value = results[index] if flag == 0 else scale*result[index]
         penalty += (value - level)/level
     return penalty
 
