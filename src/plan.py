@@ -84,9 +84,10 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
     # Define functions and goals
     if isinstance(funcs, str):
         funcs = load_funcs(funcs)
-
-
-    funcs, goals, _, _, _, _ = sample.init_prob(funcs, goals)
+    if goals is None:
+        goals = init_goals(funcs)
+    elif isinstance(goals, str):
+        goals = pd.read_csv(goals)
 
     # Optimize
     # maybe create actual objective
@@ -104,6 +105,7 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
     np.save(fpath + 'fun.npy', results.fun)
     np.save(fpath + 'func_vals.npy', results.func_vals)
     pickle.dump(results.models, open(fpath + 'models.npy', 'wb'))
+
 
 def load_funcs(fpath):
     """Load constituent functions from CSV file.
@@ -137,3 +139,37 @@ def load_funcs(fpath):
                         in re.findall(r'\d+\.\d+|\d+', row[col])]
                 funcs.loc[index, col] = pars if len(pars) > 1 else pars[0]
     return funcs
+
+
+def init_goals(funcs):
+    """Initialize clinical goals based on constituent functions.
+
+    Clinical goals are specified by columns Roi, Type, GoalCriteria,
+    AcceptanceLevel, and ParameterValue. The function get_results() is
+    currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh,
+    and MaxDvh clinical goals. All other clinical goals are not
+    evaluated, and results are set to NaN.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    pandas.DataFrame
+        Clinical goal specifications.
+
+    """
+    data = [{
+        'Roi': row['Roi'],
+        'Type': row['FunctionType'],
+        'GoalCriteria': 'AtMost'
+                        if 'Max' in row['FunctionType'] else 'AtLeast',
+        'AcceptanceLevel': row['EudParameterA']
+                           if 'Eud' in row['FunctionType'] else
+                           get_par_bound(row['PercentVolume'],
+                                         row['FunctionType'])
+    } for index, row in funcs.iterrows()]
+    columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
+               'ParameterValue']
+    return pd.DataFrame(data=data, columns=columns)
