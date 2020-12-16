@@ -94,7 +94,7 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
     # option for different solvers
     obj = lambda pars: objective(plan, beam_set, funcs, goals, roi, dose,
                                  volume, pars)
-    results = skopt.gp_minimize(obj, dimensions=get_dimenstions(funcs),
+    results = skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
                                 random_state=random_state, n_calls=n_calls,
                                 verbose=verbose)
 
@@ -165,11 +165,32 @@ def init_goals(funcs):
         'Type': row['FunctionType'],
         'GoalCriteria': 'AtMost'
                         if 'Max' in row['FunctionType'] else 'AtLeast',
-        'AcceptanceLevel': row['EudParameterA']
-                           if 'Eud' in row['FunctionType'] else
-                           get_par_bound(row['PercentVolume'],
-                                         row['FunctionType'])
+        'AcceptanceLevel': get_par_bound(row['DoseLevel'],
+                                         row['FunctionType']),
+        'ParameterValue': row['EudParameterA']
+                          if 'Eud' in row['FunctionType'] else
+                          get_par_bound(row['PercentVolume'],
+                                        row['FunctionType'])
     } for index, row in funcs.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
+
+
+def get_par_bound(par, func_type):
+    """Get min or max parameter value based on function type.
+
+    Parameters
+    ----------
+    par : float or list
+        Parameter value or boundaries.
+    func_type : str
+        Constituent function type.
+
+    Returns
+    -------
+    float
+        Parameter boundary value.
+
+    """
+    return np.max(par) if 'Max' in func_type else np.min(par)
