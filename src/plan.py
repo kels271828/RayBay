@@ -171,7 +171,7 @@ def init_goals(funcs):
                           if 'Eud' in row['FunctionType'] else
                           get_par_bound(row['PercentVolume'],
                                         row['FunctionType'])
-    } for index, row in funcs.iterrows()]
+    } for _, row in funcs.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
@@ -194,3 +194,25 @@ def get_par_bound(par, func_type):
 
     """
     return np.max(par) if 'Max' in func_type else np.min(par)
+
+
+def get_dimensions(funcs):
+    """Get constituent function parameter dimensions.
+
+    Parameters
+    ----------
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    -------
+    list
+        Constituent function parameter dimensions.
+
+    """
+    dimensions = []
+    for _, row in funcs.iterrows():
+        for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+            if isinstance(row[par], list):
+                dimensions.append(row[par])
+    return dimensions
