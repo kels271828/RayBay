@@ -211,7 +211,7 @@ def objective(plan, beam_set, funcs, goals, norm, pars):
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
     pars : list
-        Hyperparameter values.
+        Constituent function parameters.
 
     Returns
     -------
@@ -225,7 +225,46 @@ def objective(plan, beam_set, funcs, goals, norm, pars):
     return get_score(plan, goals, flag)
 
 
-# set_pars()
+def set_pars(plan, funcs, pars):
+    """Set objective function parameters.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    pars : list
+        Constituent function parameters.
+
+    Returns
+    -------
+    None.
+
+    """
+    count = 0
+    const_funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
+    for index, row in funcs.iterrows():
+        func = const_funcs[index].DoseFunctionParameters
+        if isinstance(row['DoseLevel'], list):
+            func.DoseLevel = pars[count]
+            count += 1
+        else:
+            func.DoseLevel = row['DoseLevel']
+        if 'Eud' in func.FunctionType:
+            func.EudParameterA = row['EudParameterA']
+        elif isinstance(row['PercentVolume'], list):
+            func.PercentVolume = pars[count]
+            count += 1
+        else:
+            func.PercentVolume = row['PercentVolume']
+        if isinstance(row['Weight'], list):
+            func.Weight = pars[count]
+            count += 1
+        else:
+            func.Weight = row['Weight']
+
+
 # calc_plan()
 # get_score()
 
