@@ -265,7 +265,41 @@ def set_pars(plan, funcs, pars):
             func.Weight = row['Weight']
 
 
-# calc_plan()
+def calc_plan(plan, beam_set, norm):
+    """Calculate and normalize treatment plan.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    beam_set : connect.connect_cpython.PyScriptObject
+        Current beam set.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
+
+    Returns
+    -------
+    int
+        0 = success, 1 = normalization failed, 2 = optimization failed.
+
+    """
+    # Calculate plan
+    plan.PlanOptimizations[0].ResetOptimization()
+    try:
+        plan.PlanOptimizations[0].RunOptimization()
+    except:
+        return 2
+
+    # Normalize plan
+    try:
+        beam_set.NormalizeToPrescription(RoiName=norm[0], DoseValue=norm[1],
+                                         DoseVolume=norm[2],
+                                         PrescriptionType='DoseAtVolume')
+        return 0
+    except:
+        return 1
+
+
 # get_score()
 
 
