@@ -92,8 +92,7 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
     # Optimize
     # maybe create actual objective
     # option for different solvers
-    obj = lambda pars: objective(plan, beam_set, funcs, goals, roi, dose,
-                                 volume, pars)
+    obj = lambda pars: objective(plan, beam_set, funcs, goals, norm, pars)
     results = skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
                                 random_state=random_state, n_calls=n_calls,
                                 verbose=verbose)
@@ -194,6 +193,41 @@ def get_par_bound(par, func_type):
 
     """
     return np.max(par) if 'Max' in func_type else np.min(par)
+
+
+def objective(plan, beam_set, funcs, goals, norm, pars):
+    """Objective function for hyperparameter optimization.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    beam_set : connect.connect_cpython.PyScriptObject
+        Current beam set.
+    funcs : pandas.DataFrame
+        Constituent function specifications.
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
+    pars : list
+        Hyperparameter values.
+
+    Returns
+    -------
+    float
+        Treatment plan score.
+
+    """
+    set_pars(plan, funcs, pars)
+    flag = calc_plan(plan, beam_set, norm)
+    print(f'Flag: {flag}')
+    return get_score(plan, goals, flag)
+
+
+# set_pars()
+# calc_plan()
+# get_score()
 
 
 def get_dimensions(funcs):
