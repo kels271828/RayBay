@@ -15,21 +15,20 @@ import skopt
 import connect
 
 
-def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
-             n_calls=25, random_state=None, n_initial_points=10,
-             verbose=True):
+def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
+             random_state=None, n_initial_points=10, verbose=True):
     """Hyperparameter optimization for RayStation treatment planning.
 
     Hyperparameter optimization for RayStation treatment planning using
     the following solvers from scikit-optimize:
 
-        - `gp_minimize`: Bayesian optimization using Gaussian Processes
+        - `gp_minimize`: Bayesian optimization using Gaussian processes.
         - `forest_minimize`: Sequential optimization using decision
-           trees
-        - `dummy_minimize`: Random search by uniform sampling within
-           the given bounds
+           trees.
+        - `dummy_minimize`: Random search by uniform sampling within the
+           given bounds.
 
-    For more details related to scikit-optimize, refer to
+    For more details about scikit-optimize, refer to
     https://scikit-optimize.github.io/stable/index.html
 
     Parameters
@@ -41,11 +40,8 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
     goals : pandas.DataFrame or str, optional
         Clinical goal specifications or path to CSV file.
         If None, goals are assigned based on constituent functions.
-    solver : {'gp_minimize', 'forest_minimize', 'random_minimize'}
+    solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
         Name of scikit-optimize solver to use.
-    fpath : str, optional
-        Path to output directory.
-        If not specified, results are saved in the current directory.
     n_calls : int, optional
         Number of calls to objective.
     random_state : int, optional
@@ -70,10 +66,10 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
         - `func_vals` [array]: function value for each iteration.
         - `space` [Space]: the optimization space.
         - `specs` [dict]: the call specifications.
-        - `rng` [RandomState instance]: State of the random state at
-          at the end of minimization.
+        - `rng` [RandomState instance]: State of the random state at the
+          end of minimization.
 
-        For more details related to the OptimizeResult object, refer to
+        For more details about the OptimizeResult object, refer to
         http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html
 
     """
@@ -90,20 +86,24 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', fpath='',
         goals = pd.read_csv(goals)
 
     # Optimize
-    # maybe create actual objective
-    # option for different solvers
     obj = lambda pars: objective(plan, beam_set, funcs, goals, norm, pars)
-    results = skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
-                                random_state=random_state, n_calls=n_calls,
-                                verbose=verbose)
-
-    # Save results
-    # why don't i just save the OptimizeResult?
-    np.save(fpath + 'x.npy', results.x)
-    np.save(fpath + 'x_iters.npy', results.x_iters)
-    np.save(fpath + 'fun.npy', results.fun)
-    np.save(fpath + 'func_vals.npy', results.func_vals)
-    pickle.dump(results.models, open(fpath + 'models.npy', 'wb'))
+    if solver == 'forest_minimize':
+        return skopt.forest_minimize(obj, dimensions=get_dimensions(funcs),
+                                     n_calls=n_calls,
+                                     n_initial_points=n_initial_points,
+                                     random_state=random_state,
+                                     verbose=verbose)
+    elif solver == 'dummy_minimize':
+        return skopt.dummy_minimize(obj, dimensions=get_dimensions(funcs),
+                                    n_calls=n_calls,
+                                    n_initial_points=n_initial_points,
+                                    random_state=random_state,
+                                    verbose=verbose)
+    else:
+        return skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
+                                 n_calls=n_calls,
+                                 n_initial_points=n_initial_points,
+                                 random_state=random_state, verbose=verbose)
 
 
 def load_funcs(fpath):
@@ -300,7 +300,9 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-# get_score()
+def get_score():
+    """blj"""
+
 
 
 def get_dimensions(funcs):
