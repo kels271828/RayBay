@@ -6,7 +6,6 @@ TODO:
 
 """
 import re
-import pickle
 
 import numpy as np
 import pandas as pd
@@ -109,13 +108,13 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 def load_funcs(fpath):
     """Load constituent functions from CSV file.
 
-    Constituent function parameters should be specified by columns
-    Roi, FunctionType, DoseLevel, PercentVolume, EudParameterA, and
-    Weight. The row index within the table should correspond to the
-    constituent function in the RayStation objective. Fixed parameters
-    should be a single value, tunable parameters should be a list
-    containing the minimum and maximum values, and irrelevant
-    parameters can be left blank.
+    Constituent function parameters should be specified by columns Roi,
+    FunctionType, DoseLevel, PercentVolume, EudParameterA, and Weight.
+    The row index within the table should correspond to the constituent
+    function in the RayStation objective. Fixed parameters should be a
+    a single value, tunable parameters should be a list containing the
+    minimum and maximum values, and irrelevant parameters can be left
+    blank.
 
     Parameters
     ----------
@@ -147,7 +146,7 @@ def init_goals(funcs):
     AcceptanceLevel, and ParameterValue. The function get_results() is
     currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh,
     and MaxDvh clinical goals. All other clinical goals are not
-    evaluated, and results are set to NaN.
+    evaluated, so their results are set to NaN.
 
     Parameters
     ----------
@@ -155,6 +154,7 @@ def init_goals(funcs):
         Constituent function specifications.
 
     Returns
+    -------
     pandas.DataFrame
         Clinical goal specifications.
 
