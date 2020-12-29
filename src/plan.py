@@ -3,21 +3,11 @@
 TODO:
 * Additional information about format of funcs, goals, etc.
 * Continue importing and formatting all of my raystation-facing functions
+* add grid_search function (1D for now)
+* add goal results dictionary as output
+* add get_dvh function
 
-grid search???
-get results???
-get dvh?
-
-questions: 
-* do I want to get the dvh for just the final version?
-* do I want to get the stats and/or goals for just the final version?
-* do I want a separate function to do this, or do I want to use plan_opt?
-
-* I want to calculate the dvh separately
-* I want to save separately
-* If I want to get the results for individual goals, I need to do it within
-  the optimization, but I don't think I can return it with the function...
-  maybe have an option for save results...?
+Big question about results: can I modify a dictionary in place????
 
 """
 import re
@@ -158,10 +148,7 @@ def get_goals(funcs):
     """Create clinical goals based on constituent functions.
 
     Clinical goals are specified by columns Roi, Type, GoalCriteria,
-    AcceptanceLevel, and ParameterValue. The function get_results() is
-    currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh,
-    and MaxDvh clinical goals. All other clinical goals are not
-    evaluated, so their results are set to NaN.
+    AcceptanceLevel, and ParameterValue.
 
     Parameters
     ----------
@@ -278,7 +265,7 @@ def set_pars(plan, funcs, pars):
             func.Weight = row['Weight']
 
 
-def get_plan(plan, beam_set, norm):
+def calc_plan(plan, beam_set, norm):
     """Calculate and normalize treatment plan.
 
     Parameters
@@ -345,14 +332,63 @@ def get_score(plan, goals, flag):
     for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
         value = results[index]
-        score += (value - level)/level 
-                 if 'Most' in row['GoalCriteria'] else (level - value)/level
+        sign = 1 if 'Most' in row['GoalCriteria'] else -1
+        score += sign*(value - level)/level
     return score
 
 
 def get_results(plan, goals):
-    """TODO"""
+    """Get clinical goal results.
 
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+
+    Returns
+    -------
+    dict
+        Clinical goal results.
+
+    """
+    dose = plan.TreatmentCourse.TotalDose
+    results = {}
+    for index, row in goals.iterrows():
+        results[index] = get_value(dose, row)
+    return results
+
+
+def get_value(dose, goal):
+    """Get clinical goal value.
+
+    Currently able to evaluate MinDose, AverageDose, MaxDose, MinDvh,
+    and MaxDvh clinical goal values. All other clinical goal values are
+    returned as NaN.
+
+    Parameters
+    ----------
+    dose : connect.connect_cpython.PyScriptObject
+        Current treatment plan dose.
+    goal : pandas.core.series.series
+        Row of clinical goal specification DataFrame.
+
+    Returns
+    -------
+    float
+        Clinical goal value.
+
+    """
+    if 'Dose' in goal['Type']:
+        dose_type = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
+        return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose_type)
+    elif 'Dvh' in goal['Type']:
+        volume = 0.01*goal['ParameterValue']
+        return dose.GetDoseAtRelativeVolumes(RoiName=goal['Roi'],
+                                             RelativeVolumes=[volume])[0]
+    else:
+        return np.nan
 
 
 def get_dimensions(funcs):
