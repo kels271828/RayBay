@@ -5,9 +5,30 @@ TODO:
 * Continue importing and formatting all of my raystation-facing functions
 * add grid_search function (1D for now)
 * add goal results dictionary as output
+  - create emtpy DataFrame with rows=n_calls, cols=n_goals
+  - use df.update(df_temp) where df_temp same size, all NaNs, except
+    for row corresponding to iteration? would this work?
+  -> use a dictionary rather than a DataFrame, just use keys that correspond
+     to rows in goals DataFrame, and values are a list that correspond
+     to values at each iteration... not as descriptive, but at least I know
+     how to modify it in place!
 * add get_dvh function
+* save results function? (dvh, opt results, goal results?)
 
-Big question about results: can I modify a dictionary in place????
+* how did I get the best result to extract the dvh from? what about status or
+  results? i guess it was the solution in opt results... so then I had to
+  calculate one last time
+
+* maybe create a function that extracts the things i'm interested in:
+    - score values
+    - goal values
+    - parameter values
+    - best score, parameters, and goals
+    - final dvh?
+
+    this function could take in my opt_results and goal results and 
+    format the results that I want (into my own type of object?)
+    -> i could use this object for plotting?
 
 """
 import re
@@ -411,3 +432,28 @@ def get_dimensions(funcs):
             if isinstance(row[par], list):
                 dimensions.append(row[par])
     return dimensions
+
+
+def get_dvh(roi_list):
+    """Get dose-volume histogram curves from current plan.
+
+    Parameters
+    ----------
+    roi_list : list of str
+        Regions of interest to include in results.
+
+    Returns
+    -------
+    dict
+        Dose and volumes for given regions of interest.
+
+    """
+    dose = connect.get_current('Plan').TreatmentCourse.TotalDose
+    max_dose = max([dose.GetDostStatistics(RoiName=roi, DoseType='Max')
+                    for roi in roi_list])
+    dvh_dict = {'Dose': np.linspace(0, max_dose, 100)}
+    for roi in roi_list:
+        vals = dose.GetRelativeVolumeAtDoseValues(RoiName=roi,
+                                                  DoseValues=dvh_dict['Dose'])
+        dvh_dict[roi] = vals
+    return dvh_dict
