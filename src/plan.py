@@ -1,34 +1,8 @@
 """RayStation treatment planning with Bayesian optimization.
 
 TODO:
-* Additional information about format of funcs, goals, etc.
-* Continue importing and formatting all of my raystation-facing functions
-* add grid_search function (1D for now)
-* add goal results dictionary as output
-  - create emtpy DataFrame with rows=n_calls, cols=n_goals
-  - use df.update(df_temp) where df_temp same size, all NaNs, except
-    for row corresponding to iteration? would this work?
-  -> use a dictionary rather than a DataFrame, just use keys that correspond
-     to rows in goals DataFrame, and values are a list that correspond
-     to values at each iteration... not as descriptive, but at least I know
-     how to modify it in place!
-* add get_dvh function
-* save results function? (dvh, opt results, goal results?)
-
-* how did I get the best result to extract the dvh from? what about status or
-  results? i guess it was the solution in opt results... so then I had to
-  calculate one last time
-
-* maybe create a function that extracts the things i'm interested in:
-    - score values
-    - goal values
-    - parameter values
-    - best score, parameters, and goals
-    - final dvh?
-
-    this function could take in my opt_results and goal results and 
-    format the results that I want (into my own type of object?)
-    -> i could use this object for plotting?
+* Add additional information about format of funcs, goals, etc.
+* Add 1D grid_search function
 
 """
 import re
@@ -109,26 +83,35 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
         goals = get_goals(funcs)
     elif isinstance(goals, str):
         goals = pd.read_csv(goals)
+    goal_dict = {ii: [] for ii in range(len(goals))}
 
     # Optimize
-    obj = lambda pars: objective(plan, beam_set, funcs, goals, norm, pars)
+    obj = lambda pars: objective(plan, beam_set, funcs, goals, norm, goal_dict,
+                                 pars)
     if solver == 'forest_minimize':
-        return skopt.forest_minimize(obj, dimensions=get_dimensions(funcs),
-                                     n_calls=n_calls,
-                                     n_initial_points=n_initial_points,
-                                     random_state=random_state,
-                                     verbose=verbose)
+        results = skopt.forest_minimize(obj, dimensions=get_dimensions(funcs),
+                                        n_calls=n_calls,
+                                        n_initial_points=n_initial_points,
+                                        andom_state=random_state,
+                                        verbose=verbose)
     elif solver == 'dummy_minimize':
-        return skopt.dummy_minimize(obj, dimensions=get_dimensions(funcs),
+        results = skopt.dummy_minimize(obj, dimensions=get_dimensions(funcs),
+                                       n_calls=n_calls,
+                                       n_initial_points=n_initial_points,
+                                       random_state=random_state,
+                                       verbose=verbose)
+    else:
+        results = skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
                                     n_calls=n_calls,
                                     n_initial_points=n_initial_points,
-                                    random_state=random_state,
-                                    verbose=verbose)
-    else:
-        return skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
-                                 n_calls=n_calls,
-                                 n_initial_points=n_initial_points,
-                                 random_state=random_state, verbose=verbose)
+                                    random_state=random_state, verbose=verbose)
+
+    # Get optimal dose-volume histogram
+    set_pars(plan, funcs, results.x)
+    calc_plan(plan, beam_set, norm)
+    dvh_dict = get_dvh(set(goals['Roi']))
+
+    return results, goal_dict, dvh_dict
 
 
 def get_funcs(fpath):
@@ -216,7 +199,7 @@ def get_bound(par, func_type):
     return np.max(par) if 'Max' in func_type else np.min(par)
 
 
-def objective(plan, beam_set, funcs, goals, norm, pars):
+def objective(plan, beam_set, funcs, goals, norm, goal_dict, pars):
     """Objective function for hyperparameter optimization.
 
     Parameters
@@ -231,6 +214,8 @@ def objective(plan, beam_set, funcs, goals, norm, pars):
         Clinical goal specifications.
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
+    goal_dict : dict
+        Clinical goal results.
     pars : list
         Constituent function parameters.
 
@@ -243,7 +228,7 @@ def objective(plan, beam_set, funcs, goals, norm, pars):
     set_pars(plan, funcs, pars)
     flag = calc_plan(plan, beam_set, norm)
     print(f'Flag: {flag}')
-    return get_score(plan, goals, flag)
+    return get_score(plan, goals, flag, goal_dict)
 
 
 def set_pars(plan, funcs, pars):
@@ -324,7 +309,7 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goals, flag):
+def get_score(plan, goals, flag, goal_dict):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
@@ -339,6 +324,8 @@ def get_score(plan, goals, flag):
         Clinical goal specifications.
     flag : int
         RayStation exit status.
+    goal_dict : dict
+        Clinical goal results.
 
     Returns
     -------
@@ -353,6 +340,7 @@ def get_score(plan, goals, flag):
     for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
         value = results[index]
+        goal_dict[index].append(value)
         sign = 1 if 'Most' in row['GoalCriteria'] else -1
         score += sign*(value - level)/level
     return score
