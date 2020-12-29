@@ -4,6 +4,21 @@ TODO:
 * Additional information about format of funcs, goals, etc.
 * Continue importing and formatting all of my raystation-facing functions
 
+grid search???
+get results???
+get dvh?
+
+questions: 
+* do I want to get the dvh for just the final version?
+* do I want to get the stats and/or goals for just the final version?
+* do I want a separate function to do this, or do I want to use plan_opt?
+
+* I want to calculate the dvh separately
+* I want to save separately
+* If I want to get the results for individual goals, I need to do it within
+  the optimization, but I don't think I can return it with the function...
+  maybe have an option for save results...?
+
 """
 import re
 
@@ -78,9 +93,9 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 
     # Define functions and goals
     if isinstance(funcs, str):
-        funcs = load_funcs(funcs)
+        funcs = get_funcs(funcs)
     if goals is None:
-        goals = init_goals(funcs)
+        goals = get_goals(funcs)
     elif isinstance(goals, str):
         goals = pd.read_csv(goals)
 
@@ -105,7 +120,7 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
                                  random_state=random_state, verbose=verbose)
 
 
-def load_funcs(fpath):
+def get_funcs(fpath):
     """Load constituent functions from CSV file.
 
     Constituent function parameters should be specified by columns Roi,
@@ -139,8 +154,8 @@ def load_funcs(fpath):
     return funcs
 
 
-def init_goals(funcs):
-    """Initialize clinical goals based on constituent functions.
+def get_goals(funcs):
+    """Create clinical goals based on constituent functions.
 
     Clinical goals are specified by columns Roi, Type, GoalCriteria,
     AcceptanceLevel, and ParameterValue. The function get_results() is
@@ -164,19 +179,17 @@ def init_goals(funcs):
         'Type': row['FunctionType'],
         'GoalCriteria': 'AtMost'
                         if 'Max' in row['FunctionType'] else 'AtLeast',
-        'AcceptanceLevel': get_par_bound(row['DoseLevel'],
-                                         row['FunctionType']),
+        'AcceptanceLevel': get_bound(row['DoseLevel'], row['FunctionType']),
         'ParameterValue': row['EudParameterA']
                           if 'Eud' in row['FunctionType'] else
-                          get_par_bound(row['PercentVolume'],
-                                        row['FunctionType'])
+                          get_bound(row['PercentVolume'], row['FunctionType'])
     } for _, row in funcs.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
 
 
-def get_par_bound(par, func_type):
+def get_bound(par, func_type):
     """Get min or max parameter value based on function type.
 
     Parameters
@@ -265,7 +278,7 @@ def set_pars(plan, funcs, pars):
             func.Weight = row['Weight']
 
 
-def calc_plan(plan, beam_set, norm):
+def get_plan(plan, beam_set, norm):
     """Calculate and normalize treatment plan.
 
     Parameters
@@ -280,7 +293,10 @@ def calc_plan(plan, beam_set, norm):
     Returns
     -------
     int
-        0 = success, 1 = normalization failed, 2 = optimization failed.
+        RayStation exit status:
+        - 0: success
+        - 1: normalization failed
+        - 2: optimization failed
 
     """
     # Calculate plan
@@ -300,8 +316,42 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score():
-    """blj"""
+def get_score(plan, goals, flag):
+    """Calculate treatment plan score.
+
+    The treatment plan score is a linear combination of the relative
+    difference between goal values and goal results. Returns 1e6 if
+    RayStation optimization or normalization failed.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+    flag : int
+        RayStation exit status.
+
+    Returns
+    -------
+    float
+        Treatment plan score.
+
+    """
+    if flag > 0:
+        return 1e6
+    score = 0
+    results = get_results(plan, goals)
+    for index, row in goals.iterrows():
+        level = row['AcceptanceLevel']
+        value = results[index]
+        score += (value - level)/level 
+                 if 'Most' in row['GoalCriteria'] else (level - value)/level
+    return score
+
+
+def get_results(plan, goals):
+    """TODO"""
 
 
 
