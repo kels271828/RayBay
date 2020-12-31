@@ -91,7 +91,7 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     result.opt_result = results
 
     # Get optimal dose-volume histogram
-    set_pars(plan, funcs, result.opt_result.x)
+    set_pars(plan, result.funcs, result.opt_result.x)
     calc_plan(plan, beam_set, norm)
     result.dvh_result = get_dvh(result.roi_list)
 
