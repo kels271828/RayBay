@@ -102,7 +102,7 @@ class RaybayResult:
             self.goals = pd.read_csv(goals)
         else:
             self.goals = get_goals(self.funcs)
-        self.goal_result = {ii : [] for ii in range(len(self.goals))}
+        self.goal_result = {ii: [] for ii in range(len(self.goals))}
         self.roi_list = set(self.goals['Roi'])
 
 

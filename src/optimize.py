@@ -10,7 +10,6 @@ kwarg n_initial_points reverted back to n_random_starts
 import re
 
 import numpy as np
-import pandas as pd
 import skopt
 
 import connect
