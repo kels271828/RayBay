@@ -1,10 +1,32 @@
 """RayStation treatment planning with Bayesian optimization.
 
+Constituent functions
+---------------------
+The constituent function specifications are stored in a DataFrame with
+columns corresponding to each function parameter: Roi, FunctionType,
+DoseLevel, PercentVolume, EudParameterA, and Weight. The row index
+within the DataFrame should correspond to the function index in the
+RayStation objective function. Fixed parameters should be a single
+value, tunable parameters should be a list containing the minimum and
+maximum values, and irrelevant parameters can be left blank. The
+DataFrame can be built manually or from a CSV file using `get_funcs()`.
+
+Clinical goals
+--------------
+The clinical goal specifications are stored in a DataFrame with columns
+corresponding to each goal parameter: Roi, Type, GoalCriteria,
+AcceptanceLevel, and ParameterValue. The DataFrame can be built
+manually, based on the minimum or maximum parameter values in the
+constituent functions DataFrame with `get_goals()`, or from a CSV file.
+The function `get_results()` is currently able to evaluate MinDose,
+AverageDose, MaxDose, MinDose, MinDvh, and MaxDvh clinical goals. All
+other clinical goals are not evaluated, and results are set to NaN.
+
 TODO:
-* Add additional information about format of funcs, goals, etc.
 * Add 1D grid_search function
 
-# update skopt, n_random_starts vs. n_initial_points...
+Note: My virtual environments in Citrix have old version of skopt, so
+kwarg n_initial_points reverted back to n_random_starts
 
 """
 import re
