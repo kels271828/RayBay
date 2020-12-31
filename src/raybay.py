@@ -4,6 +4,8 @@ TODO:
 * Add additional information about format of funcs, goals, etc.
 * Add 1D grid_search function
 
+# update skopt, n_random_starts vs. n_initial_points...
+
 """
 import re
 
@@ -70,6 +72,10 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 
         For more details about the OptimizeResult object, refer to
         http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html
+    dict
+        Clinical goal results.
+    dict
+        Final dose-volume histograms.
 
     """
     # Get RayStation objects
@@ -91,19 +97,19 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     if solver == 'forest_minimize':
         results = skopt.forest_minimize(obj, dimensions=get_dimensions(funcs),
                                         n_calls=n_calls,
-                                        n_initial_points=n_initial_points,
-                                        andom_state=random_state,
+                                        n_random_starts=n_initial_points,
+                                        random_state=random_state,
                                         verbose=verbose)
     elif solver == 'dummy_minimize':
         results = skopt.dummy_minimize(obj, dimensions=get_dimensions(funcs),
                                        n_calls=n_calls,
-                                       n_initial_points=n_initial_points,
+                                       n_random_starts=n_initial_points,
                                        random_state=random_state,
                                        verbose=verbose)
     else:
         results = skopt.gp_minimize(obj, dimensions=get_dimensions(funcs),
                                     n_calls=n_calls,
-                                    n_initial_points=n_initial_points,
+                                    n_random_starts=n_initial_points,
                                     random_state=random_state, verbose=verbose)
 
     # Get optimal dose-volume histogram
@@ -437,7 +443,7 @@ def get_dvh(roi_list):
 
     """
     dose = connect.get_current('Plan').TreatmentCourse.TotalDose
-    max_dose = max([dose.GetDostStatistics(RoiName=roi, DoseType='Max')
+    max_dose = max([dose.GetDoseStatistic(RoiName=roi, DoseType='Max')
                     for roi in roi_list])
     dvh_dict = {'Dose': np.linspace(0, max_dose, 100)}
     for roi in roi_list:
