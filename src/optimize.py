@@ -69,8 +69,9 @@ def plan_opt(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
                                  norm, solver, goals)
 
     # Optimize
-    obj = lambda pars: objective(plan, beam_set, result.funcs, result.goals,
-                                 norm, result.goal_result, pars)
+    def obj(pars):
+        return objective(plan, beam_set, result.funcs, result.goals, norm,
+                         result.goal_result, pars)
     if solver == 'forest_minimize':
         results = skopt.forest_minimize(obj, dimensions=get_dims(result.funcs),
                                         n_calls=n_calls,
