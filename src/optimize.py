@@ -87,7 +87,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
                                     n_initial_points=n_initial_points,
                                     random_state=random_state, verbose=verbose)
     # remove local function to allow pickling
-    results.specs['args']['funcs'] = 'local'
+    results.specs['args']['func'] = 'local'
     result.opt_result = results
 
     # Get optimal dose-volume histogram
