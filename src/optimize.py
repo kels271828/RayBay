@@ -3,9 +3,6 @@
 TODO:
 * Add 1D grid_search function
 
-Note: My virtual environments in Citrix have old version of skopt, so
-kwarg n_initial_points reverted back to n_random_starts
-
 """
 import re
 
@@ -75,19 +72,19 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     if solver == 'forest_minimize':
         results = skopt.forest_minimize(obj, dimensions=get_dims(result.funcs),
                                         n_calls=n_calls,
-                                        n_random_starts=n_initial_points,
+                                        n_initial_points=n_initial_points,
                                         random_state=random_state,
                                         verbose=verbose)
     elif solver == 'dummy_minimize':
         results = skopt.dummy_minimize(obj, dimensions=get_dims(result.funcs),
                                        n_calls=n_calls,
-                                       n_random_starts=n_initial_points,
+                                       n_initial_points=n_initial_points,
                                        random_state=random_state,
                                        verbose=verbose)
     else:
         results = skopt.gp_minimize(obj, dimensions=get_dims(result.funcs),
                                     n_calls=n_calls,
-                                    n_random_starts=n_initial_points,
+                                    n_initial_points=n_initial_points,
                                     random_state=random_state, verbose=verbose)
     # remove local function to allow pickling
     results.specs['args']['funcs'] = 'local'
