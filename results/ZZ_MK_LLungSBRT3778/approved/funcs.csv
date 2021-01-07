@@ -1,0 +1,6 @@
+﻿Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+PTV,MinDvh,4800,95,,100
+ring,MaxDose,3600,,,30
+ot,MaxDose,2050,,,5
+PTV,MinDose,4300,,,100
+Heart,MaxDose,3300,,,300
