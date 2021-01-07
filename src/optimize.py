@@ -126,7 +126,7 @@ def objective(plan, beam_set, funcs, goals, norm, goal_result, pars):
     """
     set_pars(plan, funcs, pars)
     flag = calc_plan(plan, beam_set, norm)
-    print(f'Flag: {flag}')
+    print(f'Flag: {flag}', flush=True)
     return get_score(plan, goals, flag, goal_result)
 
 
