@@ -1,4 +1,10 @@
-"""Visualize sampled treatment plan results."""
+"""Visualize sampled treatment plan results.
+
+TODO:
+- rewrite functions based on new results format
+
+
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
