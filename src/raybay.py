@@ -42,6 +42,8 @@ class RaybayResult:
         Region of interest, dose, and volume used for normalization.
     solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
         Name of scikit-optimize solver used.
+    time : float
+        Total time in seconds for treatment plan optimization.
     opt_result : scipy.optimize.OptimizeResult
         Optimization results.
     goal_result : dict
@@ -68,7 +70,8 @@ class RaybayResult:
 
     """
 
-    def __init__(self, patient, case, plan, funcs, norm, solver, goals=None):
+    def __init__(self, patient, case, plan, funcs, norm, solver=None,
+                 goals=None):
         """Initialise instance of RaybayResult.
 
         Parameters
@@ -107,6 +110,9 @@ class RaybayResult:
             self.goals = get_goals(self.funcs)
         self.goal_result = {ii: [] for ii in range(len(self.goals))}
         self.roi_list = set(self.goals['Roi'])
+        self.time = None
+        self.opt_result = None
+        self.dvh_result = None
 
 
 def get_funcs(fpath):

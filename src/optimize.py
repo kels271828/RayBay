@@ -5,6 +5,7 @@ TODO:
 
 """
 import re
+from time import time
 
 import numpy as np
 import skopt
@@ -69,6 +70,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     def obj(pars):
         return objective(plan, beam_set, result.funcs, result.goals, norm,
                          result.goal_result, pars)
+    start_time = time()
     if solver == 'forest_minimize':
         results = skopt.forest_minimize(obj, dimensions=get_dims(result.funcs),
                                         n_calls=n_calls,
@@ -86,6 +88,8 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
                                     n_calls=n_calls,
                                     n_initial_points=n_initial_points,
                                     random_state=random_state, verbose=verbose)
+    results.time = time() - start_time
+
     # remove local function to allow pickling
     results.specs['args']['func'] = 'local'
     result.opt_result = results
