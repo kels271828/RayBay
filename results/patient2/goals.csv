@@ -1,7 +1,0 @@
-﻿Roi,Type,GoalCriteria,AcceptanceLevel,ParameterValue
-PTV 4/7/20,MinDvh,AtLeast,6270,99
-PTV 4/7/20,MaxDose,AtMost,7550,0
-Lungs,MaxDvh,AtMost,2000,35
-SpinalCord (Thorax),MaxDose,AtMost,5000,0
-Esophagus,MaxDose,AtMost,6930,0
-Heart,AverageDose,AtMost,3500,0

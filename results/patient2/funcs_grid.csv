@@ -1,7 +1,0 @@
-﻿Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
-PTV 4/7/20,MinDose,6270,0,,1
-PTV 4/7/20,MaxDose,"[6271, 7550]",0,,1
-Lungs,MaxDvh,2000,35,,1
-SpinalCord (Thorax),MaxDose,5000,0,,1
-Esophagus,MaxDose,"[3465, 6930]",0,,1
-Heart,MaxEud,3500,,1,1
