@@ -9,14 +9,16 @@ import pickle
 import sys
 
 import connect
-import optimize
-import raybay
 
 repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\'
 sys.path.append(repo_path + 'src\\')
 
-# Setup
-patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
+import optimize
+import raybay
+
+# Setup (CHECK RAYSTATION PATIENT AND PLAN!)
+patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
+#case_path = 'approved\\'
 case_path = 'default\\'
 
 # Get RayStation objects
