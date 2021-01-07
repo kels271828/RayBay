@@ -127,7 +127,7 @@ def objective(plan, beam_set, funcs, goals, norm, goal_result, pars):
     set_pars(plan, funcs, pars)
     flag = calc_plan(plan, beam_set, norm)
     print(f'Flag: {flag}', flush=True)
-    return get_score(plan, goals, flag, goal_result)
+    return get_score(plan, goals, norm, flag, goal_result)
 
 
 def set_pars(plan, funcs, pars):
@@ -208,7 +208,7 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goals, flag, goal_result):
+def get_score(plan, goals, norm, flag, goal_result):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
@@ -221,6 +221,8 @@ def get_score(plan, goals, flag, goal_result):
         Current treatment plan.
     goals : pandas.DataFrame
         Clinical goal specifications.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
     flag : int
         RayStation exit status.
     goal_result : dict
@@ -232,15 +234,16 @@ def get_score(plan, goals, flag, goal_result):
         Treatment plan score.
 
     """
-    if flag > 0:
+    if flag == 2:
         return 1e6
-    score = 0
     results = get_results(plan, goals)
+    scale = get_scale(goals, norm, results) if flag == 1 else 1.0
+    score = 0
     for index, row in goals.iterrows():
         level = row['AcceptanceLevel']
-        value = results[index]
+        value = scale*results[index]
         goal_result[index].append(value)
-        sign = 1 if 'Most' in row['GoalCriteria'] else -1
+        sign = 1.0 if 'Most' in row['GoalCriteria'] else -1.0
         score += sign*(value - level)/level
     return score
 
@@ -297,6 +300,30 @@ def get_value(dose, goal):
                                              RelativeVolumes=[volume])[0]
     else:
         return np.nan
+
+
+def get_scale(goals, norm, results):
+    """Get normalization scale factor.
+
+    Parameters
+    ----------
+    goals : pandas.DataFrame
+        Clinical goal specifications.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
+    results : dict
+        Clinical goal results.
+
+    Returns
+    -------
+    float
+        Normalization scale factor.
+
+    """
+    index = goals.index[(goals['Roi'] == norm[0]) &
+                        (goals['AcceptanceLevel'] == norm[1]) &
+                        (goals['ParameterValue'] == norm[2])].tolist()[0]
+    return norm[1]/results[index]
 
 
 def get_dims(funcs):
