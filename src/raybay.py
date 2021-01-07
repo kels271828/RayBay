@@ -70,8 +70,8 @@ class RaybayResult:
 
     """
 
-    def __init__(self, patient, case, plan, funcs, norm, solver=None,
-                 goals=None):
+    def __init__(self, patient, case, plan, funcs, norm, goals=None,
+                 solver=None):
         """Initialise instance of RaybayResult.
 
         Parameters
@@ -86,11 +86,11 @@ class RaybayResult:
             Path to CSV with constituent function specifications.
         norm : (str, float, float)
             Region of interest, dose, and volume used for normalization.
-        solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
-            Name of scikit-optimize solver used.
         goals : str, optional
             Path to CSV with clinical goal specifications.
             If None, goals are assigned based on constituent functions.
+        solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
+            Name of scikit-optimize solver used.
 
         Returns
         -------
@@ -103,13 +103,13 @@ class RaybayResult:
         self.plan = plan
         self.funcs = get_funcs(funcs)
         self.norm = norm
-        self.solver = solver
         if isinstance(goals, str):
             self.goals = pd.read_csv(goals)
         else:
             self.goals = get_goals(self.funcs)
         self.goal_result = {ii: [] for ii in range(len(self.goals))}
         self.roi_list = set(self.goals['Roi'])
+        self.solver = solver
         self.time = None
         self.opt_result = None
         self.dvh_result = None

@@ -64,7 +64,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 
     # Initialize result object
     result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name, funcs,
-                                 norm, solver, goals)
+                                 norm, goals, solver)
 
     # Optimize
     def obj(pars):
