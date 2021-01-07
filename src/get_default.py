@@ -1,7 +1,7 @@
 """Get default and approved plans.
 
 Current workflow:
-    * In spyder preferneces, select
+    * In spyder preferences, select
         Default working directory: The current working directory
 
 """
@@ -9,15 +9,14 @@ import pickle
 import sys
 
 import connect
-
-repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\'
-sys.path.append(repo_path + 'src\\')
 import optimize
 import raybay
 
+repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\'
+sys.path.append(repo_path + 'src\\')
 
 # Setup
-patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
+patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 case_path = 'default\\'
 
 # Get RayStation objects
@@ -27,14 +26,9 @@ plan = connect.get_current('Plan')
 beam_set = connect.get_current('BeamSet')
 
 # Initialize result object
-result = raybay.RaybayResult(
-    patient.Name,
-    case.CaseName,
-    plan.Name,
-    patient_path + case_path + 'funcs.csv',
-    ('PTV', 4800, 95),
-    'N/A',
-    patient_path + 'goals.csv')
+result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name,
+                             patient_path + case_path + 'funcs.csv',
+                             ('PTV', 4800, 95), patient_path + 'goals.csv')
 
 # Add results
 if 'default' in case_path:
@@ -42,7 +36,7 @@ if 'default' in case_path:
     flag = optimize.calc_plan(plan, beam_set, result.norm)
 else:
     flag = 0
-result.opt_result = optimize.get_score(plan, result.goals, flag, 
+result.opt_result = optimize.get_score(plan, result.goals, result.norm, flag,
                                        result.goal_result)
 result.dvh_result = optimize.get_dvh(result.roi_list)
 
