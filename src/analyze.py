@@ -1,8 +1,9 @@
 """Visualize sampled treatment plan results.
 
 TODO:
-- rewrite functions based on new results format
-
+- add wrappers in raybay!
+- what other functions would be useful?
+- plot dvh (how many differnet plans/ROIS?)
 
 """
 import matplotlib.pyplot as plt
@@ -169,7 +170,7 @@ def format_data(specs, values, data_type):
     specs : pandas.DataFrame
         Either constituent function specifications or
         clinical goal specifications.
-    values : pandas.DataFrame
+    values : list or dict
         Either sampled constituent function parameters or
         clinical goal results.
     data_type : {'pars', 'goals'}
@@ -187,9 +188,9 @@ def format_data(specs, values, data_type):
         raise ValueError(f'Invalid data_type: {data_type}')
     data, labels = [], []
     if data_type == 'pars':
-        pars = get_tune_pars(specs)
-        for _, row in pars.iterrows():
-            data.append(values[values['Term'] == row['Term']][row['Par']])
+        pars = get_pars(specs)
+        for index, row in pars.iterrows():
+            data.append([value[index] for value in values])
             labels.append(row['Roi'] + ' ' + row['Par'])
     else:
         for index, row in specs.iterrows():
@@ -198,7 +199,7 @@ def format_data(specs, values, data_type):
     return data, labels
 
 
-def get_tune_pars(funcs):
+def get_pars(funcs):
     """Get tunable function parameters.
 
     The tunable function parameters are returned as a DataFrame with
@@ -220,33 +221,9 @@ def get_tune_pars(funcs):
     pars = []
     for idx, row in funcs.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
+            # Tunable parameters are read in as strings '[min, max]'
+            # when funcs loaded from CSV rather than RaybayResult.
             if isinstance(row[par], list) or \
                (isinstance(row[par], str) and '[' in row[par]):
                 pars.append({'Term': idx, 'Roi': row['Roi'], 'Par': par})
     return pd.DataFrame(data=pars, columns=['Term', 'Roi', 'Par'])
-
-
-def filter_flag(data, results, flag, keep=True):
-    """Filter data by flag.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Either sampled constituent function parameters
-        or clinical goal results.
-    results : pandas.DataFrame
-        Clinical goal results.
-    flag : {0, 1, 2}
-        0 = success, 1 = normalization failed, 2 = optimization failed
-    keep : bool, optional
-        If True, keep values with given flag.
-        If False, remove values with given flag.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Data filtered by flag.
-
-    """
-    samples = results[results['Flag'] == flag]['Sample'].values
-    return data[data['Sample'].isin(samples) == keep]
