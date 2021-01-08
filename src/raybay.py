@@ -20,6 +20,8 @@ import re
 import numpy as np
 import pandas as pd
 
+import analyze
+
 
 class RaybayResult:
     """RayStation treatment plan results.
@@ -71,7 +73,6 @@ class RaybayResult:
     http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html
 
     """
-
     def __init__(self, patient, case, plan, funcs, norm, goals=None,
                  solver=None):
         """Initialise instance of RaybayResult.
@@ -116,6 +117,82 @@ class RaybayResult:
         self.opt_result = None
         self.goal_dict = {ii: [] for ii in range(len(self.goal_df))}
         self.dvh_dict = {}
+
+    def boxplot(self, data_type='goals', title=None, ax=None):
+        """Visualize parameter and goal value ranges with a boxplot.
+
+        Parameters
+        ----------
+        data_type : {'goals', 'pars'}, optional
+            Type of boxplot to create.
+        title : str, optional
+            Figure title.
+        ax : matplotlib.axes.Axes, optional
+            Add the boxplot to the given axes.
+
+        Returns
+        -------
+        None.
+
+        """
+        if data_type == 'pars':
+            par_list = self.opt_result.x_iters
+            analyze.boxplot(self.func_df, par_list, 'pars', title, ax)
+        else:
+            analyze.boxplot(self.goal_df, self.goal_dict, 'goals', title, ax)
+
+    def corrplot(self, data_type='goals', title=None, size=500):
+        """Visualize goal and parameter correlations with a heatmap.
+
+        Modified from https://github.com/dylan-profiler/heatmaps.
+
+        If data_type is 'pars', plots goals on the vertical axis and
+        parameters on the horizontal axis. Otherwise plots goals on both
+        vertical and horizontal axes.
+
+        Parameters
+        ----------
+        data_type : {'goals', 'pars'}, optional
+            Type of corrplot to create.
+        title : str, optional
+            Figure title.
+        size : int, optional
+            Size scale for boxes.
+
+        Returns
+        -------
+        None.
+
+        """
+        if data_type == 'pars':
+            analyze.corrplot(self.goal_df, self.goal_dict, self.func_df,
+                             self.opt_result.x_iters, title=title, size=size)
+        else:
+            analyze.corrplot(self.goal_df, self.goal_dict, title=title,
+                             size=size)
+
+    def scatterplot(self, data_type='goals'):
+        """Visualize goal and parameter relationships wiht scatterplots.
+
+        If data_type is 'pars', plots goals on the vertical axis and
+        parameters on the horizontal axis. Otherwise plots goals on both
+        vertical and horizontal axes.
+
+        Parameters
+        ----------
+        data_type : {'goals', 'pars'}, optional
+            Type of scatterplot to create.
+
+        Returns
+        -------
+        None.
+
+        """
+        if data_type == 'pars':
+            analyze.scatterplot(self.goal_df, self.goal_dict, self.func_df,
+                                self.opt_result.x_iters)
+        else:
+            analyze.scatterplot(self.goal_df, self.goal_dict)
 
 
 def get_funcs(funcs):

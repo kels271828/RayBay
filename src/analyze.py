@@ -21,10 +21,9 @@ def boxplot(specs, values, data_type, title=None, ax=None):
     specs : pandas.DataFrame
         Either constituent function specifications or
         clinical goal specifications.
-    values : pandas.DataFrame
-        Either sampled constituent function parameters or
-        clinical goal results.
-    data_type : {'pars', 'goals'}
+    values : dict or list
+        Either clinical goal results or sampled function parameters.
+    data_type : {'goals', 'pars'}
         Type of boxplot to create.
     title: str, optional
         Figure title.
@@ -48,7 +47,8 @@ def boxplot(specs, values, data_type, title=None, ax=None):
     ax.set_title(title)
 
 
-def corrplot(goals, results, funcs=None, pars=None, title=None, size=500):
+def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
+             size=500):
     """Visualize goal and parameter correlations with a heatmap.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
@@ -59,13 +59,13 @@ def corrplot(goals, results, funcs=None, pars=None, title=None, size=500):
 
     Parameters
     ----------
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specifications.
-    results : pandas.DataFrame
+    goal_dict : dict
         Clinical goal results.
-    funcs : pandas.DataFrame, optional
+    func_df : pandas.DataFrame, optional
         Constituent function specifications.
-    pars : pandas.DataFrame, optional
+    par_list : list, optional
         Sampled constituent function parameters.
     title : str, optional
         Figure title.
@@ -78,11 +78,11 @@ def corrplot(goals, results, funcs=None, pars=None, title=None, size=500):
 
     """
     # Format data
-    ydata, ylabels = format_data(goals, results, 'goals')
-    if funcs is None:
+    ydata, ylabels = format_data(goal_df, goal_dict, 'goals')
+    if func_df is None:
         xdata, xlabels = ydata, ylabels
     else:
-        xdata, xlabels = format_data(funcs, pars, 'pars')
+        xdata, xlabels = format_data(func_df, par_list, 'pars')
     xdata, xlabels = xdata[::-1], xlabels[::-1]
 
     # Plot boxes
@@ -122,7 +122,7 @@ def corrplot(goals, results, funcs=None, pars=None, title=None, size=500):
     ax.yaxis.tick_right()
 
 
-def scatterplot(goals, results, funcs=None, pars=None):
+def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
     """Visualize goal and parameter relationships with scatterplots.
 
     If funcs and pars given, plots goals on the vertical axis and
@@ -131,13 +131,13 @@ def scatterplot(goals, results, funcs=None, pars=None):
 
     Parameters
     ----------
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specifications.
-    results : pandas.DataFrame
+    goal_dict : dict
         Clinical goal results.
-    funcs : pandas.DataFrame, optional
+    func_df : pandas.DataFrame, optional
         Constituent function specifications.
-    pars : pandas.DataFrame, optional
+    par_list : list, optional
         Sampled constituent function parameters.
 
     Returns
@@ -145,13 +145,13 @@ def scatterplot(goals, results, funcs=None, pars=None):
     None.
 
     """
-    ydata, ylabels = format_data(goals, results, 'goals')
-    if funcs is None:
+    ydata, ylabels = format_data(goal_df, goal_dict, 'goals')
+    if func_df is None:
         xdata, xlabels = ydata, ylabels
     else:
-        xdata, xlabels = format_data(funcs, pars, 'pars')
+        xdata, xlabels = format_data(func_df, par_list, 'pars')
     for ii in range(len(ydata)):
-        level = goals.iloc[ii]['AcceptanceLevel']
+        level = goal_df.iloc[ii]['AcceptanceLevel']
         fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
         for jj in range(len(xdata)):
             ax[jj].plot(xdata[jj], ydata[ii], '.')
@@ -170,10 +170,9 @@ def format_data(specs, values, data_type):
     specs : pandas.DataFrame
         Either constituent function specifications or
         clinical goal specifications.
-    values : list or dict
-        Either sampled constituent function parameters or
-        clinical goal results.
-    data_type : {'pars', 'goals'}
+    values : dict or list
+        Either clinical goal results or sampled function parameters.
+    data_type : {'goals', 'pars'}
         Type of data to format.
 
     Returns
@@ -184,22 +183,22 @@ def format_data(specs, values, data_type):
         Result labels.
 
     """
-    if data_type not in ('pars', 'goals'):
+    if data_type not in ('goals', 'pars'):
         raise ValueError(f'Invalid data_type: {data_type}')
     data, labels = [], []
-    if data_type == 'pars':
+    if data_type == 'goals':
+        for index, row in specs.iterrows():
+            data.append(values[index])
+            labels.append(row['Roi'] + ' ' + row['Type'])
+    else:
         pars = get_pars(specs)
         for index, row in pars.iterrows():
             data.append([value[index] for value in values])
             labels.append(row['Roi'] + ' ' + row['Par'])
-    else:
-        for index, row in specs.iterrows():
-            data.append(values[index])
-            labels.append(row['Roi'] + ' ' + row['Type'])
     return data, labels
 
 
-def get_pars(funcs):
+def get_pars(func_df):
     """Get tunable function parameters.
 
     The tunable function parameters are returned as a DataFrame with
@@ -209,7 +208,7 @@ def get_pars(funcs):
 
     Parameters
     ----------
-    funcs : pandas.DataFrame
+    func_df : pandas.DataFrame
         Constituent function specifications.
 
     Returns
@@ -219,7 +218,7 @@ def get_pars(funcs):
 
     """
     pars = []
-    for idx, row in funcs.iterrows():
+    for idx, row in func_df.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
             # Tunable parameters are read in as strings '[min, max]'
             # when funcs loaded from CSV rather than RaybayResult.
