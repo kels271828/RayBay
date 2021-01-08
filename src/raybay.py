@@ -11,9 +11,6 @@ Clinical goals are specified by columns Roi, Type, GoalCriteria,
 AcceptanceLevel, and ParameterValue. Valid types include MinDose,
 AverageDose, MaxDose, MinDose, MinDvh, and MaxDvh.
 
-TODO:
-* Add wrappers for plotting functions once module finished
-
 """
 import re
 
@@ -193,6 +190,25 @@ class RaybayResult:
                                 self.opt_result.x_iters)
         else:
             analyze.scatterplot(self.goal_df, self.goal_dict)
+
+    def dvhplot(self, roi_list=None):
+        """Plot dose-volume histogram of solution.
+
+        Parameters
+        ----------
+        roi_list : list of str, optional
+            Regions of interest to include in figure.
+            If None, all regions are included.
+
+        Returns
+        -------
+        None.
+
+        """
+        if roi_list is None:
+            analyze.dvhplot(self.dvh_dict, self.roi_list)
+        else:
+            analyze.dvhplot(self.dvh_dict, roi_list)
 
 
 def get_funcs(funcs):

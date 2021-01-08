@@ -162,6 +162,28 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
         ax[0].set_ylabel(ylabels[ii])
 
 
+def dvhplot(dvh_dict, roi_list):
+    """Plot dose-volume histogram of solution.
+
+    Parameters
+    ----------
+    dvh_dict : dict
+        Dose-volume histograms of solution.
+    roi_list : list of str
+        Regions of interest to include in figure.
+
+    Returns
+    -------
+    None.
+
+    """
+    for roi in roi_list:
+        plt.plot(dvh_dict['Dose'], dvh_dict[roi])
+    plt.xlabel('Dose (cGy)')
+    plt.ylabel('Volume (%)')
+    plt.legend(roi_list, bbox_to_anchor=(1, 1))
+
+
 def format_data(specs, values, data_type):
     """Format data and labels for boxplot and scatterplot.
 
