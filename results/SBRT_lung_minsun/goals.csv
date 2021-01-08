@@ -15,6 +15,7 @@ Pericardium,MaxDvh,AtMost,2800,3.23
 Pericardium,MaxDose,AtMost,3400,
 PTV,MinDvh,AtLeast,4800,95
 PTV,MinDvh,AtLeast,4320,99
+PTV,MaxDose,AtMost,6000,
 Rib,MaxDvh,AtMost,3200,0.27
 Rib,MaxDose,AtMost,4000,
 Skin,MaxDvh,AtMost,3320,0.27
