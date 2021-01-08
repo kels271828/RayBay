@@ -32,9 +32,9 @@ class RaybayResult:
         Case name.
     plan : str
         Plan name.
-    funcs : pandas.DataFrame
+    func_df : pandas.DataFrame
         Constituent function specifications.
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specificaions.
     roi_list : list of str
         Regions of interest included in clinical goals.
@@ -44,11 +44,13 @@ class RaybayResult:
         Name of scikit-optimize solver used.
     time : float
         Total time in seconds for treatment plan optimization.
+    flag_list : list
+        RayStation exit statuses.
     opt_result : scipy.optimize.OptimizeResult
         Optimization results.
-    goal_result : dict
+    goal_dict : dict
         Clinical goal results.
-    dvh_result : dict
+    dvh_dict : dict
         Dose-volume histograms of solution.
 
     Note: The optimization results returned as an OptimizeResult object.
@@ -101,21 +103,22 @@ class RaybayResult:
         self.patient = patient
         self.case = case
         self.plan = plan
-        self.funcs = get_funcs(funcs)
-        self.norm = norm
+        self.func_df = get_funcs(funcs)
         if isinstance(goals, str):
-            self.goals = pd.read_csv(goals)
+            self.goal_df = pd.read_csv(goals)
         else:
-            self.goals = get_goals(self.funcs)
-        self.goal_result = {ii: [] for ii in range(len(self.goals))}
-        self.roi_list = set(self.goals['Roi'])
+            self.goal_df = get_goals(self.funcs)
+        self.roi_list = set(self.goal_df['Roi'])
+        self.norm = norm
         self.solver = solver
-        self.time = None
+        self.time = 0.0
+        self.flag_list = []
         self.opt_result = None
-        self.dvh_result = None
+        self.goal_dict = {ii: [] for ii in range(len(self.goal_df))}
+        self.dvh_dict = {}
 
 
-def get_funcs(fpath):
+def get_funcs(funcs):
     """Load constituent functions from CSV file.
 
     Constituent function parameters should be specified by columns Roi,
@@ -128,7 +131,7 @@ def get_funcs(fpath):
 
     Parameters
     ----------
-    fpath : str
+    funcs : str
         Path to CSV with constituent function specifications.
 
     Returns
@@ -137,19 +140,19 @@ def get_funcs(fpath):
         Constituent function specifications.
 
     """
-    funcs = pd.read_csv(fpath).astype(object)
-    for index, row in funcs.iterrows():
+    funcs_df = pd.read_csv(funcs).astype(object)
+    for index, row in funcs_df.iterrows():
         for col in ['DoseLevel', 'PercentVolume', 'Weight']:
             # Tunable parameters are read in as strings '[min, max]',
             # so we need to convert them back to a list of floats.
             if isinstance(row[col], str):
                 pars = [float(par) for par
                         in re.findall(r'\d+\.\d+|\d+', row[col])]
-                funcs.loc[index, col] = pars if len(pars) > 1 else pars[0]
-    return funcs
+                funcs_df.loc[index, col] = pars if len(pars) > 1 else pars[0]
+    return funcs_df
 
 
-def get_goals(funcs):
+def get_goals(funcs_df):
     """Create clinical goals based on constituent functions.
 
     Clinical goals are specified by columns Roi, Type, GoalCriteria,
@@ -158,7 +161,7 @@ def get_goals(funcs):
 
     Parameters
     ----------
-    funcs : pandas.DataFrame
+    funcs_df : pandas.DataFrame
         Constituent function specifications.
 
     Returns
@@ -176,7 +179,7 @@ def get_goals(funcs):
         'ParameterValue': row['EudParameterA']
                           if 'Eud' in row['FunctionType'] else
                           get_bound(row['PercentVolume'], row['FunctionType'])
-    } for _, row in funcs.iterrows()]
+    } for _, row in funcs_df.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
