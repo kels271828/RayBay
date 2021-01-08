@@ -54,6 +54,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     Returns
     -------
     raybay.RaybayResult
+        RayStation treatment plan results.
 
     """
     # Get RayStation objects
@@ -68,41 +69,43 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 
     # Optimize
     def obj(pars):
-        return objective(plan, beam_set, result.funcs, result.goals, norm,
-                         result.goal_result, pars)
+        return objective(plan, beam_set, result, pars)
     start_time = time()
     if solver == 'forest_minimize':
-        results = skopt.forest_minimize(obj, dimensions=get_dims(result.funcs),
-                                        n_calls=n_calls,
-                                        n_initial_points=n_initial_points,
-                                        random_state=random_state,
-                                        verbose=verbose)
+        result.opt_result = skopt.forest_minimize(
+            obj,
+            dimensions=get_dims(result.func_df),
+            n_calls=n_calls,
+            n_initial_points=n_initial_points,
+            random_state=random_state,
+            verbose=verbose)
     elif solver == 'dummy_minimize':
-        results = skopt.dummy_minimize(obj, dimensions=get_dims(result.funcs),
-                                       n_calls=n_calls,
-                                       n_initial_points=n_initial_points,
-                                       random_state=random_state,
-                                       verbose=verbose)
+        result.opt_result = skopt.dummy_minimize(
+            obj,
+            dimensions=get_dims(result.func_df),
+            n_calls=n_calls,
+            random_state=random_state,
+            verbose=verbose)
     else:
-        results = skopt.gp_minimize(obj, dimensions=get_dims(result.funcs),
-                                    n_calls=n_calls,
-                                    n_initial_points=n_initial_points,
-                                    random_state=random_state, verbose=verbose)
-    results.time = time() - start_time
-
-    # remove local function to allow pickling
-    results.specs['args']['func'] = 'local'
-    result.opt_result = results
+        result.opt_result = skopt.gp_minimize(
+            obj,
+            dimensions=get_dims(result.func_df),
+            n_calls=n_calls,
+            n_initial_points=n_initial_points,
+            random_state=random_state,
+            verbose=verbose)
+    result.opt_result.specs['args']['func'] = 'local'  # remove local func
+    result.time = time() - start_time                  # to allow pickling
 
     # Get optimal dose-volume histogram
-    set_pars(plan, result.funcs, result.opt_result.x)
-    calc_plan(plan, beam_set, norm)
-    result.dvh_result = get_dvh(result.roi_list)
+    set_pars(plan, result.func_df, result.opt_result.x)
+    calc_plan(plan, beam_set, result.norm)
+    result.dvh_dict = get_dvh(result.roi_list)
 
     return result
 
 
-def objective(plan, beam_set, funcs, goals, norm, goal_result, pars):
+def objective(plan, beam_set, result, pars):
     """Objective function for hyperparameter optimization.
 
     Parameters
@@ -111,14 +114,8 @@ def objective(plan, beam_set, funcs, goals, norm, goal_result, pars):
         Current treatment plan.
     beam_set : connect.connect_cpython.PyScriptObject
         Current beam set.
-    funcs : pandas.DataFrame
-        Constituent function specifications.
-    goals : pandas.DataFrame
-        Clinical goal specifications.
-    norm : (str, float, float)
-        Region of interest, dose, and volume used for normalization.
-    goal_result : dict
-        Clinical goal results.
+    result : raybay.RaybayResult
+        RayStation treatment plan results.
     pars : list
         Constituent function parameters.
 
@@ -128,20 +125,21 @@ def objective(plan, beam_set, funcs, goals, norm, goal_result, pars):
         Treatment plan score.
 
     """
-    set_pars(plan, funcs, pars)
-    flag = calc_plan(plan, beam_set, norm)
+    set_pars(plan, result.func_df, pars)
+    flag = calc_plan(plan, beam_set, result.norm)
+    result.flag_list.append(flag)
     print(f'Flag: {flag}', flush=True)
-    return get_score(plan, goals, norm, flag, goal_result)
+    return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict)
 
 
-def set_pars(plan, funcs, pars):
+def set_pars(plan, func_df, pars):
     """Set objective function parameters.
 
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
-    funcs : pandas.DataFrame
+    func_df : pandas.DataFrame
         Constituent function specifications.
     pars : list
         Constituent function parameters.
@@ -153,7 +151,7 @@ def set_pars(plan, funcs, pars):
     """
     count = 0
     const_funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
-    for index, row in funcs.iterrows():
+    for index, row in func_df.iterrows():
         func = const_funcs[index].DoseFunctionParameters
         if isinstance(row['DoseLevel'], list):
             func.DoseLevel = pars[count]
@@ -204,15 +202,17 @@ def calc_plan(plan, beam_set, norm):
 
     # Normalize plan
     try:
-        beam_set.NormalizeToPrescription(RoiName=norm[0], DoseValue=norm[1],
-                                         DoseVolume=norm[2],
-                                         PrescriptionType='DoseAtVolume')
+        beam_set.NormalizeToPrescription(
+            RoiName=norm[0],
+            DoseValue=norm[1],
+            DoseVolume=norm[2],
+            PrescriptionType='DoseAtVolume')
         return 0
     except:
         return 1
 
 
-def get_score(plan, goals, norm, flag, goal_result):
+def get_score(plan, goal_df, norm, flag, goal_dict):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
@@ -223,13 +223,13 @@ def get_score(plan, goals, norm, flag, goal_result):
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specifications.
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
     flag : int
         RayStation exit status.
-    goal_result : dict
+    goal_dict : dict
         Clinical goal results.
 
     Returns
@@ -240,26 +240,26 @@ def get_score(plan, goals, norm, flag, goal_result):
     """
     if flag == 2:
         return 1e6
-    results = get_results(plan, goals)
-    scale = get_scale(goals, norm, results) if flag == 1 else 1.0
+    results = get_results(plan, goal_df)
+    scale = get_scale(goal_df, norm, results) if flag == 1 else 1.0
     score = 0
-    for index, row in goals.iterrows():
+    for index, row in goal_df.iterrows():
         level = row['AcceptanceLevel']
         value = scale*results[index]
-        goal_result[index].append(value)
+        goal_dict[index].append(value)
         sign = 1.0 if 'Most' in row['GoalCriteria'] else -1.0
         score += sign*(value - level)/level
     return score
 
 
-def get_results(plan, goals):
+def get_results(plan, goal_df):
     """Get clinical goal results.
 
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specifications.
 
     Returns
@@ -270,7 +270,7 @@ def get_results(plan, goals):
     """
     dose = plan.TreatmentCourse.TotalDose
     results = {}
-    for index, row in goals.iterrows():
+    for index, row in goal_df.iterrows():
         results[index] = get_value(dose, row)
     return results
 
@@ -306,17 +306,17 @@ def get_value(dose, goal):
         return np.nan
 
 
-def get_scale(goals, norm, results):
+def get_scale(goal_df, norm, results):
     """Get normalization scale factor.
 
     Parameters
     ----------
-    goals : pandas.DataFrame
+    goal_df : pandas.DataFrame
         Clinical goal specifications.
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
     results : dict
-        Clinical goal results.
+        Clinical goal results for current iteration.
 
     Returns
     -------
@@ -324,18 +324,18 @@ def get_scale(goals, norm, results):
         Normalization scale factor.
 
     """
-    index = goals.index[(goals['Roi'] == norm[0]) &
-                        (goals['AcceptanceLevel'] == norm[1]) &
-                        (goals['ParameterValue'] == norm[2])].tolist()[0]
+    index = goal_df.index[(goal_df['Roi'] == norm[0]) &
+                          (goal_df['AcceptanceLevel'] == norm[1]) &
+                          (goal_df['ParameterValue'] == norm[2])].tolist()[0]
     return norm[1]/results[index]
 
 
-def get_dims(funcs):
+def get_dims(func_df):
     """Get constituent function parameter dimensions.
 
     Parameters
     ----------
-    funcs : pandas.DataFrame
+    func_df : pandas.DataFrame
         Constituent function specifications.
 
     Returns
@@ -345,7 +345,7 @@ def get_dims(funcs):
 
     """
     dimensions = []
-    for _, row in funcs.iterrows():
+    for _, row in func_df.iterrows():
         for par in ['DoseLevel', 'PercentVolume', 'Weight']:
             if isinstance(row[par], list):
                 dimensions.append(row[par])

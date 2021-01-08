@@ -22,7 +22,7 @@ import pandas as pd
 
 
 class RaybayResult:
-    """Optimized RayStation treatment plan results.
+    """RayStation treatment plan results.
 
     Attributes
     ----------
@@ -97,7 +97,7 @@ class RaybayResult:
         Returns
         -------
         RaybayResult
-            RaybayResult object with plan information.
+            RayStation treatment plan results.
 
         """
         self.patient = patient
@@ -140,19 +140,19 @@ def get_funcs(funcs):
         Constituent function specifications.
 
     """
-    funcs_df = pd.read_csv(funcs).astype(object)
-    for index, row in funcs_df.iterrows():
+    func_df = pd.read_csv(funcs).astype(object)
+    for index, row in func_df.iterrows():
         for col in ['DoseLevel', 'PercentVolume', 'Weight']:
             # Tunable parameters are read in as strings '[min, max]',
             # so we need to convert them back to a list of floats.
             if isinstance(row[col], str):
                 pars = [float(par) for par
                         in re.findall(r'\d+\.\d+|\d+', row[col])]
-                funcs_df.loc[index, col] = pars if len(pars) > 1 else pars[0]
-    return funcs_df
+                func_df.loc[index, col] = pars if len(pars) > 1 else pars[0]
+    return func_df
 
 
-def get_goals(funcs_df):
+def get_goals(func_df):
     """Create clinical goals based on constituent functions.
 
     Clinical goals are specified by columns Roi, Type, GoalCriteria,
@@ -161,7 +161,7 @@ def get_goals(funcs_df):
 
     Parameters
     ----------
-    funcs_df : pandas.DataFrame
+    func_df : pandas.DataFrame
         Constituent function specifications.
 
     Returns
@@ -179,7 +179,7 @@ def get_goals(funcs_df):
         'ParameterValue': row['EudParameterA']
                           if 'Eud' in row['FunctionType'] else
                           get_bound(row['PercentVolume'], row['FunctionType'])
-    } for _, row in funcs_df.iterrows()]
+    } for _, row in func_df.iterrows()]
     columns = ['Roi', 'Type', 'GoalCriteria', 'AcceptanceLevel',
                'ParameterValue']
     return pd.DataFrame(data=data, columns=columns)
