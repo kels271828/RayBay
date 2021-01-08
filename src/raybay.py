@@ -11,6 +11,8 @@ Clinical goals are specified by columns Roi, Type, GoalCriteria,
 AcceptanceLevel, and ParameterValue. Valid types include MinDose,
 AverageDose, MaxDose, MinDose, MinDvh, and MaxDvh.
 
+TODO: Add ways to compare results between plans (e.g., dvh plots, bars)
+
 """
 import re
 
