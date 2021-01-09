@@ -1,9 +1,10 @@
 """Visualize sampled treatment plan results.
 
 TODO:
-- add wrappers in raybay!
-- what other functions would be useful?
-- plot dvh (how many differnet plans/ROIS?)
+- plot dvh
+- compare dvh
+- print result percent change
+- compare result percent change
 
 """
 import matplotlib.pyplot as plt
@@ -43,7 +44,7 @@ def boxplot(specs, values, data_type, title=None, ax=None):
     if data_type == 'pars':
         ax.set_ylabel('Parameter Values')
     else:
-        ax.set_ylabel('Goal Vaues')
+        ax.set_ylabel('Goal Values')
     ax.set_title(title)
 
 
