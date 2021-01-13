@@ -48,5 +48,5 @@ for index, row in result.goal_df.iterrows():
 result.dvh_dict = optimize.get_dvh(result.roi_list)
 
 # Save results
-with open(patient_path + case_path + 'result.pkl', 'wb') as fp:
+with open(patient_path + case_path + 'res.pkl', 'wb') as fp:
     pickle.dump(result, fp)
