@@ -122,6 +122,27 @@ class RaybayResult:
         self.goal_dict = {ii: [] for ii in range(len(self.goal_df))}
         self.dvh_dict = {}
 
+    def get_utility(self, util_type=None):
+        """Get treatment plan utility.
+
+        Parameters
+        ----------
+        goal_df : pandas.DataFrame
+            Clinical goal specifications.
+        goal_dict : dict
+            Clinical goal values.
+        util_type : {'linear', 'linear_quadratic'}, optional
+            Shape of treatment plan utility.
+
+        Returns
+        -------
+        np.ndarray
+            Vector of treatment plan utility values.
+
+        """
+        util_type = self.utility if util_type is None else util_type
+        return utility(self.goal_df, self.goal_dict, util_type)
+
     def boxplot(self, data_type='goals', title=None, ax=None):
         """Visualize parameter and goal value ranges with a boxplot.
 
@@ -212,10 +233,8 @@ class RaybayResult:
         None.
 
         """
-        if roi_list is None:
-            analyze.dvhplot(self.dvh_dict, self.roi_list)
-        else:
-            analyze.dvhplot(self.dvh_dict, roi_list)
+        roi_list = self.roi_list if roi_list is None else roi_list
+        analyze.dvhplot(self.dvh_dict, roi_list)
 
 
 def get_funcs(funcs):
@@ -304,7 +323,33 @@ def get_bound(par, func_type):
     return np.max(par) if 'Max' in func_type else np.min(par)
 
 
-def utility(value, level, goal_type, util_type):
+def utility(goal_df, goal_dict, util_type):
+    """Get treatment plan utility values.
+
+    Parameters
+    ----------
+    goal_df : pandas.DataFrame
+        Clinical goal specifications.
+    goal_dict : dict
+        Clinical goal values.
+    util_type : {'linear', 'linear_quadratic'}
+        Shape of treatment plan utility.
+
+    Returns
+    -------
+    np.ndarray
+        Vector of treatment plan utility values.
+    """
+    util_vec = np.zeros(len(goal_dict[0]))
+    for ii in range(len(util_vec)):
+        for index, row in goal_df.iterrows():
+            util_vec[ii] += get_term(goal_df[index][ii],
+                                     row['AcceptanceLevel'], row['Type'],
+                                     util_type)
+    return util_vec
+
+
+def get_term(value, level, goal_type, util_type):
     """Get treatment plan utility term value.
 
     Parameters

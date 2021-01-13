@@ -250,10 +250,10 @@ def get_score(plan, goal_df, norm, flag, goal_dict, util_type):
     scale = get_scale(goal_df, norm, results) if flag == 1 else 1.0
     score = 0
     for index, row in goal_df.iterrows():
-        level = row['AcceptanceLevel']
         value = scale*results[index]
         goal_dict[index].append(value)
-        score += -raybay.utility(value, level, row['Type'], util_type)
+        score += -raybay.get_term(value, row['AcceptanceLevel'], row['Type'],
+                                  util_type)
     return score
 
 
