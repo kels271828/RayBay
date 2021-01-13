@@ -10,6 +10,7 @@ Lung_Total-GTV,MaxDvh,AtMost,2000,10
 Lung_Total-GTV,MaxDvh,AtMost,1160,85.52
 PTV,MinDvh,AtLeast,4800,95
 PTV,MinDvh,AtLeast,4320,99
+PTV,MaxDose,AtMost,6000,
 Ribs,MaxDvh,AtMost,3200,1.15
 Ribs,MaxDose,AtMost,4000,
 Skin,MaxDvh,AtMost,3320,0.54

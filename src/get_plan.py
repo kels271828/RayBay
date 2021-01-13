@@ -1,23 +1,28 @@
-"""Get default and approved plans.
+"""Get approved and default plans.
 
-In spyder preferences, select default working directory = the current
-working directory.
+In Spyder preferences, set current working directory to default working
+directory.
 
 """
 import pickle
 import sys
 
 import connect
-import optimize
-import raybay
 
 repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\'
 sys.path.append(repo_path + 'src\\')
+import optimize
+import raybay
 
-# Setup (CHECK RAYSTATION PATIENT AND PLAN!)
+# Patient
 patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
-# case_path = 'approved\\'
-case_path = 'default\\'
+#patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
+#patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
+#patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
+
+# Case
+case_path = 'approved\\'
+#case_path = 'default\\'
 
 # Get RayStation objects
 patient = connect.get_current('Patient')
@@ -37,8 +42,9 @@ if 'default' in case_path:
 else:
     flag = 0
 result.flag_list.append(flag)
-result.opt_result = optimize.get_score(plan, result.goal_df, result.norm, flag,
-                                       result.goal_dict)
+goal_results = optimize.get_results(plan, result.goal_df)
+for index, row in result.goal_df.iterrows():
+    result.goal_dict[index].append(goal_results[index])
 result.dvh_dict = optimize.get_dvh(result.roi_list)
 
 # Save results
