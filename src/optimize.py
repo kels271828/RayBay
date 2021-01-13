@@ -4,6 +4,7 @@ TODO:
 * Add 1D grid_search function
 
 """
+import pickle
 import re
 from time import time
 
@@ -72,7 +73,7 @@ def get_plan(funcs, norm, goals=None, utility='linear',
 
     # Optimize
     def obj(pars):
-        return objective(plan, beam_set, result, pars)
+        return objective(plan, beam_set, result, funcs[:-9], pars)
     checkpoint_path = funcs[:-9] + 'checkpoint.pkl'
     checkpoint_saver = skopt.callbacks.CheckpointSaver(checkpoint_path,
                                                        store_objective=False)
@@ -114,7 +115,7 @@ def get_plan(funcs, norm, goals=None, utility='linear',
     return result
 
 
-def objective(plan, beam_set, result, pars):
+def objective(plan, beam_set, result, repo_path, pars):
     """Objective function for hyperparameter optimization.
 
     Parameters
@@ -125,6 +126,8 @@ def objective(plan, beam_set, result, pars):
         Current beam set.
     result : raybay.RaybayResult
         RayStation treatment plan results.
+    repo_path : str
+        Path to save goal checkpoints.
     pars : list
         Constituent function parameters.
 
@@ -139,7 +142,7 @@ def objective(plan, beam_set, result, pars):
     result.flag_list.append(flag)
     print(f'Flag: {flag}', flush=True)
     return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict,
-                     result.utility)
+                     result.utility, repo_path)
 
 
 def set_pars(plan, func_df, pars):
@@ -222,12 +225,12 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goal_df, norm, flag, goal_dict, util_type):
+def get_score(plan, goal_df, norm, flag, goal_dict, util_type, repo_path):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
     difference between goal values and goal results. Returns 1e6 if
-    RayStation optimization or normalization failed.
+    RayStation optimization failed.
 
     Parameters
     ----------
@@ -243,6 +246,8 @@ def get_score(plan, goal_df, norm, flag, goal_dict, util_type):
         Clinical goal results.
     util_type : {'linear', 'linear_quadratic'}
         Shape of treatment plan utility function.
+    repo_path : str
+        Path to save goal checkpoints
 
     Returns
     -------
@@ -260,6 +265,8 @@ def get_score(plan, goal_df, norm, flag, goal_dict, util_type):
         goal_dict[index].append(value)
         score += -raybay.get_term(value, row['AcceptanceLevel'], row['Type'],
                                   util_type)
+    with open(repo_path + 'goal_dict.pkl', 'wb') as fp:
+        pickle.dump(goal_dict, fp)
     return score
 
 
