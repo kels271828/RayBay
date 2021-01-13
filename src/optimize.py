@@ -73,6 +73,9 @@ def get_plan(funcs, norm, goals=None, utility='linear',
     # Optimize
     def obj(pars):
         return objective(plan, beam_set, result, pars)
+    checkpoint_path = funcs[:-9] + 'checkpoint.pkl'
+    checkpoint_saver = skopt.callbacks.CheckpointSaver(checkpoint_path,
+                                                       store_objective=False)
     start_time = time()
     if solver == 'forest_minimize':
         result.opt_result = skopt.forest_minimize(
@@ -81,14 +84,16 @@ def get_plan(funcs, norm, goals=None, utility='linear',
             n_calls=n_calls,
             n_initial_points=n_initial_points,
             random_state=random_state,
-            verbose=verbose)
+            verbose=verbose,
+            callback=[checkpoint_saver])
     elif solver == 'dummy_minimize':
         result.opt_result = skopt.dummy_minimize(
             obj,
             dimensions=get_dims(result.func_df),
             n_calls=n_calls,
             random_state=random_state,
-            verbose=verbose)
+            verbose=verbose,
+            callback=[checkpoint_saver])
     else:
         result.opt_result = skopt.gp_minimize(
             obj,
@@ -96,7 +101,8 @@ def get_plan(funcs, norm, goals=None, utility='linear',
             n_calls=n_calls,
             n_initial_points=n_initial_points,
             random_state=random_state,
-            verbose=verbose)
+            verbose=verbose,
+            callback=[checkpoint_saver])
     result.opt_result.specs['args']['func'] = utility  # remove local func
     result.time = time() - start_time                  # to allow pickling
 
