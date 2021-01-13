@@ -41,6 +41,8 @@ class RaybayResult:
         Regions of interest included in clinical goals.
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
+    utility : {'linear', 'linear_quadratic'}
+        Shape of treatment plan utility function.
     solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
         Name of scikit-optimize solver used.
     time : float
@@ -73,7 +75,7 @@ class RaybayResult:
 
     """
     def __init__(self, patient, case, plan, funcs, norm, goals=None,
-                 solver=None):
+                 utility=None, solver=None):
         """Initialise instance of RaybayResult.
 
         Parameters
@@ -91,7 +93,9 @@ class RaybayResult:
         goals : str, optional
             Path to CSV with clinical goal specifications.
             If None, goals are assigned based on constituent functions.
-        solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
+        utility : {'linear', 'linear_quadratic'}, optional
+            Shape of treatment plan utility function.
+        solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}, optional
             Name of scikit-optimize solver used.
 
         Returns
@@ -110,6 +114,7 @@ class RaybayResult:
             self.goal_df = get_goals(self.funcs)
         self.roi_list = set(self.goal_df['Roi'])
         self.norm = norm
+        self.utility = utility
         self.solver = solver
         self.time = 0.0
         self.flag_list = []
@@ -297,3 +302,33 @@ def get_bound(par, func_type):
 
     """
     return np.max(par) if 'Max' in func_type else np.min(par)
+
+
+def utility(value, level, goal_type, util_type):
+    """Get treatment plan utility term value.
+
+    Parameters
+    ----------
+    value : float
+        Clinical goal value.
+    level : float
+        Clinical goal AcceptanceLevel.
+    goal_type : str
+        Clinical goal type (e.g., 'MaxDose')
+    util_type : {'linear', 'linear_quadratic'}
+        Shape of treatment plan utility term.
+
+    Returns
+    -------
+    float
+        Treatment plan utility term value.
+
+    """
+    diff = 100*(value - level)/level
+    if util_type == 'linear_quadratic':
+        if 'Max' in goal_type:
+            return -diff if value <= level else -(diff + 1)*diff
+        else:
+            return diff if value >= level else -(diff - 1)*diff
+    else:
+        return -diff if 'Max' in goal_type else diff

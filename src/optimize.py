@@ -14,8 +14,9 @@ import connect
 import raybay
 
 
-def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
-             random_state=None, n_initial_points=10, verbose=True):
+def get_plan(funcs, norm, goals=None, utility='linear',
+             solver='gp_minimize', n_calls=25, random_state=None,
+             n_initial_points=10, verbose=True):
     """Hyperparameter optimization for RayStation treatment planning.
 
     Hyperparameter optimization for RayStation treatment planning using
@@ -39,7 +40,9 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     goals : pandas.DataFrame or str, optional
         Path to CSV with clinical goal specifications.
         If None, goals are assigned based on constituent functions.
-    solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
+    utility : {'linear', 'linear_quadratic'}, optional
+        Shape of treatment plan utility function.
+    solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}, optional
         Name of scikit-optimize solver to use.
     n_calls : int, optional
         Number of calls to objective.
@@ -65,7 +68,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 
     # Initialize result object
     result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name, funcs,
-                                 norm, goals, solver)
+                                 norm, goals, utility, solver)
 
     # Optimize
     def obj(pars):
@@ -94,7 +97,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
             n_initial_points=n_initial_points,
             random_state=random_state,
             verbose=verbose)
-    result.opt_result.specs['args']['func'] = 'local'  # remove local func
+    result.opt_result.specs['args']['func'] = utility  # remove local func
     result.time = time() - start_time                  # to allow pickling
 
     # Get optimal dose-volume histogram
@@ -129,7 +132,8 @@ def objective(plan, beam_set, result, pars):
     flag = calc_plan(plan, beam_set, result.norm)
     result.flag_list.append(flag)
     print(f'Flag: {flag}', flush=True)
-    return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict)
+    return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict,
+                     result.utility)
 
 
 def set_pars(plan, func_df, pars):
@@ -212,7 +216,7 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goal_df, norm, flag, goal_dict):
+def get_score(plan, goal_df, norm, flag, goal_dict, util_type):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
@@ -231,6 +235,8 @@ def get_score(plan, goal_df, norm, flag, goal_dict):
         RayStation exit status.
     goal_dict : dict
         Clinical goal results.
+    util_type : {'linear', 'linear_quadratic'}
+        Shape of treatment plan utility function.
 
     Returns
     -------
@@ -247,8 +253,7 @@ def get_score(plan, goal_df, norm, flag, goal_dict):
         level = row['AcceptanceLevel']
         value = scale*results[index]
         goal_dict[index].append(value)
-        sign = 1.0 if 'Most' in row['GoalCriteria'] else -1.0
-        score += sign*(value - level)/level
+        score += -raybay.utility(value, level, row['Type'], util_type)
     return score
 
 
