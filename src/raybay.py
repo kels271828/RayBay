@@ -343,7 +343,7 @@ def utility(goal_df, goal_dict, util_type):
     util_vec = np.zeros(len(goal_dict[0]))
     for ii in range(len(util_vec)):
         for index, row in goal_df.iterrows():
-            util_vec[ii] += get_term(goal_df[index][ii],
+            util_vec[ii] += get_term(goal_dict[index][ii],
                                      row['AcceptanceLevel'], row['Type'],
                                      util_type)
     return util_vec
@@ -369,11 +369,13 @@ def get_term(value, level, goal_type, util_type):
         Treatment plan utility term value.
 
     """
+    if util_type not in ('linear', 'linear_quadratic'):
+        raise ValueError(f'Invalid util_type: {util_type}')
     diff = 100*(value - level)/level
-    if util_type == 'linear_quadratic':
+    if util_type == 'linear':
+        return -diff if 'Max' in goal_type else diff
+    else:
         if 'Max' in goal_type:
             return -diff if value <= level else -(diff + 1)*diff
         else:
             return diff if value >= level else -(diff - 1)*diff
-    else:
-        return -diff if 'Max' in goal_type else diff

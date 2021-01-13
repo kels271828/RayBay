@@ -212,7 +212,7 @@ def format_data(specs, values, data_type):
     if data_type == 'goals':
         for index, row in specs.iterrows():
             data.append(values[index])
-            labels.append(row['Roi'] + ' ' + row['Type'])
+            labels.append(f"{index} {row['Roi']} {row['Type']}")
     else:
         pars = get_pars(specs)
         for index, row in pars.iterrows():
