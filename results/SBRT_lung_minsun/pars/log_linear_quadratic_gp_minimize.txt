@@ -1,0 +1,600 @@
+Iteration No: 1 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 1 ended. Evaluation done at random point.
+Time taken: 160.0385
+Function value obtained: -1039.3388
+Current minimum: -1039.3388
+Iteration No: 2 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 2 ended. Evaluation done at random point.
+Time taken: 106.9936
+Function value obtained: -232.5235
+Current minimum: -1039.3388
+Iteration No: 3 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 3 ended. Evaluation done at random point.
+Time taken: 144.6732
+Function value obtained: -732.3591
+Current minimum: -1039.3388
+Iteration No: 4 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 4 ended. Evaluation done at random point.
+Time taken: 140.6889
+Function value obtained: -143.5622
+Current minimum: -1039.3388
+Iteration No: 5 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 5 ended. Evaluation done at random point.
+Time taken: 162.4419
+Function value obtained: 9367.3488
+Current minimum: -1039.3388
+Iteration No: 6 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 6 ended. Evaluation done at random point.
+Time taken: 131.5756
+Function value obtained: -574.8122
+Current minimum: -1039.3388
+Iteration No: 7 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 7 ended. Evaluation done at random point.
+Time taken: 145.1209
+Function value obtained: -1038.9198
+Current minimum: -1039.3388
+Iteration No: 8 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 8 ended. Evaluation done at random point.
+Time taken: 107.8258
+Function value obtained: -1173.5198
+Current minimum: -1173.5198
+Iteration No: 9 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 9 ended. Evaluation done at random point.
+Time taken: 158.5217
+Function value obtained: -1002.7733
+Current minimum: -1173.5198
+Iteration No: 10 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 10 ended. Evaluation done at random point.
+Time taken: 146.1408
+Function value obtained: -946.1047
+Current minimum: -1173.5198
+Iteration No: 11 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 11 ended. Search finished for the next optimal point.
+Time taken: 96.7182
+Function value obtained: -368.7798
+Current minimum: -1173.5198
+Iteration No: 12 started. Searching for the next optimal point.
+Flag: 1
+Iteration No: 12 ended. Search finished for the next optimal point.
+Time taken: 170.0891
+Function value obtained: 23308.7725
+Current minimum: -1173.5198
+Iteration No: 13 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 13 ended. Search finished for the next optimal point.
+Time taken: 134.9672
+Function value obtained: -892.2785
+Current minimum: -1173.5198
+Iteration No: 14 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 14 ended. Search finished for the next optimal point.
+Time taken: 103.9411
+Function value obtained: -1015.1431
+Current minimum: -1173.5198
+Iteration No: 15 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 15 ended. Search finished for the next optimal point.
+Time taken: 134.6887
+Function value obtained: -1179.9759
+Current minimum: -1179.9759
+Iteration No: 16 started. Searching for the next optimal point.
+Flag: 1
+Iteration No: 16 ended. Search finished for the next optimal point.
+Time taken: 157.7353
+Function value obtained: 19726.2441
+Current minimum: -1179.9759
+Iteration No: 17 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 17 ended. Search finished for the next optimal point.
+Time taken: 145.8395
+Function value obtained: -999.3937
+Current minimum: -1179.9759
+Iteration No: 18 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 18 ended. Search finished for the next optimal point.
+Time taken: 143.1697
+Function value obtained: -440.2025
+Current minimum: -1179.9759
+Iteration No: 19 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 19 ended. Search finished for the next optimal point.
+Time taken: 147.8564
+Function value obtained: -1040.2577
+Current minimum: -1179.9759
+Iteration No: 20 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 20 ended. Search finished for the next optimal point.
+Time taken: 117.0973
+Function value obtained: -1212.5147
+Current minimum: -1212.5147
+Iteration No: 21 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 21 ended. Search finished for the next optimal point.
+Time taken: 136.2833
+Function value obtained: -1187.4308
+Current minimum: -1212.5147
+Iteration No: 22 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 22 ended. Search finished for the next optimal point.
+Time taken: 146.3926
+Function value obtained: -1041.8019
+Current minimum: -1212.5147
+Iteration No: 23 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 23 ended. Search finished for the next optimal point.
+Time taken: 137.3449
+Function value obtained: -41.7590
+Current minimum: -1212.5147
+Iteration No: 24 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 24 ended. Search finished for the next optimal point.
+Time taken: 153.9177
+Function value obtained: 3411.7944
+Current minimum: -1212.5147
+Iteration No: 25 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 25 ended. Search finished for the next optimal point.
+Time taken: 103.4390
+Function value obtained: -1055.3778
+Current minimum: -1212.5147
+Iteration No: 26 started. Searching for the next optimal point.
+Flag: 1
+Iteration No: 26 ended. Search finished for the next optimal point.
+Time taken: 158.1353
+Function value obtained: 19726.2493
+Current minimum: -1212.5147
+Iteration No: 27 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 27 ended. Search finished for the next optimal point.
+Time taken: 109.2728
+Function value obtained: -1005.8632
+Current minimum: -1212.5147
+Iteration No: 28 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 28 ended. Search finished for the next optimal point.
+Time taken: 107.1263
+Function value obtained: -1128.8814
+Current minimum: -1212.5147
+Iteration No: 29 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 29 ended. Search finished for the next optimal point.
+Time taken: 109.4402
+Function value obtained: -1156.1729
+Current minimum: -1212.5147
+Iteration No: 30 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 30 ended. Search finished for the next optimal point.
+Time taken: 154.8408
+Function value obtained: 67.4607
+Current minimum: -1212.5147
+Iteration No: 31 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 31 ended. Search finished for the next optimal point.
+Time taken: 148.9946
+Function value obtained: -996.9886
+Current minimum: -1212.5147
+Iteration No: 32 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 32 ended. Search finished for the next optimal point.
+Time taken: 104.4919
+Function value obtained: -990.6829
+Current minimum: -1212.5147
+Iteration No: 33 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 33 ended. Search finished for the next optimal point.
+Time taken: 136.0329
+Function value obtained: -767.0609
+Current minimum: -1212.5147
+Iteration No: 34 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 34 ended. Search finished for the next optimal point.
+Time taken: 110.5073
+Function value obtained: -1168.1206
+Current minimum: -1212.5147
+Iteration No: 35 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 35 ended. Search finished for the next optimal point.
+Time taken: 108.7409
+Function value obtained: -704.0851
+Current minimum: -1212.5147
+Iteration No: 36 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 36 ended. Search finished for the next optimal point.
+Time taken: 111.4092
+Function value obtained: -1169.0644
+Current minimum: -1212.5147
+Iteration No: 37 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 37 ended. Search finished for the next optimal point.
+Time taken: 146.3968
+Function value obtained: -983.7969
+Current minimum: -1212.5147
+Iteration No: 38 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 38 ended. Search finished for the next optimal point.
+Time taken: 142.6124
+Function value obtained: -710.8061
+Current minimum: -1212.5147
+Iteration No: 39 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 39 ended. Search finished for the next optimal point.
+Time taken: 155.6087
+Function value obtained: -899.5673
+Current minimum: -1212.5147
+Iteration No: 40 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 40 ended. Search finished for the next optimal point.
+Time taken: 134.6887
+Function value obtained: -1127.2843
+Current minimum: -1212.5147
+Iteration No: 41 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 41 ended. Search finished for the next optimal point.
+Time taken: 138.1535
+Function value obtained: -901.1573
+Current minimum: -1212.5147
+Iteration No: 42 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 42 ended. Search finished for the next optimal point.
+Time taken: 123.5857
+Function value obtained: -1216.2399
+Current minimum: -1216.2399
+Iteration No: 43 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 43 ended. Search finished for the next optimal point.
+Time taken: 121.0417
+Function value obtained: -1213.2874
+Current minimum: -1216.2399
+Iteration No: 44 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 44 ended. Search finished for the next optimal point.
+Time taken: 114.5349
+Function value obtained: -1148.7927
+Current minimum: -1216.2399
+Iteration No: 45 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 45 ended. Search finished for the next optimal point.
+Time taken: 127.4071
+Function value obtained: -1225.9881
+Current minimum: -1225.9881
+Iteration No: 46 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 46 ended. Search finished for the next optimal point.
+Time taken: 129.2717
+Function value obtained: -1215.4576
+Current minimum: -1225.9881
+Iteration No: 47 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 47 ended. Search finished for the next optimal point.
+Time taken: 114.6489
+Function value obtained: -1175.6966
+Current minimum: -1225.9881
+Iteration No: 48 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 48 ended. Search finished for the next optimal point.
+Time taken: 103.1928
+Function value obtained: -319.3061
+Current minimum: -1225.9881
+Iteration No: 49 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 49 ended. Search finished for the next optimal point.
+Time taken: 164.3301
+Function value obtained: 1857.8165
+Current minimum: -1225.9881
+Iteration No: 50 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 50 ended. Search finished for the next optimal point.
+Time taken: 117.1570
+Function value obtained: -1149.1400
+Current minimum: -1225.9881
+Iteration No: 51 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 51 ended. Search finished for the next optimal point.
+Time taken: 146.8721
+Function value obtained: -1039.4577
+Current minimum: -1225.9881
+Iteration No: 52 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 52 ended. Search finished for the next optimal point.
+Time taken: 115.2639
+Function value obtained: -1165.4959
+Current minimum: -1225.9881
+Iteration No: 53 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 53 ended. Search finished for the next optimal point.
+Time taken: 107.9741
+Function value obtained: -372.6189
+Current minimum: -1225.9881
+Iteration No: 54 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 54 ended. Search finished for the next optimal point.
+Time taken: 126.0269
+Function value obtained: -1240.1715
+Current minimum: -1240.1715
+Iteration No: 55 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 55 ended. Search finished for the next optimal point.
+Time taken: 123.6086
+Function value obtained: -1238.9332
+Current minimum: -1240.1715
+Iteration No: 56 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 56 ended. Search finished for the next optimal point.
+Time taken: 124.3725
+Function value obtained: -1238.4339
+Current minimum: -1240.1715
+Iteration No: 57 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 57 ended. Search finished for the next optimal point.
+Time taken: 124.9561
+Function value obtained: -1244.1740
+Current minimum: -1244.1740
+Iteration No: 58 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 58 ended. Search finished for the next optimal point.
+Time taken: 125.0797
+Function value obtained: -1245.6848
+Current minimum: -1245.6848
+Iteration No: 59 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 59 ended. Search finished for the next optimal point.
+Time taken: 123.0253
+Function value obtained: -1238.5312
+Current minimum: -1245.6848
+Iteration No: 60 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 60 ended. Search finished for the next optimal point.
+Time taken: 128.0896
+Function value obtained: -1246.6560
+Current minimum: -1246.6560
+Iteration No: 61 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 61 ended. Search finished for the next optimal point.
+Time taken: 135.0950
+Function value obtained: -1245.3505
+Current minimum: -1246.6560
+Iteration No: 62 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 62 ended. Search finished for the next optimal point.
+Time taken: 125.8107
+Function value obtained: -1243.9928
+Current minimum: -1246.6560
+Iteration No: 63 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 63 ended. Search finished for the next optimal point.
+Time taken: 128.6148
+Function value obtained: -1247.1125
+Current minimum: -1247.1125
+Iteration No: 64 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 64 ended. Search finished for the next optimal point.
+Time taken: 180.7183
+Function value obtained: -1238.0456
+Current minimum: -1247.1125
+Iteration No: 65 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 65 ended. Search finished for the next optimal point.
+Time taken: 130.4575
+Function value obtained: -1240.9523
+Current minimum: -1247.1125
+Iteration No: 66 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 66 ended. Search finished for the next optimal point.
+Time taken: 133.3339
+Function value obtained: -1244.8478
+Current minimum: -1247.1125
+Iteration No: 67 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 67 ended. Search finished for the next optimal point.
+Time taken: 130.5478
+Function value obtained: -1244.8645
+Current minimum: -1247.1125
+Iteration No: 68 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 68 ended. Search finished for the next optimal point.
+Time taken: 129.4246
+Function value obtained: -1243.3668
+Current minimum: -1247.1125
+Iteration No: 69 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 69 ended. Search finished for the next optimal point.
+Time taken: 142.9102
+Function value obtained: -1079.0808
+Current minimum: -1247.1125
+Iteration No: 70 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 70 ended. Search finished for the next optimal point.
+Time taken: 130.5693
+Function value obtained: -1243.8278
+Current minimum: -1247.1125
+Iteration No: 71 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 71 ended. Search finished for the next optimal point.
+Time taken: 130.0881
+Function value obtained: -1243.4850
+Current minimum: -1247.1125
+Iteration No: 72 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 72 ended. Search finished for the next optimal point.
+Time taken: 129.6591
+Function value obtained: -1238.5048
+Current minimum: -1247.1125
+Iteration No: 73 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 73 ended. Search finished for the next optimal point.
+Time taken: 131.7335
+Function value obtained: -1246.8267
+Current minimum: -1247.1125
+Iteration No: 74 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 74 ended. Search finished for the next optimal point.
+Time taken: 133.4323
+Function value obtained: -1246.4638
+Current minimum: -1247.1125
+Iteration No: 75 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 75 ended. Search finished for the next optimal point.
+Time taken: 132.6069
+Function value obtained: -1246.6862
+Current minimum: -1247.1125
+Iteration No: 76 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 76 ended. Search finished for the next optimal point.
+Time taken: 146.3131
+Function value obtained: -1129.8433
+Current minimum: -1247.1125
+Iteration No: 77 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 77 ended. Search finished for the next optimal point.
+Time taken: 135.2573
+Function value obtained: -1230.0942
+Current minimum: -1247.1125
+Iteration No: 78 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 78 ended. Search finished for the next optimal point.
+Time taken: 132.2386
+Function value obtained: -1244.0826
+Current minimum: -1247.1125
+Iteration No: 79 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 79 ended. Search finished for the next optimal point.
+Time taken: 133.0472
+Function value obtained: -1227.6766
+Current minimum: -1247.1125
+Iteration No: 80 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 80 ended. Search finished for the next optimal point.
+Time taken: 135.8721
+Function value obtained: -1246.6371
+Current minimum: -1247.1125
+Iteration No: 81 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 81 ended. Search finished for the next optimal point.
+Time taken: 146.4860
+Function value obtained: -1051.3454
+Current minimum: -1247.1125
+Iteration No: 82 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 82 ended. Search finished for the next optimal point.
+Time taken: 138.5458
+Function value obtained: -1244.0259
+Current minimum: -1247.1125
+Iteration No: 83 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 83 ended. Search finished for the next optimal point.
+Time taken: 136.4965
+Function value obtained: -1245.1902
+Current minimum: -1247.1125
+Iteration No: 84 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 84 ended. Search finished for the next optimal point.
+Time taken: 136.3494
+Function value obtained: -1243.9101
+Current minimum: -1247.1125
+Iteration No: 85 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 85 ended. Search finished for the next optimal point.
+Time taken: 115.7483
+Function value obtained: -324.4307
+Current minimum: -1247.1125
+Iteration No: 86 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 86 ended. Search finished for the next optimal point.
+Time taken: 141.8634
+Function value obtained: -1246.6520
+Current minimum: -1247.1125
+Iteration No: 87 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 87 ended. Search finished for the next optimal point.
+Time taken: 170.2753
+Function value obtained: -940.8485
+Current minimum: -1247.1125
+Iteration No: 88 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 88 ended. Search finished for the next optimal point.
+Time taken: 136.1852
+Function value obtained: -1239.2971
+Current minimum: -1247.1125
+Iteration No: 89 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 89 ended. Search finished for the next optimal point.
+Time taken: 131.1660
+Function value obtained: -1243.9329
+Current minimum: -1247.1125
+Iteration No: 90 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 90 ended. Search finished for the next optimal point.
+Time taken: 141.8340
+Function value obtained: -1241.8445
+Current minimum: -1247.1125
+Iteration No: 91 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 91 ended. Search finished for the next optimal point.
+Time taken: 135.0564
+Function value obtained: -1236.7715
+Current minimum: -1247.1125
+Iteration No: 92 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 92 ended. Search finished for the next optimal point.
+Time taken: 134.9566
+Function value obtained: -1244.8498
+Current minimum: -1247.1125
+Iteration No: 93 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 93 ended. Search finished for the next optimal point.
+Time taken: 140.0762
+Function value obtained: -1247.1706
+Current minimum: -1247.1706
+Iteration No: 94 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 94 ended. Search finished for the next optimal point.
+Time taken: 136.5457
+Function value obtained: -1241.9879
+Current minimum: -1247.1706
+Iteration No: 95 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 95 ended. Search finished for the next optimal point.
+Time taken: 126.6981
+Function value obtained: -1117.4628
+Current minimum: -1247.1706
+Iteration No: 96 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 96 ended. Search finished for the next optimal point.
+Time taken: 136.7250
+Function value obtained: -1238.6514
+Current minimum: -1247.1706
+Iteration No: 97 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 97 ended. Search finished for the next optimal point.
+Time taken: 139.2188
+Function value obtained: -1244.5057
+Current minimum: -1247.1706
+Iteration No: 98 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 98 ended. Search finished for the next optimal point.
+Time taken: 142.3577
+Function value obtained: -1244.0792
+Current minimum: -1247.1706
+Iteration No: 99 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 99 ended. Search finished for the next optimal point.
+Time taken: 169.7453
+Function value obtained: -1242.6027
+Current minimum: -1247.1706
+Iteration No: 100 started. Searching for the next optimal point.
+Flag: 0
+Iteration No: 100 ended. Search finished for the next optimal point.
+Time taken: 137.5378
+Function value obtained: -1243.9651
+Current minimum: -1247.1706
