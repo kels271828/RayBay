@@ -123,7 +123,8 @@ def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
     ax.yaxis.tick_right()
 
 
-def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
+def scatterplot(goal_df, goal_dict, func_df=None, par_list=None,
+                flag_list=None):
     """Visualize goal and parameter relationships with scatterplots.
 
     If funcs and pars given, plots goals on the vertical axis and
@@ -140,6 +141,8 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
         Constituent function specifications.
     par_list : list, optional
         Sampled constituent function parameters.
+    flag_list : list, optional
+        RayStation exit statuses.
 
     Returns
     -------
@@ -155,7 +158,13 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
         level = goal_df.iloc[ii]['AcceptanceLevel']
         fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
         for jj in range(len(xdata)):
-            ax[jj].plot(xdata[jj], ydata[ii], '.')
+            if flag_list is None:
+                ax[jj].plot(xdata[jj], ydata[ii], '.')
+            else:
+                for flag in set(flag_list):
+                    idx = np.where(np.array(flag_list) == flag)[0]
+                    ax[jj].plot(np.array(xdata[jj])[idx],
+                                np.array(ydata[ii])[idx], '.')
             ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
             ax[jj].set_xlabel(xlabels[jj])
             corr = f'Corr: {np.corrcoef(xdata[jj], ydata[ii])[0, 1]:.2f}'

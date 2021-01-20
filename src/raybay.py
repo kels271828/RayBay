@@ -196,7 +196,7 @@ class RaybayResult:
             analyze.corrplot(self.goal_df, self.goal_dict, title=title,
                              size=size)
 
-    def scatterplot(self, data_type='goals'):
+    def scatterplot(self, data_type='goals', flags=True):
         """Visualize goal and parameter relationships wiht scatterplots.
 
         If data_type is 'pars', plots goals on the vertical axis and
@@ -207,17 +207,21 @@ class RaybayResult:
         ----------
         data_type : {'goals', 'pars'}, optional
             Type of scatterplot to create.
+        flags : bool, optional
+            If True, color points by RayStation exit status.
 
         Returns
         -------
         None.
 
         """
+        flag_list = self.flag_list if flags else None
         if data_type == 'pars':
             analyze.scatterplot(self.goal_df, self.goal_dict, self.func_df,
-                                self.opt_result.x_iters)
+                                self.opt_result.x_iters, flag_list)
         else:
-            analyze.scatterplot(self.goal_df, self.goal_dict)
+            analyze.scatterplot(self.goal_df, self.goal_dict,
+                                flag_list=flag_list)
 
     def dvhplot(self, roi_list=None):
         """Plot dose-volume histogram of solution.
