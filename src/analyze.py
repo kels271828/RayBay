@@ -14,7 +14,7 @@ import seaborn as sns
 sns.set(color_codes=True, font_scale=1.2)
 
 
-def boxplot(specs, values, data_type, title=None, ax=None):
+def boxplot(specs, values, data_type, flag_list=None, title=None):
     """Visualize parameter and goal value ranges with a boxplot.
 
     Parameters
@@ -26,26 +26,31 @@ def boxplot(specs, values, data_type, title=None, ax=None):
         Either clinical goal results or sampled function parameters.
     data_type : {'goals', 'pars'}
         Type of boxplot to create.
+    flag_list : list, optional
+        RayStation exit statuses.
     title: str, optional
         Figure title.
-    ax : matploblib.axes.Axes, optional
-        Add the boxplot to the given axes.
 
     Returns
     -------
     None.
 
     """
-    data, labels = format_data(specs, values, data_type)
-    if ax is None:
-        fig, ax = plt.subplots(1, 1)
-    ax.boxplot(data)
-    ax.set_xticklabels(labels, rotation=90)
-    if data_type == 'pars':
-        ax.set_ylabel('Parameter Values')
-    else:
-        ax.set_ylabel('Goal Values')
-    ax.set_title(title)
+    data, labels = format_data(specs, values, data_type, flag_list)
+    fig, ax = plt.subplots(1, len(data), squeeze=False,
+                           figsize=(6.4*len(data), 4.8))
+    for flag in range(len(data)):
+        ax[0, flag].boxplot(data[flag])
+        ax[0, flag].set_xticklabels(labels, rotation=90)
+        if flag == 0:
+            if data_type == 'pars':
+                ax[0, flag].set_ylabel('Parameter Values')
+            else:
+                ax[0, flag].set_ylabel('Goal Values')
+        if flag_list is None:
+            ax[0, flag].set_title(title)
+        else:
+            ax[0, flag].set_title(f'Flag: {flag}')
 
 
 def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
@@ -149,26 +154,25 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None,
     None.
 
     """
-    ydata, ylabels = format_data(goal_df, goal_dict, 'goals')
+    ydata, ylabels = format_data(goal_df, goal_dict, 'goals', flag_list)
     if func_df is None:
         xdata, xlabels = ydata, ylabels
     else:
-        xdata, xlabels = format_data(func_df, par_list, 'pars')
-    for ii in range(len(ydata)):
+        xdata, xlabels = format_data(func_df, par_list, 'pars', flag_list)
+    for ii in range(len(ydata[0])):
         level = goal_df.iloc[ii]['AcceptanceLevel']
-        fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
-        for jj in range(len(xdata)):
-            if flag_list is None:
-                ax[jj].plot(xdata[jj], ydata[ii], '.')
-            else:
-                for flag in set(flag_list):
-                    idx = np.where(np.array(flag_list) == flag)[0]
-                    ax[jj].plot(np.array(xdata[jj])[idx],
-                                np.array(ydata[ii])[idx], '.')
-            ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
+        fig, ax = plt.subplots(1, len(xdata[0]), figsize=(25, 5))
+        for jj in range(len(xdata[0])):
+            xmin = []
+            xmax = []
+            for flag in range(len(xdata)):
+                ax[jj].plot(xdata[flag][jj], ydata[flag][ii], '.')
+                xmin.append(min(xdata[flag][jj]))
+                xmax.append(max(xdata[flag][jj]))
+            ax[jj].plot([min(xmin), max(xmax)], [level, level])
             ax[jj].set_xlabel(xlabels[jj])
-            corr = f'Corr: {np.corrcoef(xdata[jj], ydata[ii])[0, 1]:.2f}'
-            ax[jj].set_title(corr)
+            corr = np.corrcoef(xdata[flag][jj], ydata[flag][ii])[0, 1]
+            ax[jj].set_title(f'Corr: {corr:.2f}')
         ax[0].set_ylabel(ylabels[ii])
 
 
@@ -194,7 +198,7 @@ def dvhplot(dvh_dict, roi_list):
     plt.legend(roi_list, bbox_to_anchor=(1, 1))
 
 
-def format_data(specs, values, data_type):
+def format_data(specs, values, data_type, flag_list=None):
     """Format data and labels for boxplot and scatterplot.
 
     Parameters
@@ -206,6 +210,8 @@ def format_data(specs, values, data_type):
         Either clinical goal results or sampled function parameters.
     data_type : {'goals', 'pars'}
         Type of data to format.
+    flag_list : list, optional
+        RayStation exit statuses.
 
     Returns
     -------
@@ -227,7 +233,30 @@ def format_data(specs, values, data_type):
         for index, row in pars.iterrows():
             data.append([value[index] for value in values])
             labels.append(row['Roi'] + ' ' + row['Par'])
-    return data, labels
+    return filter_flags(data, flag_list), labels
+
+
+def filter_flags(data, flag_list):
+    """Filter figure data by RayStation exit status.
+
+    Parameters
+    ----------
+    data : list
+        Result values.
+    flag_list : list
+        RayStation exit statuses.
+
+    Returns : list
+        Result values filtered by RayStation exit status.
+
+    """
+    if flag_list is None:
+        return [data]
+    data_flag = []
+    for flag in set(flag_list):
+        data_flag.append([[row[ii] for ii in range(len(flag_list))
+                           if flag_list[ii] == flag] for row in data])
+    return data_flag
 
 
 def get_pars(func_df):

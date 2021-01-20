@@ -143,13 +143,15 @@ class RaybayResult:
         util_type = self.utility if util_type is None else util_type
         return utility(self.goal_df, self.goal_dict, util_type)
 
-    def boxplot(self, data_type='goals', title=None, ax=None):
+    def boxplot(self, data_type='goals', flags=True, title=None):
         """Visualize parameter and goal value ranges with a boxplot.
 
         Parameters
         ----------
         data_type : {'goals', 'pars'}, optional
             Type of boxplot to create.
+        flags : bool, optional
+            If True, filter data by RayStation exit status.
         title : str, optional
             Figure title.
         ax : matplotlib.axes.Axes, optional
@@ -160,11 +162,13 @@ class RaybayResult:
         None.
 
         """
+        flag_list = self.flag_list if flags else None
         if data_type == 'pars':
             par_list = self.opt_result.x_iters
-            analyze.boxplot(self.func_df, par_list, 'pars', title, ax)
+            analyze.boxplot(self.func_df, par_list, 'pars', flag_list, title)
         else:
-            analyze.boxplot(self.goal_df, self.goal_dict, 'goals', title, ax)
+            analyze.boxplot(self.goal_df, self.goal_dict, 'goals', flag_list,
+                            title)
 
     def corrplot(self, data_type='goals', title=None, size=500):
         """Visualize goal and parameter correlations with a heatmap.
