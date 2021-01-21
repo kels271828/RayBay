@@ -14,7 +14,7 @@ import seaborn as sns
 sns.set(color_codes=True, font_scale=1.2)
 
 
-def boxplot(specs, values, data_type, flag_list=None, title=None):
+def boxplot(specs, values, data_type, title=None):
     """Visualize parameter and goal value ranges with a boxplot.
 
     Parameters
@@ -26,8 +26,6 @@ def boxplot(specs, values, data_type, flag_list=None, title=None):
         Either clinical goal results or sampled function parameters.
     data_type : {'goals', 'pars'}
         Type of boxplot to create.
-    flag_list : list, optional
-        RayStation exit statuses.
     title: str, optional
         Figure title.
 
@@ -36,25 +34,19 @@ def boxplot(specs, values, data_type, flag_list=None, title=None):
     None.
 
     """
-    data, labels = format_data(specs, values, data_type, flag_list)
-    fig, ax = plt.subplots(1, len(data), squeeze=False,
-                           figsize=(6.4*len(data), 4.8))
-    for flag in range(len(data)):
-        ax[0, flag].boxplot(data[flag])
-        ax[0, flag].set_xticklabels(labels, rotation=90)
-        if flag == 0:
-            if data_type == 'pars':
-                ax[0, flag].set_ylabel('Parameter Values')
-            else:
-                ax[0, flag].set_ylabel('Goal Values')
-        if flag_list is None:
-            ax[0, flag].set_title(title)
-        else:
-            ax[0, flag].set_title(f'Flag: {flag}')
+    data, labels = format_data(specs, values, data_type)
+    fig, ax = plt.subplots(1, 1)
+    ax.boxplot(data)
+    ax.set_xticklabels(labels, rotation=90)
+    if data_type == 'pars':
+        ax.set_ylabel('Parameter Values')
+    else:
+        ax.set_ylabel('Goal Values')
+    ax.set_title(title)
 
 
-def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
-             size=500):
+def corrplot(goal_df, goal_dict, func_df=None, par_list=None, size=50,
+             title=None):
     """Visualize goal and parameter correlations with a heatmap.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
@@ -73,10 +65,10 @@ def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
         Constituent function specifications.
     par_list : list, optional
         Sampled constituent function parameters.
-    title : str, optional
-        Figure title.
     size : int, optional
         Size scale for boxes.
+    title : str, optional
+        Figure title.
 
     Returns
     -------
@@ -128,8 +120,7 @@ def corrplot(goal_df, goal_dict, func_df=None, par_list=None, title=None,
     ax.yaxis.tick_right()
 
 
-def scatterplot(goal_df, goal_dict, func_df=None, par_list=None,
-                flag_list=None):
+def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
     """Visualize goal and parameter relationships with scatterplots.
 
     If funcs and pars given, plots goals on the vertical axis and
@@ -146,32 +137,26 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None,
         Constituent function specifications.
     par_list : list, optional
         Sampled constituent function parameters.
-    flag_list : list, optional
-        RayStation exit statuses.
 
     Returns
     -------
     None.
 
     """
-    ydata, ylabels = format_data(goal_df, goal_dict, 'goals', flag_list)
+    ydata, ylabels = format_data(goal_df, goal_dict, 'goals')
     if func_df is None:
         xdata, xlabels = ydata, ylabels
     else:
-        xdata, xlabels = format_data(func_df, par_list, 'pars', flag_list)
-    for ii in range(len(ydata[0])):
+        xdata, xlabels = format_data(func_df, par_list, 'pars')
+    for ii in range(len(ydata)):
         level = goal_df.iloc[ii]['AcceptanceLevel']
-        fig, ax = plt.subplots(1, len(xdata[0]), figsize=(25, 5))
-        for jj in range(len(xdata[0])):
-            xmin = []
-            xmax = []
+        fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
+        for jj in range(len(xdata)):
             for flag in range(len(xdata)):
-                ax[jj].plot(xdata[flag][jj], ydata[flag][ii], '.')
-                xmin.append(min(xdata[flag][jj]))
-                xmax.append(max(xdata[flag][jj]))
-            ax[jj].plot([min(xmin), max(xmax)], [level, level])
+                ax[jj].plot(xdata[jj], ydata[ii], '.')
+            ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
             ax[jj].set_xlabel(xlabels[jj])
-            corr = np.corrcoef(xdata[flag][jj], ydata[flag][ii])[0, 1]
+            corr = np.corrcoef(xdata[jj], ydata[ii])[0, 1]
             ax[jj].set_title(f'Corr: {corr:.2f}')
         ax[0].set_ylabel(ylabels[ii])
 
@@ -198,7 +183,7 @@ def dvhplot(dvh_dict, roi_list):
     plt.legend(roi_list, bbox_to_anchor=(1, 1))
 
 
-def format_data(specs, values, data_type, flag_list=None):
+def format_data(specs, values, data_type):
     """Format data and labels for boxplot and scatterplot.
 
     Parameters
@@ -210,8 +195,8 @@ def format_data(specs, values, data_type, flag_list=None):
         Either clinical goal results or sampled function parameters.
     data_type : {'goals', 'pars'}
         Type of data to format.
-    flag_list : list, optional
-        RayStation exit statuses.
+    flag : int, optional
+        RayStation exit status.
 
     Returns
     -------
@@ -233,30 +218,7 @@ def format_data(specs, values, data_type, flag_list=None):
         for index, row in pars.iterrows():
             data.append([value[index] for value in values])
             labels.append(row['Roi'] + ' ' + row['Par'])
-    return filter_flags(data, flag_list), labels
-
-
-def filter_flags(data, flag_list):
-    """Filter figure data by RayStation exit status.
-
-    Parameters
-    ----------
-    data : list
-        Result values.
-    flag_list : list
-        RayStation exit statuses.
-
-    Returns : list
-        Result values filtered by RayStation exit status.
-
-    """
-    if flag_list is None:
-        return [data]
-    data_flag = []
-    for flag in set(flag_list):
-        data_flag.append([[row[ii] for ii in range(len(flag_list))
-                           if flag_list[ii] == flag] for row in data])
-    return data_flag
+    return data, labels
 
 
 def get_pars(func_df):

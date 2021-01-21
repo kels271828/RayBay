@@ -143,7 +143,7 @@ class RaybayResult:
         util_type = self.utility if util_type is None else util_type
         return utility(self.goal_df, self.goal_dict, util_type)
 
-    def boxplot(self, data_type='goals', flags=True, title=None):
+    def boxplot(self, data_type='goals', title=None):
         """Visualize parameter and goal value ranges with a boxplot.
 
         Parameters
@@ -154,23 +154,19 @@ class RaybayResult:
             If True, filter data by RayStation exit status.
         title : str, optional
             Figure title.
-        ax : matplotlib.axes.Axes, optional
-            Add the boxplot to the given axes.
 
         Returns
         -------
         None.
 
         """
-        flag_list = self.flag_list if flags else None
         if data_type == 'pars':
             par_list = self.opt_result.x_iters
-            analyze.boxplot(self.func_df, par_list, 'pars', flag_list, title)
+            analyze.boxplot(self.func_df, par_list, 'pars', title)
         else:
-            analyze.boxplot(self.goal_df, self.goal_dict, 'goals', flag_list,
-                            title)
+            analyze.boxplot(self.goal_df, self.goal_dict, 'goals', title)
 
-    def corrplot(self, data_type='goals', title=None, size=500):
+    def corrplot(self, data_type='goals', size=50, title=None):
         """Visualize goal and parameter correlations with a heatmap.
 
         Modified from https://github.com/dylan-profiler/heatmaps.
@@ -183,10 +179,10 @@ class RaybayResult:
         ----------
         data_type : {'goals', 'pars'}, optional
             Type of corrplot to create.
-        title : str, optional
-            Figure title.
         size : int, optional
             Size scale for boxes.
+        title : str, optional
+            Figure title.
 
         Returns
         -------
@@ -195,12 +191,12 @@ class RaybayResult:
         """
         if data_type == 'pars':
             analyze.corrplot(self.goal_df, self.goal_dict, self.func_df,
-                             self.opt_result.x_iters, title=title, size=size)
+                             self.opt_result.x_iters, size, title)
         else:
-            analyze.corrplot(self.goal_df, self.goal_dict, title=title,
-                             size=size)
+            analyze.corrplot(self.goal_df, self.goal_dict, size=size,
+                             title=title)
 
-    def scatterplot(self, data_type='goals', flags=True):
+    def scatterplot(self, data_type='goals'):
         """Visualize goal and parameter relationships wiht scatterplots.
 
         If data_type is 'pars', plots goals on the vertical axis and
@@ -211,21 +207,17 @@ class RaybayResult:
         ----------
         data_type : {'goals', 'pars'}, optional
             Type of scatterplot to create.
-        flags : bool, optional
-            If True, color points by RayStation exit status.
 
         Returns
         -------
         None.
 
         """
-        flag_list = self.flag_list if flags else None
         if data_type == 'pars':
             analyze.scatterplot(self.goal_df, self.goal_dict, self.func_df,
-                                self.opt_result.x_iters, flag_list)
+                                self.opt_result.x_iters)
         else:
-            analyze.scatterplot(self.goal_df, self.goal_dict,
-                                flag_list=flag_list)
+            analyze.scatterplot(self.goal_df, self.goal_dict)
 
     def dvhplot(self, roi_list=None):
         """Plot dose-volume histogram of solution.
