@@ -152,8 +152,7 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
         level = goal_df.iloc[ii]['AcceptanceLevel']
         fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
         for jj in range(len(xdata)):
-            for flag in range(len(xdata)):
-                ax[jj].plot(xdata[jj], ydata[ii], '.')
+            ax[jj].plot(xdata[jj], ydata[ii], '.')
             ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
             ax[jj].set_xlabel(xlabels[jj])
             corr = np.corrcoef(xdata[jj], ydata[ii])[0, 1]
