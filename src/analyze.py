@@ -183,6 +183,54 @@ def dvhplot(dvh_dict, roi_list):
     plt.legend(roi_list, bbox_to_anchor=(1, 1))
 
 
+def goalplot(goal_df, res_dict, percent=True):
+    """a;sldk
+
+    Parameters
+    ----------
+    goal_df : pandas.DataFrame
+        Clinical goal specifications.
+    res_dict : dict of str: raybay.RaybayResult
+        RayStation treatment plan names and results.
+    percent : bool, optional
+        If True, prints goal results as percentages.
+        Otherwise prints goal values.
+
+    Returns
+    -------
+    None.
+
+    """
+    val_list = []
+    roi_dict = {}
+    for index, row in goal_df.iterrows():
+        goal_vals = []
+        level = row['AcceptanceLevel']
+        roi_dict[f"{index} {row['Roi']} {row['Type']}"] = index
+        if not percent:
+            goal_vals.append(level)
+        for res in res_dict:
+            if res in ('Approved', 'Default'):
+                idx_sol = 0
+            else:
+                idx_sol = np.argmin(res_dict[res].opt_result.func_vals)
+            val = res_dict[res].goal_dict[index][idx_sol]
+            if percent:
+                goal_vals.append((val - level)/level)
+            else:
+                goal_vals.append(val)
+        val_list.append(goal_vals)
+    if percent:
+        columns = res_dict.keys()
+    else:
+        columns = ['AcceptanceLevel'] + list(res_dict.keys())
+    val_df = pd.DataFrame(columns=columns, data=val_list, index=roi_dict)
+    ncols = len(res_dict) if percent else 1.5*(len(res_dict) + 1)
+    fig, ax = plt.subplots(1, figsize=(ncols, len(goal_df)))
+    sns.heatmap(val_df, cmap=sns.diverging_palette(220, 20, n=256), center=0,
+                annot=True, fmt=".2f", cbar_kws={'label': 'Goal Value'}, ax=ax)
+
+
 def format_data(specs, values, data_type):
     """Format data and labels for boxplot and scatterplot.
 
