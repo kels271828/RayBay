@@ -184,17 +184,17 @@ def dvhplot(dvh_dict, roi_list):
 
 
 def goalplot(goal_df, res_dict, percent=True):
-    """a;sldk
+    """Visualize comparison of goal results as table.
 
     Parameters
     ----------
     goal_df : pandas.DataFrame
         Clinical goal specifications.
-    res_dict : dict of str: raybay.RaybayResult
+    res_dict : {str: raybay.RaybayResult}
         RayStation treatment plan names and results.
     percent : bool, optional
-        If True, prints goal results as percentages.
-        Otherwise prints goal values.
+        If True, prints goal results as percentages, otherwise prints
+        goal values.
 
     Returns
     -------
