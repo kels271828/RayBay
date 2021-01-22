@@ -209,7 +209,7 @@ def goalplot(goal_df, res_dict, percent=True):
         if not percent:
             goal_vals.append(level)
         for res in res_dict:
-            if res in ('Approved', 'Default'):
+            if res.lower() in ('approved', 'default'):
                 idx_sol = 0
             else:
                 idx_sol = np.argmin(res_dict[res].opt_result.func_vals)

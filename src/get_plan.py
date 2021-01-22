@@ -15,14 +15,14 @@ import optimize
 import raybay
 
 # Patient
-patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
+#patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 #patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
-#patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
+patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
 
 # Case
-case_path = 'approved\\'
-#case_path = 'default\\'
+#case_path = 'approved\\'
+case_path = 'default\\'
 
 # Get RayStation objects
 patient = connect.get_current('Patient')
@@ -31,9 +31,13 @@ plan = connect.get_current('Plan')
 beam_set = connect.get_current('BeamSet')
 
 # Initialize result object
-result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name,
-                             patient_path + case_path + 'funcs.csv',
-                             ('PTV', 4800, 95), patient_path + 'goals.csv')
+result = raybay.RaybayResult(
+    name=patient.Name,
+    case=case.CaseName,
+    plan=plan.Name,
+    funcs=patient_path + case_path + 'funcs.csv',
+    norm=('PTV', 4800, 95),
+    goals=patient_path + 'goals.csv')
 
 # Add results
 if 'default' in case_path:
@@ -48,5 +52,6 @@ for index, row in result.goal_df.iterrows():
 result.dvh_dict = optimize.get_dvh(result.roi_list)
 
 # Save results
-with open(patient_path + case_path + 'res.pkl', 'wb') as fp:
+result_path = patient_path + case_path + 'res_' + case_path[:-1] + '.pkl'
+with open(result_path, 'wb') as fp:
     pickle.dump(result, fp)

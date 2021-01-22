@@ -17,7 +17,7 @@ import raybay
 
 def get_plan(funcs, norm, goals=None, utility='linear',
              solver='gp_minimize', n_calls=25, random_state=None,
-             n_initial_points=10, verbose=True, rib_weight=1.0):
+             n_initial_points=10, verbose=True):
     """Hyperparameter optimization for RayStation treatment planning.
 
     Hyperparameter optimization for RayStation treatment planning using
@@ -73,7 +73,7 @@ def get_plan(funcs, norm, goals=None, utility='linear',
 
     # Optimize
     def obj(pars):
-        return objective(plan, beam_set, result, funcs[:-9], pars, rib_weight)
+        return objective(plan, beam_set, result, funcs[:-9], pars)
     checkpoint_path = funcs[:-9] + 'checkpoint.pkl'
     checkpoint_saver = skopt.callbacks.CheckpointSaver(checkpoint_path,
                                                        store_objective=False)
@@ -115,7 +115,7 @@ def get_plan(funcs, norm, goals=None, utility='linear',
     return result
 
 
-def objective(plan, beam_set, result, repo_path, pars, rib_weight=1.0):
+def objective(plan, beam_set, result, repo_path, pars):
     """Objective function for hyperparameter optimization.
 
     Parameters
@@ -142,7 +142,7 @@ def objective(plan, beam_set, result, repo_path, pars, rib_weight=1.0):
     result.flag_list.append(flag)
     print(f'Flag: {flag}', flush=True)
     return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict,
-                     result.utility, repo_path, rib_weight)
+                     result.utility, repo_path)
 
 
 def set_pars(plan, func_df, pars):
@@ -225,8 +225,7 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goal_df, norm, flag, goal_dict, util_type, repo_path,
-              rib_weight=1.0):
+def get_score(plan, goal_df, norm, flag, goal_dict, util_type, repo_path):
     """Calculate treatment plan score.
 
     The treatment plan score is a linear combination of the relative
@@ -264,9 +263,8 @@ def get_score(plan, goal_df, norm, flag, goal_dict, util_type, repo_path,
     for index, row in goal_df.iterrows():
         value = scale*results[index]
         goal_dict[index].append(value)
-        coeff = rib_weight if 'Rib' in row['Roi'] else 1.0
-        score += -coeff*raybay.get_term(value, row['AcceptanceLevel'],
-                                        row['Type'], util_type)
+        score += -row['Weight']*raybay.get_term(value, row['AcceptanceLevel'],
+                                                row['Type'], row['Shape'])
     with open(repo_path + 'goal_dict.pkl', 'wb') as fp:
         pickle.dump(goal_dict, fp)
     return score

@@ -11,7 +11,9 @@ Clinical goals are specified by columns Roi, Type, GoalCriteria,
 AcceptanceLevel, and ParameterValue. Valid types include MinDose,
 AverageDose, MaxDose, MinDose, MinDvh, and MaxDvh.
 
-TODO: Add ways to compare results between plans (e.g., dvh plots, bars)
+Treatment plan utility function terms are specified by columms Weight
+and Shape, and are included with the clinical goals. Valid shapes
+include linear and linear_quadratic.
 
 """
 import re
@@ -41,8 +43,6 @@ class RaybayResult:
         Regions of interest included in clinical goals.
     norm : (str, float, float)
         Region of interest, dose, and volume used for normalization.
-    utility : {'linear', 'linear_quadratic'}
-        Shape of treatment plan utility function.
     solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}
         Name of scikit-optimize solver used.
     time : float
@@ -75,7 +75,7 @@ class RaybayResult:
 
     """
     def __init__(self, patient, case, plan, funcs, norm, goals=None,
-                 utility=None, solver=None):
+                 solver=None):
         """Initialise instance of RaybayResult.
 
         Parameters
@@ -93,8 +93,6 @@ class RaybayResult:
         goals : str, optional
             Path to CSV with clinical goal specifications.
             If None, goals are assigned based on constituent functions.
-        utility : {'linear', 'linear_quadratic'}, optional
-            Shape of treatment plan utility function.
         solver : {'gp_minimize', 'forest_minimize', 'dummy_minimize'}, optional
             Name of scikit-optimize solver used.
 
@@ -114,34 +112,12 @@ class RaybayResult:
             self.goal_df = get_goals(self.funcs)
         self.roi_list = set(self.goal_df['Roi'])
         self.norm = norm
-        self.utility = utility
         self.solver = solver
         self.time = 0.0
         self.flag_list = []
         self.opt_result = None
         self.goal_dict = {ii: [] for ii in range(len(self.goal_df))}
         self.dvh_dict = {}
-
-    def get_utility(self, util_type=None):
-        """Get treatment plan utility.
-
-        Parameters
-        ----------
-        goal_df : pandas.DataFrame
-            Clinical goal specifications.
-        goal_dict : dict
-            Clinical goal values.
-        util_type : {'linear', 'linear_quadratic'}, optional
-            Shape of treatment plan utility.
-
-        Returns
-        -------
-        np.ndarray
-            Vector of treatment plan utility values.
-
-        """
-        util_type = self.utility if util_type is None else util_type
-        return utility(self.goal_df, self.goal_dict, util_type)
 
     def boxplot(self, data_type='goals', title=None):
         """Visualize parameter and goal value ranges with a boxplot.
@@ -323,7 +299,7 @@ def get_bound(par, func_type):
     return np.max(par) if 'Max' in func_type else np.min(par)
 
 
-def utility(goal_df, goal_dict, util_type):
+def get_utility(goal_df, goal_dict, weights=None, shapes=None):
     """Get treatment plan utility values.
 
     Parameters
@@ -332,24 +308,33 @@ def utility(goal_df, goal_dict, util_type):
         Clinical goal specifications.
     goal_dict : dict
         Clinical goal values.
-    util_type : {'linear', 'linear_quadratic'}
-        Shape of treatment plan utility.
+    weights : list of float, optional
+        Utility term weights. If None, uses Weight column in goal_df.
+    shapes : list of str, optional
+        Shape of utility terms ('linear' or 'linear_quadratic').
+        If None, uses Shape column in goal_df.
 
     Returns
     -------
     np.ndarray
         Vector of treatment plan utility values.
+
     """
+    if weights is None:
+        weights = goal_df['Weight']
+    if shapes is None:
+        shapes = goal_df['Shape']
     util_vec = np.zeros(len(goal_dict[0]))
     for ii in range(len(util_vec)):
         for index, row in goal_df.iterrows():
-            util_vec[ii] += get_term(goal_dict[index][ii],
-                                     row['AcceptanceLevel'], row['Type'],
-                                     util_type)
+            util_vec[ii] += weights[index]*get_term(
+                goal_dict[index][ii],
+                row['AcceptanceLevel'],
+                row['Type'], shapes[index])
     return util_vec
 
 
-def get_term(value, level, goal_type, util_type):
+def get_term(value, level, goal_type, shape):
     """Get treatment plan utility term value.
 
     Parameters
@@ -360,7 +345,7 @@ def get_term(value, level, goal_type, util_type):
         Clinical goal AcceptanceLevel.
     goal_type : str
         Clinical goal type (e.g., 'MaxDose')
-    util_type : {'linear', 'linear_quadratic'}
+    shape : {'linear', 'linear_quadratic'}
         Shape of treatment plan utility term.
 
     Returns
@@ -369,10 +354,10 @@ def get_term(value, level, goal_type, util_type):
         Treatment plan utility term value.
 
     """
-    if util_type not in ('linear', 'linear_quadratic'):
-        raise ValueError(f'Invalid util_type: {util_type}')
+    if shape not in ('linear', 'linear_quadratic'):
+        raise ValueError(f'Invalid shape: {shape}')
     diff = 100*(value - level)/level
-    if util_type == 'linear':
+    if shape == 'linear':
         return -diff if 'Max' in goal_type else diff
     else:
         if 'Max' in goal_type:
