@@ -222,7 +222,7 @@ def goalplot(goal_df, res_dict, percent=True):
                 idx_sol = np.argmin(res_dict[res].opt_result.func_vals)
             val = res_dict[res].goal_dict[index][idx_sol]
             if percent:
-                goal_vals.append((val - level)/level)
+                goal_vals.append(100*(val - level)/level)
             else:
                 goal_vals.append(val)
         val_list.append(goal_vals)
