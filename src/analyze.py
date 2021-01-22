@@ -10,6 +10,7 @@ TODO:
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.cluster.hierarchy as sch
 import seaborn as sns
 sns.set(color_codes=True, font_scale=1.2)
 
@@ -46,7 +47,7 @@ def boxplot(specs, values, data_type, title=None):
 
 
 def corrplot(goal_df, goal_dict, func_df=None, par_list=None, size=50,
-             title=None):
+             cluster=True, title=None):
     """Visualize goal and parameter correlations with a heatmap.
 
     Modified from https://github.com/dylan-profiler/heatmaps.
@@ -67,6 +68,8 @@ def corrplot(goal_df, goal_dict, func_df=None, par_list=None, size=50,
         Sampled constituent function parameters.
     size : int, optional
         Size scale for boxes.
+    cluster : bool, optional
+        If True, use hierarchical clustering to order rows and columns.
     title : str, optional
         Figure title.
 
@@ -77,11 +80,15 @@ def corrplot(goal_df, goal_dict, func_df=None, par_list=None, size=50,
     """
     # Format data
     ydata, ylabels = format_data(goal_df, goal_dict, 'goals')
+    if cluster:
+        ydata, ylabels = cluster_data(goal_dict, ydata, ylabels, 'goals')
     if func_df is None:
         xdata, xlabels = ydata, ylabels
     else:
         xdata, xlabels = format_data(func_df, par_list, 'pars')
-    xdata, xlabels = xdata[::-1], xlabels[::-1]
+        if cluster:
+            xdata, xlabels = cluster_data(goal_dict, xdata, xlabels, 'pars')
+    ydata, ylabels = ydata[::-1], ylabels[::-1]  # reorder
 
     # Plot boxes
     palette = sns.diverging_palette(20, 220, n=256)
@@ -230,6 +237,50 @@ def goalplot(goal_df, res_dict, percent=True):
                 annot=True, fmt=".2f", cbar_kws={'label': 'Goal Value'}, ax=ax)
 
 
+def cluster_data(goal_dict, data, labels, data_type):
+    """Get indices for hierarchical goal value clusters.
+
+    Parameters
+    ----------
+    goal_dict : dict
+        Clinical goal results.
+    data : list
+        Result values.
+    labels : list
+        Result labels.
+    data_type : {'goals', 'pars'}
+        Type of data to cluster.
+
+    Returns
+    -------
+    list
+        Clustered result values.
+    list
+        Clustered result labels.
+
+    """
+    # Cluster goal results
+    corr = pd.DataFrame(goal_dict).corr().values
+    dist = sch.distance.pdist(corr)
+    link = sch.linkage(dist, method='complete')
+    idx_goals = np.argsort(sch.fcluster(link, 0.5*dist.max(), 'distance'))
+
+    # Sort data
+    if data_type == 'goals':
+        data_sorted = np.array(data)[idx_goals]
+        labels_sorted = [labels[idx] for idx in idx_goals]
+    else:
+        idx_pars = np.array([int(label.split()[0]) for label in labels])
+        data_sorted = []
+        labels_sorted = []
+        for idx in idx_goals:
+            if idx in idx_pars:
+                ii = np.where(idx_pars == idx)[0][0]
+                data_sorted.append(data[ii])
+                labels_sorted.append(labels[ii])
+    return data_sorted, labels_sorted
+
+
 def format_data(specs, values, data_type):
     """Format data and labels for boxplot and scatterplot.
 
@@ -264,7 +315,7 @@ def format_data(specs, values, data_type):
         pars = get_pars(specs)
         for index, row in pars.iterrows():
             data.append([value[index] for value in values])
-            labels.append(row['Roi'] + ' ' + row['Par'])
+            labels.append(f"{row['Term']} {row['Roi']} {row['Par']}")
     return data, labels
 
 
