@@ -138,8 +138,8 @@ def objective(plan, beam_set, result, repo_path, pars):
     flag = calc_plan(plan, beam_set, result.norm)
     result.flag_list.append(flag)
     print(f'Flag: {flag}', flush=True)
-    return get_score(plan, result.goal_df, result.norm, flag, result.goal_dict,
-                     repo_path)
+    return get_utility(plan, result.goal_df, result.norm, flag,
+                       result.goal_dict, repo_path)
 
 
 def set_pars(plan, func_df, pars):
@@ -222,12 +222,12 @@ def calc_plan(plan, beam_set, norm):
         return 1
 
 
-def get_score(plan, goal_df, norm, flag, goal_dict, repo_path):
-    """Calculate treatment plan score.
+def get_utility(plan, goal_df, norm, flag, goal_dict, repo_path):
+    """Calculate treatment plan utility.
 
-    The treatment plan score is a linear combination of the relative
-    difference between goal values and goal results. Returns 1e6 if
-    RayStation optimization failed.
+    Returns 1e6 if RayStation optimization failed.
+    Negative of utility computed in raybay module (since skopt solves
+    a minimization problem).
 
     Parameters
     ----------
@@ -247,22 +247,23 @@ def get_score(plan, goal_df, norm, flag, goal_dict, repo_path):
     Returns
     -------
     float
-        Treatment plan score.
+        Treatment plan utility.
 
     """
     if flag == 2:
         return 1e6
     results = get_results(plan, goal_df)
     scale = get_scale(goal_df, norm, results) if flag == 1 else 1.0
-    score = 0
+    utility = 0
     for index, row in goal_df.iterrows():
         value = scale*results[index]
         goal_dict[index].append(value)
-        score += -row['Weight']*raybay.get_term(value, row['AcceptanceLevel'],
-                                                row['Type'], row['Shape'])
+        term = raybay.get_term(value, row['AcceptanceLevel'], row['Type'],
+                               row['Shape'])
+        utility += -row['Weight']*term
     with open(repo_path + 'goal_dict.pkl', 'wb') as fp:
         pickle.dump(goal_dict, fp)
-    return score
+    return utility
 
 
 def get_results(plan, goal_df):
