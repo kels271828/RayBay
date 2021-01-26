@@ -240,6 +240,8 @@ def goalplot(goal_df, res_dict, percent=True):
 def cluster_data(goal_dict, data, labels, data_type):
     """Get indices for hierarchical goal value clusters.
 
+    Modified from https://github.com/TheLoneNut/CorrelationMatrixClustering/blob/master/CorrelationMatrixClustering.ipynb
+
     Parameters
     ----------
     goal_dict : dict
