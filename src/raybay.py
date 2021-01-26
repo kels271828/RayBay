@@ -109,7 +109,7 @@ class RaybayResult:
         if isinstance(goals, str):
             self.goal_df = pd.read_csv(goals)
         else:
-            self.goal_df = get_goals(self.funcs)
+            self.goal_df = get_goals(self.func_df)
         self.roi_list = set(self.goal_df['Roi'])
         self.norm = norm
         self.solver = solver
@@ -211,6 +211,37 @@ class RaybayResult:
         """
         roi_list = self.roi_list if roi_list is None else roi_list
         analyze.dvhplot(self.dvh_dict, roi_list)
+
+
+class OptimizeResult:
+    """Grid search parameter values.
+
+    Because grid search doesn't have a utility function, we do not need
+    to store opt_results as a scipy.optimize.OptimizeResult (with
+    attributes like x, fun, func_vals, etc.). However, we want to be
+    able to access x_iters similarly for plotting routines.
+
+    Attributes
+    ----------
+    x_iters : list of lists
+        Parameter evaluations for each iteration.
+
+    """
+    def __init__(self, x_iters):
+        """Initialize instance of OptimizeResult
+
+        Parameters
+        ----------
+        x_iters : list of lists
+            Parameter evaluations for each iteration.
+
+        Returns
+        -------
+        OptimizeResult
+            Grid search parameter values.
+
+        """
+        self.x_iters = x_iters
 
 
 def get_funcs(funcs):
