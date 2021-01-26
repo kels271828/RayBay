@@ -21,13 +21,21 @@ patient = repo + 'results\\SBRT_lung_minsun\\'
 case = 'grid\\'
 
 # Calculate treatment plans
-result = optimize.grid_search(
-    funcs=patient + case + 'funcs.csv',
-    norm=('PTV', 4800, 95),
-    goals=patient + case + 'goals_lin_rib.csv',
-    n_points=5)
+
+
+# Calculate treatment plans
+log_path = patient + case + 'log_grid_1.txt'
+stdout = sys.stdout
+with open(log_path, 'w') as fp:
+    sys.stdout = fp
+    result = optimize.grid_search(
+        funcs=patient + case + 'funcs.csv',
+        norm=('PTV', 4800, 95),
+        goals=patient + case + 'goals_lin_rib.csv',
+        n_points=25)
+sys.stdout = stdout
 
 # Save results
-result_path = patient + case + 'res_grid.pkl'
+result_path = patient + case + 'res_grid_1.pkl'
 with open(result_path, 'wb') as fp:
     pickle.dump(result, fp)

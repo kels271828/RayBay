@@ -154,7 +154,7 @@ def grid_search(funcs, norm, goals=None, n_points=25):
         set_pars(plan, result.func_df, [par])
         flag = calc_plan(plan, beam_set, norm)
         result.flag_list.append(flag)
-        print(f'Par: {par}, Flag: {flag}')
+        print(f'Par: {par}, Flag: {flag}, Time: {time() - start_time:.4f}')
         results = get_results(plan, result.goal_df)
         scale = get_scale(result.goal_df, result.norm, results) \
             if flag == 1 else 1.0
