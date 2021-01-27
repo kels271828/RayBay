@@ -115,9 +115,6 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
 def grid_search(funcs, norm, goals=None, n_points=25):
     """1D grid search for RayStation treatment planning.
 
-    Will need to make changes for 2D grid searches. Note that x_iters
-    should be a list of length n_iters, and not of length n_pars.
-
     Parameters
     ----------
     funcs : str
@@ -128,7 +125,7 @@ def grid_search(funcs, norm, goals=None, n_points=25):
         Path to CSV with clinical goal specifications.
         If None, goals are assigned based on constituent functions.
     n_points : int, optional
-        Number of treatment plans to evaluate for each dimension.
+        Number of treatment plans to evaluate.
 
     Returns
     -------
@@ -167,7 +164,70 @@ def grid_search(funcs, norm, goals=None, n_points=25):
     result.time = time() - start_time
 
     # Save parameter values
-    result.opt_result = raybay.OptimizeResult(pars)
+    x_iters = [[par] for par in pars]
+    result.opt_result = raybay.OptimizeResult(x_iters)
+
+    return result
+
+
+def grid_search2(funcs, norm, goals=None, n_points=[25, 25]):
+    """2D grid search for RayStation treatment planning.
+
+    Parameters
+    ----------
+    funcs : str
+        Path to CSV with constituent function specifications.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
+    goals : pandas.DataFrame or str, optional
+        Path to CSV with clinical goal specifications.
+        If None, goals are assigned based on constituent functions.
+    n_points : list of int, optional
+        Number of treatment plans to evaluate for each dimension.
+
+    Returns
+    -------
+    raybay.RaybayResult
+        RayStation treatment plan results.
+
+    """
+    # Get RayStation objects
+    patient = connect.get_current('Patient')
+    case = connect.get_current('Case')
+    plan = connect.get_current('Plan')
+    beam_set = connect.get_current('BeamSet')
+
+    # Initialize result object
+    result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name, funcs,
+                                 norm, goals)
+    dims = get_dims(result.func_df)[:2]
+    pars = [np.linspace(dims[ii][0], dims[ii][1], n_points[ii])
+            for ii in range(2)]
+    x_iters = []
+
+    # Evaluate treatment plans
+    start_time = time()
+    for ii in pars[0]:
+        for jj in pars[1]:
+            x_iters.append([ii, jj])
+            set_pars(plan, result.func_df, [ii, jj])
+            flag = calc_plan(plan, beam_set, norm)
+            result.flag_list.append(flag)
+            time_iter = time() - start_time
+            print(f'Pars: {ii, jj}, Flag: {flag}, Time: {time_iter:.4f}',
+                  flush=True)
+            results = get_results(plan, result.goal_df)
+            scale = get_scale(result.goal_df, result.norm, results) \
+                if flag == 1 else 1.0
+            for index, row in result.goal_df.iterrows():
+                value = scale*results[index]
+                result.goal_dict[index].append(value)
+            with open(funcs[:-9] + 'goal_dict.pkl', 'wb') as fp:
+                pickle.dump(result.goal_dict, fp)
+    result.time = time() - start_time
+
+    # Save parameter values
+    result.opt_result = raybay.OptimizeResult(x_iters)
 
     return result
 
