@@ -159,12 +159,21 @@ def scatterplot(goal_df, goal_dict, func_df=None, par_list=None):
         level = goal_df.iloc[ii]['AcceptanceLevel']
         fig, ax = plt.subplots(1, len(xdata), figsize=(25, 5))
         for jj in range(len(xdata)):
-            ax[jj].plot(xdata[jj], ydata[ii], '.')
-            ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
-            ax[jj].set_xlabel(xlabels[jj])
-            corr = np.corrcoef(xdata[jj], ydata[ii])[0, 1]
-            ax[jj].set_title(f'Corr: {corr:.2f}')
-        ax[0].set_ylabel(ylabels[ii])
+            if len(xdata) == 1:
+                ax.plot(xdata[jj], ydata[ii], '.')
+                ax.plot([min(xdata[jj]), max(xdata[jj])], [level, level])
+                ax.set_xlabel(xlabels[jj])
+                corr = np.corrcoef(xdata[jj], ydata[ii])[0, 1]
+                ax.set_title(f'Corr: {corr:.2f}')
+                ax.set_ylabel(ylabels[ii])
+            else:
+                ax[jj].plot(xdata[jj], ydata[ii], '.')
+                ax[jj].plot([min(xdata[jj]), max(xdata[jj])], [level, level])
+                ax[jj].set_xlabel(xlabels[jj])
+                corr = np.corrcoef(xdata[jj], ydata[ii])[0, 1]
+                ax[jj].set_title(f'Corr: {corr:.2f}')
+                if jj == 0:
+                    ax[0].set_ylabel(ylabels[ii])
 
 
 def dvhplot(dvh_dict, roi_list):
