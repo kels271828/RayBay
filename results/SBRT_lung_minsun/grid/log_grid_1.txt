@@ -1,25 +1,69 @@
-Par: 0.0, Flag: 1, Time: 159.6189
-Par: 100.0, Flag: 0, Time: 317.3829
-Par: 200.0, Flag: 0, Time: 439.5841
-Par: 300.0, Flag: 0, Time: 574.6926
-Par: 400.0, Flag: 0, Time: 718.3223
-Par: 500.0, Flag: 0, Time: 856.8545
-Par: 600.0, Flag: 0, Time: 1003.3325
-Par: 700.0, Flag: 0, Time: 1140.5830
-Par: 800.0, Flag: 0, Time: 1276.7151
-Par: 900.0, Flag: 0, Time: 1412.9579
-Par: 1000.0, Flag: 0, Time: 1532.7248
-Par: 1100.0, Flag: 0, Time: 1652.6501
-Par: 1200.0, Flag: 0, Time: 1780.4592
-Par: 1300.0, Flag: 0, Time: 1902.0836
-Par: 1400.0, Flag: 0, Time: 2010.8553
-Par: 1500.0, Flag: 0, Time: 2119.8809
-Par: 1600.0, Flag: 0, Time: 2219.2255
-Par: 1700.0, Flag: 0, Time: 2323.5611
-Par: 1800.0, Flag: 0, Time: 2423.9759
-Par: 1900.0, Flag: 0, Time: 2523.7593
-Par: 2000.0, Flag: 0, Time: 2614.5134
-Par: 2100.0, Flag: 0, Time: 2709.1034
-Par: 2200.0, Flag: 0, Time: 2800.3337
-Par: 2300.0, Flag: 0, Time: 2893.8818
-Par: 2400.0, Flag: 0, Time: 2986.8647
+Pars: (0.0, 0.0), Flag: 1, Time: 153.3356
+Pars: (0.0, 100.0), Flag: 1, Time: 312.9817
+Pars: (0.0, 200.0), Flag: 1, Time: 470.8674
+Pars: (0.0, 300.0), Flag: 1, Time: 620.4651
+Pars: (0.0, 400.0), Flag: 1, Time: 784.6793
+Pars: (0.0, 500.0), Flag: 1, Time: 937.7131
+Pars: (0.0, 600.0), Flag: 1, Time: 1090.3671
+Pars: (0.0, 700.0), Flag: 1, Time: 1242.8419
+Pars: (0.0, 800.0), Flag: 1, Time: 1412.7149
+Pars: (0.0, 900.0), Flag: 1, Time: 1566.6728
+Pars: (0.0, 1000.0), Flag: 1, Time: 1724.4247
+Pars: (0.0, 1100.0), Flag: 1, Time: 1878.1361
+Pars: (0.0, 1200.0), Flag: 1, Time: 2032.0076
+Pars: (0.0, 1300.0), Flag: 1, Time: 2189.6068
+Pars: (0.0, 1400.0), Flag: 1, Time: 2352.7636
+Pars: (0.0, 1500.0), Flag: 1, Time: 2507.1201
+Pars: (0.0, 1600.0), Flag: 1, Time: 2662.8873
+Pars: (0.0, 1700.0), Flag: 1, Time: 2821.3870
+Pars: (0.0, 1800.0), Flag: 1, Time: 2975.1490
+Pars: (0.0, 1900.0), Flag: 1, Time: 3133.2446
+Pars: (0.0, 2000.0), Flag: 1, Time: 3291.5111
+Pars: (0.0, 2100.0), Flag: 1, Time: 3460.5317
+Pars: (0.0, 2200.0), Flag: 1, Time: 3615.3842
+Pars: (0.0, 2300.0), Flag: 1, Time: 3771.1510
+Pars: (0.0, 2400.0), Flag: 1, Time: 3958.6842
+Pars: (0.0, 2500.0), Flag: 1, Time: 4173.5130
+Pars: (0.0, 2600.0), Flag: 1, Time: 4380.6397
+Pars: (0.0, 2700.0), Flag: 1, Time: 4534.2593
+Pars: (0.0, 2800.0), Flag: 1, Time: 4689.8250
+Pars: (0.0, 2900.0), Flag: 1, Time: 4845.1073
+Pars: (0.0, 3000.0), Flag: 1, Time: 4999.3225
+Pars: (0.0, 3100.0), Flag: 1, Time: 5156.9773
+Pars: (0.0, 3200.0), Flag: 1, Time: 5313.0458
+Pars: (0.0, 3300.0), Flag: 1, Time: 5466.2334
+Pars: (0.0, 3400.0), Flag: 1, Time: 5648.1673
+Pars: (0.0, 3500.0), Flag: 1, Time: 5843.5878
+Pars: (0.0, 3600.0), Flag: 1, Time: 6040.2358
+Pars: (0.0, 3700.0), Flag: 1, Time: 6206.0618
+Pars: (0.0, 3800.0), Flag: 1, Time: 6362.7815
+Pars: (0.0, 3900.0), Flag: 1, Time: 6550.1995
+Pars: (0.0, 4000.0), Flag: 1, Time: 6709.3573
+Pars: (100.0, 0.0), Flag: 1, Time: 6854.2446
+Pars: (100.0, 100.0), Flag: 1, Time: 7001.7472
+Pars: (100.0, 200.0), Flag: 0, Time: 7153.4943
+Pars: (100.0, 300.0), Flag: 0, Time: 7300.9667
+Pars: (100.0, 400.0), Flag: 0, Time: 7449.7110
+Pars: (100.0, 500.0), Flag: 0, Time: 7600.5409
+Pars: (100.0, 600.0), Flag: 0, Time: 7746.2891
+Pars: (100.0, 700.0), Flag: 0, Time: 7894.2098
+Pars: (100.0, 800.0), Flag: 1, Time: 8041.7970
+Pars: (100.0, 900.0), Flag: 0, Time: 8190.8413
+Pars: (100.0, 1000.0), Flag: 0, Time: 8339.2103
+Pars: (100.0, 1100.0), Flag: 0, Time: 8490.1524
+Pars: (100.0, 1200.0), Flag: 0, Time: 8637.3526
+Pars: (100.0, 1300.0), Flag: 1, Time: 8782.7185
+Pars: (100.0, 1400.0), Flag: 0, Time: 8929.3540
+Pars: (100.0, 1500.0), Flag: 0, Time: 9078.3536
+Pars: (100.0, 1600.0), Flag: 0, Time: 9221.7441
+Pars: (100.0, 1700.0), Flag: 1, Time: 9371.2108
+Pars: (100.0, 1800.0), Flag: 1, Time: 9516.2951
+Pars: (100.0, 1900.0), Flag: 0, Time: 9666.6184
+Pars: (100.0, 2000.0), Flag: 0, Time: 9816.8572
+Pars: (100.0, 2100.0), Flag: 0, Time: 9965.5119
+Pars: (100.0, 2200.0), Flag: 0, Time: 10115.2573
+Pars: (100.0, 2300.0), Flag: 0, Time: 10265.6171
+Pars: (100.0, 2400.0), Flag: 0, Time: 10410.5904
+Pars: (100.0, 2500.0), Flag: 0, Time: 10557.9752
+Pars: (100.0, 2600.0), Flag: 0, Time: 10707.8577
+Pars: (100.0, 2700.0), Flag: 1, Time: 10853.7763

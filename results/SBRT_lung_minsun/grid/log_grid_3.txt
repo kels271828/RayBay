@@ -1,0 +1,13 @@
+Par: 2800.0, Flag: 0, Time: 161.6158
+Par: 2900.0, Flag: 1, Time: 321.8054
+Par: 3000.0, Flag: 1, Time: 481.3404
+Par: 3100.0, Flag: 1, Time: 641.0536
+Par: 3200.0, Flag: 1, Time: 803.8513
+Par: 3300.0, Flag: 0, Time: 969.1213
+Par: 3400.0, Flag: 0, Time: 1123.7141
+Par: 3500.0, Flag: 0, Time: 1284.1699
+Par: 3600.0, Flag: 0, Time: 1446.9807
+Par: 3700.0, Flag: 0, Time: 1609.8335
+Par: 3800.0, Flag: 0, Time: 1777.8428
+Par: 3900.0, Flag: 0, Time: 1946.7558
+Par: 4000.0, Flag: 0, Time: 2113.2847

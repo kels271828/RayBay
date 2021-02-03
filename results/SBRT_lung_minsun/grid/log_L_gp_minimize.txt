@@ -1,0 +1,8 @@
+Iteration No: 1 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 1 ended. Evaluation done at random point.
+Time taken: 97.0790
+Function value obtained: -210.8782
+Current minimum: -210.8782
+Iteration No: 2 started. Evaluating function at random point.
+Flag: 0
