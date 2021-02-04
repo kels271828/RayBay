@@ -1,0 +1,32 @@
+Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+SpinalCanal,MaxDose,2080,0,,90
+Esophagus,MaxDose,1880,0,,90
+Heart,MaxDose,2800,0,,90
+GreatVes,MaxDose,4300,0,,90
+Trachea,MaxDose,1560,0,,90
+Bronchus,MaxDose,1560,0,,90
+Rib,MaxDose,3200,0,,90
+Skin,MaxDose,3320,0,,90
+PTV,MaxDose,6240,0,,95
+PTV,MinDose,4800,0,,100
+Chestwall_L,MaxDvh,3000,1.5,,90
+Lungs,MaxDvh,2000,10,,90
+D2cm,MaxDose,2300,0,,90
+Pericardium,MaxDose,2800,0,,90
+R1,MaxDose,4400,0,,90
+R2,MaxDose,4200,0,,90
+D2cm_CD,MaxDose,2300,0,,90
+D2cm_CD2,MaxDose,2300,0,,90
+PTV_5000,MinDose,5000,0,,750
+PTV_5000,MaxDose,6750,0,,50
+External,"Dose Fall-Off [H]5000 cGy [L]2500 cGy, Low dose distance 2.50 cm",,,,1
+MAX 3600,MaxDose,3750,0,,1
+MAX 1680,MaxDose,1750,0,,1
+D2cm,MaxDose,2250,0,,125
+Proximal_Bronchial_Tree,MaxEud,500,,1,1
+12,MaxDvh,2250,15,,1
+max 3100,MaxDose,3250,0,,1
+Lung (Left),MaxDvh,1350,5,,1
+Rib,MaxDose,5000,0,,1
+Lung (Left),MaxEud,500,,1,1
+Proximal_Bronchial_Tree,MaxDvh,1000,3,,1
