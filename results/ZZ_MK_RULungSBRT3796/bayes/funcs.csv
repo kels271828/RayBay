@@ -1,0 +1,12 @@
+﻿Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+ChestWall,MaxDvh,"[750,3000]",1.94,,1
+D2cm,MaxDose,"[750,3000]",0,,1
+Esophagus,MaxDvh,"[470,1880]",19.97,,1
+Lung_Total-GTV,MaxDvh,"[290,1160]",56.63,,1
+Lung_Total-GTV,MaxDvh,"[310,1240]",37.76,,1
+PTV,MinDvh,4800,95,,1
+PTV,MaxDose,"[5600,8000]",0,,1
+Ribs,MaxDvh,"[800,3200]",2.13,,1
+Ribs,MaxDose,"[1000,4000]",0,,1
+SpinalCanal,MaxDvh,"[340,1360]",1.99,,1
+SpinalCanal,MaxDose,"[650,2600]",0,,1
