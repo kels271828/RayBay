@@ -1,0 +1,12 @@
+﻿Roi,Type,GoalCriteria,AcceptanceLevel,ParameterValue,Weight,Shape
+Chestwall_L,MaxDvh,AtMost,3000,2.04,1,linear
+D2cm,MaxDose,AtMost,2400,,1,linear_quadratic
+Esophagus,MaxDvh,AtMost,1880,16.91,1,linear_quadratic
+Lungs,MaxDvh,AtMost,1160,29.19,1,linear_quadratic
+Lungs,MaxDvh,AtMost,1240,19.46,1,linear_quadratic
+PTV,MinDvh,AtLeast,4800,95,1,linear_quadratic
+PTV,MaxDose,AtMost,8000,,1,linear_quadratic
+Rib,MaxDvh,AtMost,3200,0.27,1,linear
+Rib,MaxDose,AtMost,4000,,1,linear
+SpinalCanal,MaxDvh,AtMost,1360,2.3,1,linear_quadratic
+SpinalCanal,MaxDose,AtMost,2600,,1,linear_quadratic
