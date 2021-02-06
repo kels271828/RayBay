@@ -1,0 +1,600 @@
+Iteration No: 1 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 1 ended. Evaluation done at random point.
+Time taken: 83.8081
+Function value obtained: 2395.2420
+Current minimum: 2395.2420
+Iteration No: 2 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 2 ended. Evaluation done at random point.
+Time taken: 65.3696
+Function value obtained: 45.3936
+Current minimum: 45.3936
+Iteration No: 3 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 3 ended. Evaluation done at random point.
+Time taken: 67.9368
+Function value obtained: 4113.2220
+Current minimum: 45.3936
+Iteration No: 4 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 4 ended. Evaluation done at random point.
+Time taken: 68.5763
+Function value obtained: -152.5349
+Current minimum: -152.5349
+Iteration No: 5 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 5 ended. Evaluation done at random point.
+Time taken: 71.7019
+Function value obtained: 3265.3425
+Current minimum: -152.5349
+Iteration No: 6 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 6 ended. Evaluation done at random point.
+Time taken: 66.0972
+Function value obtained: 3490.3093
+Current minimum: -152.5349
+Iteration No: 7 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 7 ended. Evaluation done at random point.
+Time taken: 70.9523
+Function value obtained: 11912.6877
+Current minimum: -152.5349
+Iteration No: 8 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 8 ended. Evaluation done at random point.
+Time taken: 74.6594
+Function value obtained: 0.8772
+Current minimum: -152.5349
+Iteration No: 9 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 9 ended. Evaluation done at random point.
+Time taken: 72.6477
+Function value obtained: 24959.7049
+Current minimum: -152.5349
+Iteration No: 10 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 10 ended. Evaluation done at random point.
+Time taken: 67.3413
+Function value obtained: 4333.0582
+Current minimum: -152.5349
+Iteration No: 11 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 11 ended. Evaluation done at random point.
+Time taken: 68.8556
+Function value obtained: 5600.6497
+Current minimum: -152.5349
+Iteration No: 12 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 12 ended. Evaluation done at random point.
+Time taken: 70.9313
+Function value obtained: 22254.0848
+Current minimum: -152.5349
+Iteration No: 13 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 13 ended. Evaluation done at random point.
+Time taken: 66.9049
+Function value obtained: 4509.1983
+Current minimum: -152.5349
+Iteration No: 14 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 14 ended. Evaluation done at random point.
+Time taken: 70.8162
+Function value obtained: -409.9698
+Current minimum: -409.9698
+Iteration No: 15 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 15 ended. Evaluation done at random point.
+Time taken: 74.1039
+Function value obtained: 8049.7790
+Current minimum: -409.9698
+Iteration No: 16 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 16 ended. Evaluation done at random point.
+Time taken: 68.1540
+Function value obtained: -373.6006
+Current minimum: -409.9698
+Iteration No: 17 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 17 ended. Evaluation done at random point.
+Time taken: 66.3665
+Function value obtained: 4082.1586
+Current minimum: -409.9698
+Iteration No: 18 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 18 ended. Evaluation done at random point.
+Time taken: 69.1028
+Function value obtained: 5812.6414
+Current minimum: -409.9698
+Iteration No: 19 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 19 ended. Evaluation done at random point.
+Time taken: 67.1631
+Function value obtained: 5096.9289
+Current minimum: -409.9698
+Iteration No: 20 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 20 ended. Evaluation done at random point.
+Time taken: 65.1935
+Function value obtained: 709.2457
+Current minimum: -409.9698
+Iteration No: 21 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 21 ended. Evaluation done at random point.
+Time taken: 74.9897
+Function value obtained: 4706.0160
+Current minimum: -409.9698
+Iteration No: 22 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 22 ended. Evaluation done at random point.
+Time taken: 73.3783
+Function value obtained: 6655.2609
+Current minimum: -409.9698
+Iteration No: 23 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 23 ended. Evaluation done at random point.
+Time taken: 69.7253
+Function value obtained: 1470.8579
+Current minimum: -409.9698
+Iteration No: 24 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 24 ended. Evaluation done at random point.
+Time taken: 71.4577
+Function value obtained: 220.1867
+Current minimum: -409.9698
+Iteration No: 25 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 25 ended. Evaluation done at random point.
+Time taken: 75.6352
+Function value obtained: 37941.3094
+Current minimum: -409.9698
+Iteration No: 26 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 26 ended. Evaluation done at random point.
+Time taken: 66.0592
+Function value obtained: 1928.0882
+Current minimum: -409.9698
+Iteration No: 27 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 27 ended. Evaluation done at random point.
+Time taken: 69.6953
+Function value obtained: 6091.5717
+Current minimum: -409.9698
+Iteration No: 28 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 28 ended. Evaluation done at random point.
+Time taken: 67.7026
+Function value obtained: 4372.1755
+Current minimum: -409.9698
+Iteration No: 29 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 29 ended. Evaluation done at random point.
+Time taken: 67.4834
+Function value obtained: 7890.8137
+Current minimum: -409.9698
+Iteration No: 30 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 30 ended. Evaluation done at random point.
+Time taken: 69.6032
+Function value obtained: 6808.8335
+Current minimum: -409.9698
+Iteration No: 31 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 31 ended. Evaluation done at random point.
+Time taken: 67.9778
+Function value obtained: 4306.5820
+Current minimum: -409.9698
+Iteration No: 32 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 32 ended. Evaluation done at random point.
+Time taken: 74.7905
+Function value obtained: 15607.9910
+Current minimum: -409.9698
+Iteration No: 33 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 33 ended. Evaluation done at random point.
+Time taken: 72.5857
+Function value obtained: 3540.5373
+Current minimum: -409.9698
+Iteration No: 34 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 34 ended. Evaluation done at random point.
+Time taken: 68.8956
+Function value obtained: 3504.5277
+Current minimum: -409.9698
+Iteration No: 35 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 35 ended. Evaluation done at random point.
+Time taken: 64.6320
+Function value obtained: 1005.8462
+Current minimum: -409.9698
+Iteration No: 36 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 36 ended. Evaluation done at random point.
+Time taken: 76.9293
+Function value obtained: -299.5751
+Current minimum: -409.9698
+Iteration No: 37 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 37 ended. Evaluation done at random point.
+Time taken: 72.8639
+Function value obtained: -379.6526
+Current minimum: -409.9698
+Iteration No: 38 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 38 ended. Evaluation done at random point.
+Time taken: 69.5041
+Function value obtained: -267.7253
+Current minimum: -409.9698
+Iteration No: 39 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 39 ended. Evaluation done at random point.
+Time taken: 73.2672
+Function value obtained: 501.5065
+Current minimum: -409.9698
+Iteration No: 40 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 40 ended. Evaluation done at random point.
+Time taken: 72.4015
+Function value obtained: -340.3588
+Current minimum: -409.9698
+Iteration No: 41 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 41 ended. Evaluation done at random point.
+Time taken: 72.0462
+Function value obtained: 59.7075
+Current minimum: -409.9698
+Iteration No: 42 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 42 ended. Evaluation done at random point.
+Time taken: 70.6731
+Function value obtained: 5117.9663
+Current minimum: -409.9698
+Iteration No: 43 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 43 ended. Evaluation done at random point.
+Time taken: 67.9108
+Function value obtained: -423.3399
+Current minimum: -423.3399
+Iteration No: 44 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 44 ended. Evaluation done at random point.
+Time taken: 67.8377
+Function value obtained: -421.9144
+Current minimum: -423.3399
+Iteration No: 45 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 45 ended. Evaluation done at random point.
+Time taken: 67.4984
+Function value obtained: -162.5918
+Current minimum: -423.3399
+Iteration No: 46 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 46 ended. Evaluation done at random point.
+Time taken: 67.5355
+Function value obtained: -367.1228
+Current minimum: -423.3399
+Iteration No: 47 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 47 ended. Evaluation done at random point.
+Time taken: 69.4971
+Function value obtained: -315.0379
+Current minimum: -423.3399
+Iteration No: 48 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 48 ended. Evaluation done at random point.
+Time taken: 65.6669
+Function value obtained: 4017.5499
+Current minimum: -423.3399
+Iteration No: 49 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 49 ended. Evaluation done at random point.
+Time taken: 68.0108
+Function value obtained: 3771.1605
+Current minimum: -423.3399
+Iteration No: 50 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 50 ended. Evaluation done at random point.
+Time taken: 69.6332
+Function value obtained: 33.4964
+Current minimum: -423.3399
+Iteration No: 51 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 51 ended. Evaluation done at random point.
+Time taken: 71.2315
+Function value obtained: 1626.8554
+Current minimum: -423.3399
+Iteration No: 52 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 52 ended. Evaluation done at random point.
+Time taken: 69.1048
+Function value obtained: 1660.3459
+Current minimum: -423.3399
+Iteration No: 53 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 53 ended. Evaluation done at random point.
+Time taken: 68.6554
+Function value obtained: 3769.3087
+Current minimum: -423.3399
+Iteration No: 54 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 54 ended. Evaluation done at random point.
+Time taken: 73.3033
+Function value obtained: 22618.4762
+Current minimum: -423.3399
+Iteration No: 55 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 55 ended. Evaluation done at random point.
+Time taken: 66.7398
+Function value obtained: 609.9539
+Current minimum: -423.3399
+Iteration No: 56 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 56 ended. Evaluation done at random point.
+Time taken: 71.1845
+Function value obtained: 5660.8873
+Current minimum: -423.3399
+Iteration No: 57 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 57 ended. Evaluation done at random point.
+Time taken: 75.1748
+Function value obtained: 16582.8552
+Current minimum: -423.3399
+Iteration No: 58 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 58 ended. Evaluation done at random point.
+Time taken: 69.2859
+Function value obtained: 104.1151
+Current minimum: -423.3399
+Iteration No: 59 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 59 ended. Evaluation done at random point.
+Time taken: 77.1275
+Function value obtained: 4153.9101
+Current minimum: -423.3399
+Iteration No: 60 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 60 ended. Evaluation done at random point.
+Time taken: 68.1960
+Function value obtained: 4159.8206
+Current minimum: -423.3399
+Iteration No: 61 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 61 ended. Evaluation done at random point.
+Time taken: 74.9426
+Function value obtained: 14830.7124
+Current minimum: -423.3399
+Iteration No: 62 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 62 ended. Evaluation done at random point.
+Time taken: 67.8387
+Function value obtained: 4484.4398
+Current minimum: -423.3399
+Iteration No: 63 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 63 ended. Evaluation done at random point.
+Time taken: 71.9421
+Function value obtained: -370.6601
+Current minimum: -423.3399
+Iteration No: 64 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 64 ended. Evaluation done at random point.
+Time taken: 73.6816
+Function value obtained: -375.9823
+Current minimum: -423.3399
+Iteration No: 65 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 65 ended. Evaluation done at random point.
+Time taken: 70.1907
+Function value obtained: 2728.9073
+Current minimum: -423.3399
+Iteration No: 66 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 66 ended. Evaluation done at random point.
+Time taken: 66.6587
+Function value obtained: 329.3143
+Current minimum: -423.3399
+Iteration No: 67 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 67 ended. Evaluation done at random point.
+Time taken: 72.7848
+Function value obtained: 217.7266
+Current minimum: -423.3399
+Iteration No: 68 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 68 ended. Evaluation done at random point.
+Time taken: 72.0112
+Function value obtained: 11486.2390
+Current minimum: -423.3399
+Iteration No: 69 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 69 ended. Evaluation done at random point.
+Time taken: 70.5960
+Function value obtained: -422.0351
+Current minimum: -423.3399
+Iteration No: 70 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 70 ended. Evaluation done at random point.
+Time taken: 70.2427
+Function value obtained: 1050.6688
+Current minimum: -423.3399
+Iteration No: 71 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 71 ended. Evaluation done at random point.
+Time taken: 66.5756
+Function value obtained: -32.2314
+Current minimum: -423.3399
+Iteration No: 72 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 72 ended. Evaluation done at random point.
+Time taken: 71.2365
+Function value obtained: 20701.9120
+Current minimum: -423.3399
+Iteration No: 73 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 73 ended. Evaluation done at random point.
+Time taken: 67.8007
+Function value obtained: 3067.4182
+Current minimum: -423.3399
+Iteration No: 74 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 74 ended. Evaluation done at random point.
+Time taken: 69.7303
+Function value obtained: 4242.3068
+Current minimum: -423.3399
+Iteration No: 75 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 75 ended. Evaluation done at random point.
+Time taken: 68.9967
+Function value obtained: 4970.5332
+Current minimum: -423.3399
+Iteration No: 76 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 76 ended. Evaluation done at random point.
+Time taken: 74.8766
+Function value obtained: 20731.7322
+Current minimum: -423.3399
+Iteration No: 77 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 77 ended. Evaluation done at random point.
+Time taken: 74.1190
+Function value obtained: 32766.6858
+Current minimum: -423.3399
+Iteration No: 78 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 78 ended. Evaluation done at random point.
+Time taken: 73.4904
+Function value obtained: 5042.4556
+Current minimum: -423.3399
+Iteration No: 79 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 79 ended. Evaluation done at random point.
+Time taken: 68.8656
+Function value obtained: 6127.6061
+Current minimum: -423.3399
+Iteration No: 80 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 80 ended. Evaluation done at random point.
+Time taken: 68.5273
+Function value obtained: 12344.7935
+Current minimum: -423.3399
+Iteration No: 81 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 81 ended. Evaluation done at random point.
+Time taken: 67.6405
+Function value obtained: 1318.5570
+Current minimum: -423.3399
+Iteration No: 82 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 82 ended. Evaluation done at random point.
+Time taken: 73.1471
+Function value obtained: -412.8437
+Current minimum: -423.3399
+Iteration No: 83 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 83 ended. Evaluation done at random point.
+Time taken: 68.9837
+Function value obtained: 6336.1012
+Current minimum: -423.3399
+Iteration No: 84 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 84 ended. Evaluation done at random point.
+Time taken: 67.2752
+Function value obtained: 2351.5143
+Current minimum: -423.3399
+Iteration No: 85 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 85 ended. Evaluation done at random point.
+Time taken: 75.7383
+Function value obtained: 26737.9930
+Current minimum: -423.3399
+Iteration No: 86 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 86 ended. Evaluation done at random point.
+Time taken: 69.9925
+Function value obtained: 33231.4927
+Current minimum: -423.3399
+Iteration No: 87 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 87 ended. Evaluation done at random point.
+Time taken: 67.6806
+Function value obtained: 4442.9882
+Current minimum: -423.3399
+Iteration No: 88 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 88 ended. Evaluation done at random point.
+Time taken: 67.8847
+Function value obtained: 3277.6928
+Current minimum: -423.3399
+Iteration No: 89 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 89 ended. Evaluation done at random point.
+Time taken: 78.3935
+Function value obtained: 14084.6321
+Current minimum: -423.3399
+Iteration No: 90 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 90 ended. Evaluation done at random point.
+Time taken: 70.6430
+Function value obtained: 7472.5741
+Current minimum: -423.3399
+Iteration No: 91 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 91 ended. Evaluation done at random point.
+Time taken: 66.2284
+Function value obtained: -417.0742
+Current minimum: -423.3399
+Iteration No: 92 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 92 ended. Evaluation done at random point.
+Time taken: 75.0768
+Function value obtained: 502.0031
+Current minimum: -423.3399
+Iteration No: 93 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 93 ended. Evaluation done at random point.
+Time taken: 66.0792
+Function value obtained: -347.4911
+Current minimum: -423.3399
+Iteration No: 94 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 94 ended. Evaluation done at random point.
+Time taken: 74.0189
+Function value obtained: 15271.0508
+Current minimum: -423.3399
+Iteration No: 95 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 95 ended. Evaluation done at random point.
+Time taken: 67.1822
+Function value obtained: 177.0583
+Current minimum: -423.3399
+Iteration No: 96 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 96 ended. Evaluation done at random point.
+Time taken: 73.4894
+Function value obtained: -279.3805
+Current minimum: -423.3399
+Iteration No: 97 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 97 ended. Evaluation done at random point.
+Time taken: 69.3209
+Function value obtained: 7527.1712
+Current minimum: -423.3399
+Iteration No: 98 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 98 ended. Evaluation done at random point.
+Time taken: 72.8159
+Function value obtained: 0.8560
+Current minimum: -423.3399
+Iteration No: 99 started. Evaluating function at random point.
+Flag: 1
+Iteration No: 99 ended. Evaluation done at random point.
+Time taken: 69.5311
+Function value obtained: 5278.5415
+Current minimum: -423.3399
+Iteration No: 100 started. Evaluating function at random point.
+Flag: 0
+Iteration No: 100 ended. Evaluation done at random point.
+Time taken: 71.2375
+Function value obtained: -248.9364
+Current minimum: -423.3399
