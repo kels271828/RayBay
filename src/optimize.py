@@ -112,7 +112,7 @@ def get_plan(funcs, norm, goals=None, solver='gp_minimize', n_calls=25,
     return result
 
 
-def grid_search(funcs, norm, goals=None, n_points=25):
+def grid_search(funcs, norm, goals=None, n_points=25, weight=False):
     """1D grid search for RayStation treatment planning.
 
     Parameters
@@ -126,6 +126,8 @@ def grid_search(funcs, norm, goals=None, n_points=25):
         If None, goals are assigned based on constituent functions.
     n_points : int, optional
         Number of treatment plans to evaluate.
+    weight : bool, optional
+        If True, uses logspacing for grid values.
 
     Returns
     -------
@@ -143,7 +145,10 @@ def grid_search(funcs, norm, goals=None, n_points=25):
     result = raybay.RaybayResult(patient.Name, case.CaseName, plan.Name, funcs,
                                  norm, goals)
     dims = get_dims(result.func_df)[0]
-    pars = np.linspace(dims[0], dims[1], n_points)
+    if weight:
+        pars = np.geomspace(dims[0], dims[1], n_points)
+    else:
+        pars = np.linspace(dims[0], dims[1], n_points)
 
     # Evaluate treatment plans
     start_time = time()
