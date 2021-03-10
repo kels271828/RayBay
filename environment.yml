@@ -1,0 +1,14 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - flake8
+  - jupyter
+  - matplotlib
+  - numpy
+  - pandas
+  - python=3.7
+  - scikit-learn
+  - scikit-optimize
+  - scipy
+  - seaborn
