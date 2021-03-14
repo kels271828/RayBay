@@ -1,9 +1,4 @@
-"""RayStation treatment planning with Bayesian optimization.
-
-TODO:
-* Add 1D grid_search function
-
-"""
+"""RayStation treatment planning with Bayesian optimization."""
 import pickle
 import re
 from time import time
