@@ -1,28 +1,24 @@
-"""Get approved and default plans.
-
-In Spyder preferences, set current working directory to default working
-directory.
-
-"""
+"""Get clinical and default plans."""
 import pickle
 import sys
 
 import connect
 
-repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\autoray\\'
+repo_path = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\raybay\\'
 sys.path.append(repo_path + 'src\\')
 import optimize
 import raybay
 
 # Patient
-#patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
+patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 #patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
-patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
+#patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
+#patient_path = repo_path + 'results\\ZZ_MK_LLLungSBRT3977\\'
 
 # Case
-#case_path = 'approved\\'
-case_path = 'default\\'
+case_path = 'approved\\'
+#case_path = 'default\\'
 
 # Get RayStation objects
 patient = connect.get_current('Patient')
@@ -32,11 +28,11 @@ beam_set = connect.get_current('BeamSet')
 
 # Initialize result object
 result = raybay.RaybayResult(
-    name=patient.Name,
-    case=case.CaseName,
-    plan=plan.Name,
-    funcs=patient_path + case_path + 'funcs.csv',
-    norm=('PTV', 4800, 95),
+    patient.Name,
+    case.CaseName,
+    plan.Name,
+    patient_path + case_path + 'funcs.csv',
+    ('PTV', 4800, 95),
     goals=patient_path + 'goals.csv')
 
 # Add results
