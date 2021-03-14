@@ -1,12 +1,4 @@
-"""Visualize sampled treatment plan results.
-
-TODO:
-- plot dvh
-- compare dvh
-- print result percent change
-- compare result percent change
-
-"""
+"""Visualize sampled treatment plan results."""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
