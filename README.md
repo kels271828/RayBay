@@ -1,4 +1,7 @@
 # RayBay
+
+[![DOI](https://zenodo.org/badge/261853893.svg)](https://zenodo.org/badge/latestdoi/261853893)
+
 Automatic parameter tuning for the RayStation treatment planning system
 
 ## Code
