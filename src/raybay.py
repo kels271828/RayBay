@@ -8,8 +8,9 @@ single value, tunable parameters should be a list containing the
 minimum and maximum values, and irrelevant parameters can be left blank.
 
 Clinical goals are specified by columns Roi, Type, GoalCriteria,
-AcceptanceLevel, and ParameterValue. Valid types include MinDose,
-AverageDose, MaxDose, MinDose, MinDvh, and MaxDvh.
+AcceptanceLevel, ParameterValue, Weight, and Shape. Valid types include
+AverageDose, MinDose, MaxDose, MinDvh, and MaxDvh. Valid shapes include
+linear and linear_quadratic.
 
 Treatment plan utility function terms are specified by columms Weight
 and Shape, and are included with the clinical goals. Valid shapes
