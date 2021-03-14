@@ -1,14 +1,25 @@
-# autoray
-Automatic parameter tuning for RayStation
+# RayBay
+Automatic parameter tuning for the RayStation treatment planning system
 
-# Current Workflow
+## Code
 
-Here is my current workflow for running Python scripts for RayStation in Spyder.
-Based on [Landon's instructions](https://github.com/kels271828/autoray/blob/master/docs/Raystation%20Virtual%20Environment.docx), but some things have been modified.
-Other scripting information can be found in the [RayStation documentation](https://github.com/kels271828/autoray/blob/master/docs/RSL-D-RS-8B-SG-EN-1.0-2018-12-20%20RayStation%208B%20Scripting%20Guideline.pdf).
+* [raybay](/src/raybay.py): Class and functions for specifying and saving problem instances.
+* [optimize](/src/optimize.py): Hyperparameter optimization functions for RayStation treatment planning system.
+* [analyze](/src/analyze.py): Plotting functions to visualize treatment plan results.
 
-## Launch RayStation
-1. Log into Citrix Receiver at https://access.radonc.washington.edu/
+Data and notebooks used to create the figures appearing in chapter 4 of my dissertation can be found in [results](/results).
+
+## Workflow
+
+### Define clinical goals and objective functions
+
+* Clinical goals are specified in a CSV file with columns Roi, Type, GoalCriteria, AcceptanceLevel, ParameterValue, Weight, and Shape. Valid types include AverageDose, MinDose, MaxDose, MinDvh, and MaxDvh. Valid shapes include linear and linear_quadratic.
+* Constituent functions are specified in a CSV file with columns Roi, FunctionType, DoseLevel, PercentVolume, EudParameterA, and Weight. The row index within the table should correspond to the constituent function in the RayStation objective. Fixed parameters should be a single value, tunable parameters should be a list containing the minimum and maximum values, and irrelevant parameters can be left blank.
+
+See [results](/results) for examples.
+
+### Launch RayStation
+1. Log in to Citrix Receiver
 2. Open RayStation 8B SP1
 3. Open RayStation Planning
 3. Select patient and plan
@@ -17,7 +28,7 @@ Other scripting information can be found in the [RayStation documentation](https
 4. In Scripting tab, run script `run_console` (may need to de-select "Show only validated scripts" in Settings)
 5. Create a new tab in the RayStation console
 
-## Set up virtual environment
+### Set up virtual environment
 
 1. Create virtual environment: ``python -m venv fpath\virtual_environment``
 2. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
@@ -25,7 +36,7 @@ Other scripting information can be found in the [RayStation documentation](https
 
 Note: Setting up the virtual environment only needs to be done once.
 
-## Run Spyder and connect to RayStation
+### Run Spyder and connect to RayStation
 1. Activate virtual environment: ``fpath\virtual_environment\Scripts\activate.bat``
 2. Run Spyder: ``spyder``
 3. Start Spyder kernel: ``python -m spyder_kernels.console``
@@ -34,13 +45,9 @@ Note: Setting up the virtual environment only needs to be done once.
     * Click "Connect to existing kernel"
     * Enter kernel number listed in the RayStation console
     
-## Run Python Script
+### Run Python Script
 1. Open script in Spyder
     * To use scripts on local computer, may need to change read/write settings first
-2. Click "Run file" button, press F5 button, or use ``%run fpath\script.py`` in console
+2. Click "Run file" button
 
-After I updated my environment packages, I am now getting an error upon opening spyder and connecting to the kernel.
-I also had a problem with the path and/or working directory, and needed to import connect before running the script.
-
-Haven't tried, but assuming could also run in RayStation console with ``python fpath\script``.
-Wouldn't be good for debugging, but okay once script working.
+See [src](/src) for example scripts.
