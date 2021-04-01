@@ -102,7 +102,7 @@ pytz==2020.5
 pywin32==300
 pywin32-ctypes==0.2.0
 pywinpty==0.5.7
-PyYAML==5.3.1
+PyYAML==5.4
 pyzmq==20.0.0
 QDarkStyle==2.8.1
 QtAwesome==1.0.2
