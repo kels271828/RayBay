@@ -156,7 +156,7 @@ def grid_search(funcs, norm, goals=None, n_points=25, weight=False):
         results = get_results(plan, result.goal_df)
         scale = get_scale(result.goal_df, result.norm, results) \
             if flag == 1 else 1.0
-        for index, row in result.goal_df.iterrows():
+        for index, _ in result.goal_df.iterrows():
             value = scale*results[index]
             result.goal_dict[index].append(value)
         with open(funcs[:-9] + 'goal_dict.pkl', 'wb') as fp:
@@ -219,7 +219,7 @@ def grid_search2(funcs, norm, goals=None, n_points=[25, 25]):
             results = get_results(plan, result.goal_df)
             scale = get_scale(result.goal_df, result.norm, results) \
                 if flag == 1 else 1.0
-            for index, row in result.goal_df.iterrows():
+            for index, _ in result.goal_df.iterrows():
                 value = scale*results[index]
                 result.goal_dict[index].append(value)
             with open(funcs[:-9] + 'goal_dict.pkl', 'wb') as fp:
@@ -331,6 +331,28 @@ def calc_plan(plan, beam_set, norm):
         return 2
 
     # Normalize plan
+    return normalize(beam_set, norm)
+
+
+def normalize(beam_set, norm):
+    """Normalize treatment plan.
+
+    Parameters
+    ----------
+    beam_set : connect.connect_cpython.PyScriptObject
+        Current beam set.
+    norm : (str, float, float)
+        Region of interest, dose, and volume used for normalization.
+
+    Returns
+    -------
+    int
+        RayStation exit status:
+        - 0: success
+        - 1: normalization failed
+        - 2: optimization failed
+
+    """
     try:
         beam_set.NormalizeToPrescription(
             RoiName=norm[0],
@@ -432,12 +454,11 @@ def get_value(dose, goal):
     if 'Dose' in goal['Type']:
         dose_type = re.findall('[A-Z][^A-Z]*', goal['Type'])[0]
         return dose.GetDoseStatistic(RoiName=goal['Roi'], DoseType=dose_type)
-    elif 'Dvh' in goal['Type']:
+    if 'Dvh' in goal['Type']:
         volume = 0.01*goal['ParameterValue']
         return dose.GetDoseAtRelativeVolumes(RoiName=goal['Roi'],
                                              RelativeVolumes=[volume])[0]
-    else:
-        return np.nan
+    return np.nan
 
 
 def get_scale(goal_df, norm, results):
