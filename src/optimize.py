@@ -331,28 +331,6 @@ def calc_plan(plan, beam_set, norm):
         return 2
 
     # Normalize plan
-    return normalize(beam_set, norm)
-
-
-def normalize(beam_set, norm):
-    """Normalize treatment plan.
-
-    Parameters
-    ----------
-    beam_set : connect.connect_cpython.PyScriptObject
-        Current beam set.
-    norm : (str, float, float)
-        Region of interest, dose, and volume used for normalization.
-
-    Returns
-    -------
-    int
-        RayStation exit status:
-        - 0: success
-        - 1: normalization failed
-        - 2: optimization failed
-
-    """
     try:
         beam_set.NormalizeToPrescription(
             RoiName=norm[0],
