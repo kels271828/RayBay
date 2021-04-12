@@ -10,12 +10,11 @@ import optimize
 import raybay
 
 # Patient
-#patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
+patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 #patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
-#patient_path = repo_path + 'results\\ZZ_MK_LLLungSBRT3977\\'
-patient_path = repo_path + 'results\\ZZ_MK_RLSBRT1931\\'
+#patient_path = repo_path + 'results\\ZZ_MK_RLSBRT1931\\'
 
 # Case
 case_path = 'approved\\'

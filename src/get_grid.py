@@ -2,7 +2,7 @@
 import pickle
 import sys
 
-repo = '\\\\client\\C$\\Users\\Kelsey\\Dropbox (uwamath)\\raybay\\'
+repo = '\\\\client\\E$\\My Drive\\RayBay\\'
 sys.path.append(repo + 'src\\')
 import optimize
 
@@ -11,7 +11,7 @@ patient = repo + 'results\\SBRT_lung_minsun\\'
 #patient = repo + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient = repo + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient = repo + 'results\\ZZ_MK_RULungSBRT3796\\'
-#patient = repo + 'results\\ZZ_MK_LLLungSBRT3977\\'
+#patient = repo + 'results\\ZZ_MK_RLSBRT1931\\'
 
 # Case
 case = 'weight\\'
