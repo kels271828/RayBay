@@ -1,6 +1,6 @@
 ﻿Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
 ChestWall,MaxDvh,"[750,3000]",3.42,,1
-D2cm,MaxDose,"[0,2600]",0,,1
+D2cm,MaxDose,"[650,2600]",0,,1
 Esophagus,MaxDvh,"[470,1880]",30.71,,1
 Lung_Total-GTV,MaxDvh,"[290,1160]",58.59,,1
 Lung_Total-GTV,MaxDvh,"[310,1240]",39.06,,1
