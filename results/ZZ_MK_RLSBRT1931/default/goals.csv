@@ -1,0 +1,12 @@
+﻿Roi,Type,GoalCriteria,AcceptanceLevel,ParameterValue
+ChestWall,MaxDvh,AtMost,3000,2.39
+D2cm,MaxDose,AtMost,2400,
+Esophagus,MaxDvh,AtMost,1880,39.15
+Lung_Total-GTV,MaxDvh,AtMost,1160,53.33
+Lung_Total-GTV,MaxDvh,AtMost,1240,35.55
+PTV,MinDvh,AtLeast,4800,95
+PTV,MaxDose,AtMost,8000,
+Ribs,MaxDvh,AtMost,3200,0.89
+Ribs,MaxDose,AtMost,4000,
+SpinalCanal,MaxDvh,AtMost,1360,9.22
+SpinalCanal,MaxDose,AtMost,2600,
