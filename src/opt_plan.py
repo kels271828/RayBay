@@ -8,18 +8,19 @@ import optimize
 
 # Patient
 patient = repo + 'results\\SBRT_lung_minsun\\'
-# patient = repo + 'results\\ZZ_MK_LLungSBRT3778\\'
+#patient = repo + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient = repo + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient = repo + 'results\\ZZ_MK_RULungSBRT3796\\'
 #patient = repo + 'results\\ZZ_MK_RLSBRT1931\\'
+#patient = repo + 'results\\ZZ_MK_LLLungSBRT2736\\'
 
 # Case
 case = 'bayes\\'
 #case = 'dimension\\'
 
 # Solver
-solver = 'dummy_minimize'
-#solver = 'gp_minimize'
+#solver = 'dummy_minimize'
+solver = 'gp_minimize'
 
 # Optimize treatment plan
 log_path = patient + case + 'log_linquad_' + solver + '.txt'

@@ -15,6 +15,7 @@ patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLSBRT1931\\'
+#patient_path = repo_path + 'results\\ZZ_MK_LLLungSBRT2736\\'
 
 # Case
 case_path = 'approved\\'
