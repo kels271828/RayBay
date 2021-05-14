@@ -10,7 +10,7 @@ Automatic parameter tuning for the RayStation treatment planning system
 * [optimize](/src/optimize.py): Hyperparameter optimization functions for RayStation treatment planning system.
 * [analyze](/src/analyze.py): Plotting functions to visualize treatment plan results.
 
-Data and notebooks used to create the figures appearing in chapter 4 of my dissertation can be found in [results](/results).
+Data and notebooks used to create the figures appearing in our preprint "A feasibility study of a hyperparameter tuning approach to automated inverse planning in radiotherapy" can be found in [results](/results).
 
 ## Workflow
 
