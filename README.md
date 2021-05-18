@@ -10,8 +10,6 @@ Automatic parameter tuning for the RayStation treatment planning system
 * [optimize](/src/optimize.py): Hyperparameter optimization functions for RayStation treatment planning system.
 * [analyze](/src/analyze.py): Plotting functions to visualize treatment plan results.
 
-Data and notebooks used to create the figures appearing in our preprint "A feasibility study of a hyperparameter tuning approach to automated inverse planning in radiotherapy" can be found in [results](/results).
-
 ## Workflow
 
 ### Define clinical goals and objective functions
@@ -54,3 +52,10 @@ Note: Setting up the virtual environment only needs to be done once.
 2. Click "Run file" button
 
 See [src](/src) for example scripts.
+
+## Paper
+
+Data and notebooks used to create the figures appearing in our [preprint](https://arxiv.org/abs/2105.07024) "A feasibility study of a hyperparameter tuning approach to automated inverse planning in radiotherapy" can be found in [results](/results).
+
+#### Abstract
+Radiotherapy inverse planning requires treatment planners to modify multiple parameters in the objective function to produce clinically acceptable plans. Due to manual steps in this process, plan quality can vary widely depending on planning time available and planner's skills. The purpose of this study is to automate the inverse planning process to reduce active planning time while maintaining plan quality. We propose a hyperparameter tuning approach for automated inverse planning, where a treatment plan utility is maximized with respect to the limit dose parameters and weights of each organ-at-risk (OAR) objective. Using 6 patient cases, we investigated the impact of the choice of dose parameters, random and Bayesian search methods, and utility function form on planning time and plan quality. For given parameters, the plan was optimized in RayStation, using the scripting interface to obtain the dose distributions deliverable. We normalized all plans to have the same target coverage and compared the OAR dose metrics in the automatically generated plans with those in the manually generated clinical plans. Using 100 samples was found to produce satisfactory plan quality, and the average planning time was 2.3 hours. The OAR doses in the automatically generated plans were lower than the clinical plans by up to 76.8%. When the OAR doses were larger than the clinical plans, they were still between 0.57% above and 98.9% below the limit doses, indicating they are clinically acceptable. For a challenging case, a dimensionality reduction strategy produced a 92.9% higher utility using only 38.5% of the time needed to optimize over the original problem. This study demonstrates our hyperparameter tuning framework for automated inverse planning can significantly reduce the treatment planner's planning time with plan quality that is similar to or better than manually generated plans.
