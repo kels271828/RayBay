@@ -4,6 +4,7 @@ import re
 from time import time
 
 import numpy as np
+import pandas as pd
 import skopt
 
 import connect
@@ -508,3 +509,49 @@ def get_dvh(roi_list):
                                                   DoseValues=dvh_dict['Dose'])
         dvh_dict[roi] = vals
     return dvh_dict
+
+
+def get_volumes(patient_path):
+    """Get ROI names and volumes.
+
+    Initalize patient goal spreadsheet with Roi and Volume (cm^3)
+    columns. Saved as a CSV file in the provided directory.
+
+    Parameters
+    ----------
+    patient_path : str
+        Path to patient folder.
+
+    Returns
+    -------
+    None.
+
+    """
+    # Get RayStation objects
+    case = connect.get_current('Case')
+    roi_geometries = case.PatientModel.StructureSets[0].RoiGeometries
+
+    # Get names and volumes
+    roi_names = []
+    roi_volumes = []
+    for roi in roi_geometries:
+        roi_name = roi.OfRoi.Name
+        try:
+            roi_volume = roi.GetRoiVolume()
+        except:
+            roi_volume = 'Error'
+        roi_names.append(roi_name)
+        roi_volumes.append(roi_volume)
+
+    # Save results
+    n_roi = len(roi_geometries)
+    roi_df = pd.DataFrame(data={
+        'Roi': roi_names,
+        'RoiVolume (cm^3)': roi_volumes,
+        'Type': n_roi*[np.nan],
+        'GoalCriteria': n_roi*[np.nan],
+        'DoseLevel (cGy)': n_roi*[np.nan],
+        'Volume (cm^3)': n_roi*[np.nan],
+        'Volume (%)': n_roi*[np.nan]
+    })
+    roi_df.to_csv(patient_path + 'goals_auto.csv', index=False)
