@@ -554,4 +554,4 @@ def get_volumes(patient_path):
         'Volume (cm^3)': n_roi*[np.nan],
         'Volume (%)': n_roi*[np.nan]
     })
-    roi_df.to_csv(patient_path + 'goals_auto.csv', index=False)
+    roi_df.to_csv(patient_path + 'goals.csv', index=False)
