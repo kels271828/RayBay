@@ -555,3 +555,78 @@ def get_volumes(patient_path):
         'Volume (%)': n_roi*[np.nan]
     })
     roi_df.to_csv(patient_path + 'goals.csv', index=False)
+
+
+def get_funcs(plan):
+    """Get clinical constituent functions from plan.
+
+    Currently only able to handle MinDose, MaxDose, MinDvh, MaxDvh,
+    and DoseFall-Off function types. Does not extract EudParameter A
+    values from plan.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+
+
+    Returns
+    -------
+    pandas.DataFrame
+        Constituent function specifications.
+
+    """
+    func_df = pd.DataFrame(data={
+        'Roi': [],
+        'FunctionType': [],
+        'DoseLevel': [],
+        'PercentVolume': [],
+        'EudParameterA': [],
+        'Weight': []
+    })
+    const_funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
+    for func in const_funcs:
+        func_pars = func.DoseFunctionParameters
+        try:
+            func_df = func_df.append({
+                'Roi': func.ForRegionOfInterest.Name,
+                'FunctionType': func_pars.FunctionType,
+                'DoseLevel': func_pars.DoseLevel,
+                'PercentVolume': func_pars.PercentVolume,
+                'Weight': func_pars.Weight
+            }, ignore_index=True)
+        except:
+            high_dose = func_pars.HighDoseLevel
+            low_dose = func_pars.LowDoseLevel
+            dose_dist = func_pars.LowDoseDistance
+            func_type = f"Dose Fall-Off [H]{high_dose} cGy "
+            func_type += f"[L]{low_dose} cGy, "
+            func_type += f"Low dose distance {dose_dist} cm"
+            func_df = func_df.append({
+                'Roi': func.ForRegionOfInterest.Name,
+                'FunctionType': func_type,
+                'Weight': func_pars.Weight
+            }, ignore_index=True)
+    return func_df
+
+
+def add_funcs(plan, func_df):
+    """Add constituent function terms to plan.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    func_df : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    -------
+    None.
+
+    """
+    plan_opt = plan.PlanOptimizations[0]
+    plan_opt.ClearConstituentFunctions()
+    for _, row in func_df.iterrows():
+        plan_opt.AddOptimizationFunction(FunctionType=row['FunctionType'],
+                                         RoiName=row['Roi'])

@@ -248,7 +248,8 @@ class OptimizeResult:
 def create_funcs(patient_path, case):
     """Format output of get_volumes.py into case-specific funcs.csv.
 
-    If case == 'approved', CSV is initialized, but left blank.
+    If case == 'approved', CSV is initialized, but left blank. Run
+    optimize.get_funcs() to get clinical constituent functions.
     Assumes all term weights are one. See get_dose_range() for
     additional tuneable parameter assumptions.
 

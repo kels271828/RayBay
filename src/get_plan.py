@@ -10,12 +10,13 @@ import optimize
 import raybay
 
 # Patient
-patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
+#patient_path = repo_path + 'results\\SBRT_lung_minsun\\'
 #patient_path = repo_path + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RULungSBRT3796\\'
 #patient_path = repo_path + 'results\\ZZ_MK_RLSBRT1931\\'
 #patient_path = repo_path + 'results\\ZZ_MK_LLLungSBRT2736\\'
+patient_path = repo_path + 'results\\ZZ_MK_LULSBRT4544\\'
 
 # Case
 case_path = 'approved\\'
@@ -38,9 +39,12 @@ result = raybay.RaybayResult(
 
 # Add results
 if 'default' in case_path:
+    optimize.add_funcs(plan, result.func_df)
     optimize.set_pars(plan, result.func_df, [])
     flag = optimize.calc_plan(plan, beam_set, result.norm)
 else:
+    result.func_df = optimize.get_funcs(plan)
+    result.func_df.to_csv(patient_path + case_path + 'funcs.csv')
     flag = 0
 result.flag_list.append(flag)
 goal_results = optimize.get_results(plan, result.goal_df)
