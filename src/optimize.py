@@ -514,7 +514,7 @@ def get_dvh(roi_list):
 def get_volumes(patient_path):
     """Get ROI names and volumes.
 
-    Initalize patient goal spreadsheet with Roi and Volume (cm^3)
+    Initalize patient goal spreadsheet with `Roi` and `Volume (cm^3)`
     columns. Saved as a CSV file in the provided directory.
 
     Parameters
