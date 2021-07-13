@@ -267,8 +267,10 @@ def create_funcs(patient_path, case):
     if case == 'approved':
         func_df = pd.DataFrame(data={
             'Roi': [],
-            'Function': [],
-            'Description': [],
+            'FunctionType': [],
+            'DoseLevel': [],
+            'PercentVolume': [],
+            'EudParameterA': [],
             'Weight': []
         })
     else:
@@ -282,9 +284,30 @@ def create_funcs(patient_path, case):
             'EudParameterA': n_roi*[np.nan],
             'Weight': n_roi*[1]
         })
+        func_df['PercentVolume'] = func_df.apply(add_zeros, axis=1)
         if case == 'bayes':
             func_df['DoseLevel'] = func_df.apply(get_dose_range, axis=1)
+    func_df.sort_values(by='Roi', inplace=True)
     func_df.to_csv(patient_path + case + '/funcs.csv', index=False)
+
+
+def add_zeros(row):
+    """Replace missing PercentVolume values with zeros.
+
+    Parameters
+    ----------
+    row : pandas.core.series.Series
+        Row of func_df DataFrame.
+
+    Returns
+    -------
+    float
+        PercentVolume values.
+
+    """
+    if np.isnan(row['PercentVolume']):
+        return 0
+    return row['PercentVolume']
 
 
 def get_dose_range(row):
@@ -377,8 +400,29 @@ def create_goals(patient_path, case):
     })
     if case == 'bayes':
         goal_df['Weight'] = len(roi_df)*[1]
-        goal_df['Shape'] = len(roi_df)*['linear']
+        goal_df['Shape'] = goal_df.apply(get_util_shape, axis=1)
+    goal_df.sort_values(by='Roi', inplace=True)
     goal_df.to_csv(patient_path + case + '/goals.csv', index=False)
+
+
+def get_util_shape(row):
+    """Get utility term shape based on ROI.
+
+    Parameters
+    ----------
+    row : pandas.core.series.Series
+        Row of func_df DataFrame.
+
+    Returns
+    -------
+    str
+        If 'chest' or 'rib in row['Roi'], then return 'linear'.
+        Otherwise, return 'linear_quadratic'.
+
+    """
+    if any([roi in row['Roi'].lower() for roi in ['chest', 'rib']]):
+        return 'linear'
+    return 'linear_quadratic'
 
 
 def get_goals(func_df):
