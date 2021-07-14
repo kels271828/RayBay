@@ -1,0 +1,12 @@
+Roi,RoiVolume (cm^3),Type,GoalCriteria,DoseLevel (cGy),Volume (cm^3),Volume (%)
+Chestwall,575.3964791,MaxDvh,AtMost,3000,30,5.213796241
+SpinalCanal,41.31368922,MaxDvh,AtMost,1360,1.2,2.904606252
+SpinalCanal,41.31368922,MaxDose,AtMost,2600,,
+D2cm,288.5739005,MaxDose,AtMost,,,
+Esophagus,30.67868039,MaxDvh,AtMost,1880,5,16.29796307
+Lungs,3065.374655,MaxDvh,AtMost,1160,1500,48.93365963
+Lungs,3065.374655,MaxDvh,AtMost,1240,1000,32.62243975
+PTV,47.1156652,MinDose,AtLeast,4800,,95
+PTV,47.1156652,MaxDose,AtMost,8000,,
+Ribs,64.15579902,MaxDvh,AtMost,3200,1,1.55870555
+Ribs,64.15579902,MaxDose,AtMost,4000,,
