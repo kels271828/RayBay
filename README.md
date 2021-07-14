@@ -19,6 +19,10 @@ Automatic parameter tuning for the RayStation treatment planning system
 
 See [results](/results) for examples.
 
+Once the virtual environment is set up (see below), you can create clinical goal and objective function files with the following steps:
+1. Run [get_volume](/src/get_volume.py) script from Spyder to create initial goals.csv file. This will include the names and volumes for all ROIs in the current case. Delete rows that you don't want to include, and fill out the remaining columns based on your clinical goals. Use columns `Volume (cm^3)` and `RoiVolume (cm^3)` to compute the column `Volume (%)`.
+2. Run [setup_patient](/src/setup_patient.py) script from local computer to create goals.csv and funcs.csv files formatted for the approved, default, and bayes cases. For the approved plan, the file approved/funcs.csv will be filled in when you run the script [get_plan](/src/get_plan.py). For the optimized plan, the file bayes/goals.csv will have default weights = 1 for all ROIs and shape = 'linear_quadratic' for all ROIs except for the chestwall and ribs. Update `Weight` and `Shape` columns if needed. The file bayes/funcs.csv will have `DoseLevel` = [gamma/4, gamma] for all goals except for the PTV. The PTV D95 will be 4800, and the PTV Max will be [(gamma - 3*4800)/4, gamma]. Update `DoseLevel`, `PercentVolume`, and `Weight` columns if needed (parameter will be tuned if a range of values is given, and parameter will be held constant if a single value is given).  
+
 ### Launch RayStation
 1. Log in to Citrix Receiver
 2. Open RayStation 8B SP1
@@ -51,7 +55,9 @@ Note: Setting up the virtual environment only needs to be done once.
     * To use scripts on local computer, may need to change read/write settings first
 2. Click "Run file" button
 
-See [src](/src) for example scripts.
+See [src](/src) for example scripts:
+* [get_plan](/src/get_plan.py) gets clinical goal values for the approved plan and the default plan. Make sure you have the correct plan open in RayStation. For the default plan, the constituent functions in RayStation will be cleared and re-populated based on default/funcs.csv.
+* [opt_plan](/src/opt_plan.py) gets the optimized treatment plan using either random sampling (`dummy_minimize`) or Bayesian optimization (`gp_minimize`).
 
 ## Paper
 
