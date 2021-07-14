@@ -7,12 +7,13 @@ sys.path.append(repo + 'src\\')
 import optimize
 
 # Patient
-patient = repo + 'results\\SBRT_lung_minsun\\'
+#patient = repo + 'results\\SBRT_lung_minsun\\'
 #patient = repo + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient = repo + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient = repo + 'results\\ZZ_MK_RULungSBRT3796\\'
 #patient = repo + 'results\\ZZ_MK_RLSBRT1931\\'
 #patient = repo + 'results\\ZZ_MK_LLLungSBRT2736\\'
+patient = repo + 'results\\ZZ_MK_LULSBRT4544\\'
 
 # Case
 case = 'bayes\\'

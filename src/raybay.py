@@ -245,6 +245,100 @@ class OptimizeResult:
         self.x_iters = x_iters
 
 
+def create_funcs(patient_path, case):
+    """Format output of get_volumes.py into case-specific funcs.csv.
+
+    If case == 'approved', CSV is initialized, but left blank. Run
+    optimize.get_funcs() to get clinical constituent functions.
+    Assumes all term weights are one. See get_dose_range() for
+    additional tuneable parameter assumptions.
+
+    Parameters
+    ----------
+    patient_path : str
+        Path to patient folder.
+    case : str
+        Case name.
+
+    Returns
+    -------
+    None.
+
+    """
+    if case == 'approved':
+        func_df = pd.DataFrame(data={
+            'Roi': [],
+            'FunctionType': [],
+            'DoseLevel': [],
+            'PercentVolume': [],
+            'EudParameterA': [],
+            'Weight': []
+        })
+    else:
+        roi_df = pd.read_csv(patient_path + 'goals.csv')
+        n_roi = len(roi_df)
+        func_df = pd.DataFrame(data={
+            'Roi': roi_df['Roi'],
+            'FunctionType': roi_df['Type'],
+            'DoseLevel': roi_df['DoseLevel (cGy)'],
+            'PercentVolume': roi_df['Volume (%)'],
+            'EudParameterA': n_roi*[np.nan],
+            'Weight': n_roi*[1]
+        })
+        func_df['PercentVolume'] = func_df.apply(add_zeros, axis=1)
+        if case == 'bayes':
+            func_df['DoseLevel'] = func_df.apply(get_dose_range, axis=1)
+    func_df.sort_values(by='Roi', inplace=True)
+    func_df.to_csv(patient_path + case + '/funcs.csv', index=False)
+
+
+def add_zeros(row):
+    """Replace missing PercentVolume values with zeros.
+
+    Parameters
+    ----------
+    row : pandas.core.series.Series
+        Row of func_df DataFrame.
+
+    Returns
+    -------
+    float
+        PercentVolume values.
+
+    """
+    if np.isnan(row['PercentVolume']):
+        return 0
+    return row['PercentVolume']
+
+
+def get_dose_range(row):
+    """Get tuneable parameter range.
+
+    Assumes PTV D95 (MinDvh) is not tuneable.
+    Assumes all other dose parameters (MaxDvh and MaxDose) are
+    tuneable between a range of 0.25-1.0 of DoseLevel, except for
+    PTV MaxDose, which uses (5*MaxDose - 4800)/4.
+
+    Parameters
+    ----------
+    row : pandas.core.series.Series
+        Row of func_df DataFrame.
+
+    Returns
+    -------
+    float or str
+        If parameter not tuneable, return DoseLevel.
+        Otherwise, return lower and upper limits of DoseLevel.
+
+    """
+    if row['Roi'] == 'PTV':
+        if row['FunctionType'] == 'MinDvh':
+            return row['DoseLevel']
+        min_dose = (row['DoseLevel'] + 3*4800)/4
+        return f"[{min_dose}, {row['DoseLevel']}]"
+    return f"[{row['DoseLevel']/4}, {row['DoseLevel']}]"
+
+
 def get_funcs(funcs):
     """Load constituent functions from CSV file.
 
@@ -277,6 +371,59 @@ def get_funcs(funcs):
                         in re.findall(r'\d+\.\d+|\d+', row[col])]
                 func_df.loc[index, col] = pars if len(pars) > 1 else pars[0]
     return func_df
+
+
+def create_goals(patient_path, case):
+    """Format output of get_volumes.py into case-specific goals.csv.
+
+    If case == 'bayes', goals.csv includes `Weight` and `Shape`
+    columns with default values of 1 and 'linear'.
+
+    Parameters
+    ----------
+    patient_path : str
+        Path to patient folder.
+    case : str
+        Case name.
+
+    Returns
+    -------
+    None.
+
+    """
+    roi_df = pd.read_csv(patient_path + 'goals.csv')
+    goal_df = pd.DataFrame(data={
+        'Roi': roi_df['Roi'],
+        'Type': roi_df['Type'],
+        'GoalCriteria': roi_df['GoalCriteria'],
+        'AcceptanceLevel': roi_df['DoseLevel (cGy)'],
+        'ParameterValue': roi_df['Volume (%)']
+    })
+    if case == 'bayes':
+        goal_df['Weight'] = len(roi_df)*[1]
+        goal_df['Shape'] = goal_df.apply(get_util_shape, axis=1)
+    goal_df.sort_values(by='Roi', inplace=True)
+    goal_df.to_csv(patient_path + case + '/goals.csv', index=False)
+
+
+def get_util_shape(row):
+    """Get utility term shape based on ROI.
+
+    Parameters
+    ----------
+    row : pandas.core.series.Series
+        Row of func_df DataFrame.
+
+    Returns
+    -------
+    str
+        If 'chest' or 'rib in row['Roi'], then return 'linear'.
+        Otherwise, return 'linear_quadratic'.
+
+    """
+    if any([roi in row['Roi'].lower() for roi in ['chest', 'rib']]):
+        return 'linear'
+    return 'linear_quadratic'
 
 
 def get_goals(func_df):
@@ -357,9 +504,9 @@ def get_utility(goal_df, goal_dict, weights=None, shapes=None):
     if shapes is None:
         shapes = goal_df['Shape']
     util_vec = np.zeros(len(goal_dict[0]))
-    for ii in range(len(util_vec)):
+    for ii, util in enumerate(util_vec):
         for index, row in goal_df.iterrows():
-            util_vec[ii] += weights[index]*get_term(
+            util += weights[index]*get_term(
                 goal_dict[index][ii],
                 row['AcceptanceLevel'],
                 row['Type'], shapes[index])
@@ -391,8 +538,6 @@ def get_term(value, level, goal_type, shape):
     diff = 100*(value - level)/level
     if shape == 'linear':
         return -diff if 'Max' in goal_type else diff
-    else:
-        if 'Max' in goal_type:
-            return -diff if value <= level else -(diff + 1)*diff
-        else:
-            return diff if value >= level else -(diff - 1)*diff
+    if 'Max' in goal_type:
+        return -diff if value <= level else -(diff + 1)*diff
+    return diff if value >= level else -(diff - 1)*diff

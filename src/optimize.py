@@ -4,6 +4,7 @@ import re
 from time import time
 
 import numpy as np
+import pandas as pd
 import skopt
 
 import connect
@@ -508,3 +509,124 @@ def get_dvh(roi_list):
                                                   DoseValues=dvh_dict['Dose'])
         dvh_dict[roi] = vals
     return dvh_dict
+
+
+def get_volumes(patient_path):
+    """Get ROI names and volumes.
+
+    Initalize patient goal spreadsheet with `Roi` and `Volume (cm^3)`
+    columns. Saved as a CSV file in the provided directory.
+
+    Parameters
+    ----------
+    patient_path : str
+        Path to patient folder.
+
+    Returns
+    -------
+    None.
+
+    """
+    # Get RayStation objects
+    case = connect.get_current('Case')
+    roi_geometries = case.PatientModel.StructureSets[0].RoiGeometries
+
+    # Get names and volumes
+    roi_names = []
+    roi_volumes = []
+    for roi in roi_geometries:
+        roi_name = roi.OfRoi.Name
+        try:
+            roi_volume = roi.GetRoiVolume()
+        except:
+            roi_volume = 'Error'
+        roi_names.append(roi_name)
+        roi_volumes.append(roi_volume)
+
+    # Save results
+    n_roi = len(roi_geometries)
+    roi_df = pd.DataFrame(data={
+        'Roi': roi_names,
+        'RoiVolume (cm^3)': roi_volumes,
+        'Type': n_roi*[np.nan],
+        'GoalCriteria': n_roi*[np.nan],
+        'DoseLevel (cGy)': n_roi*[np.nan],
+        'Volume (cm^3)': n_roi*[np.nan],
+        'Volume (%)': n_roi*[np.nan]
+    })
+    roi_df.to_csv(patient_path + 'goals.csv', index=False)
+
+
+def get_funcs(plan):
+    """Get clinical constituent functions from plan.
+
+    Currently only able to handle MinDose, MaxDose, MinDvh, MaxDvh,
+    and DoseFall-Off function types. Does not extract EudParameter A
+    values from plan.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+
+
+    Returns
+    -------
+    pandas.DataFrame
+        Constituent function specifications.
+
+    """
+    func_df = pd.DataFrame(data={
+        'Roi': [],
+        'FunctionType': [],
+        'DoseLevel': [],
+        'PercentVolume': [],
+        'EudParameterA': [],
+        'Weight': []
+    })
+    const_funcs = plan.PlanOptimizations[0].Objective.ConstituentFunctions
+    for func in const_funcs:
+        func_pars = func.DoseFunctionParameters
+        try:
+            func_df = func_df.append({
+                'Roi': func.ForRegionOfInterest.Name,
+                'FunctionType': func_pars.FunctionType,
+                'DoseLevel': func_pars.DoseLevel,
+                'PercentVolume': func_pars.PercentVolume,
+                'Weight': func_pars.Weight
+            }, ignore_index=True)
+        except:
+            high_dose = func_pars.HighDoseLevel
+            low_dose = func_pars.LowDoseLevel
+            dose_dist = func_pars.LowDoseDistance
+            func_type = f"Dose Fall-Off [H]{high_dose} cGy "
+            func_type += f"[L]{low_dose} cGy, "
+            func_type += f"Low dose distance {dose_dist} cm"
+            func_df = func_df.append({
+                'Roi': func.ForRegionOfInterest.Name,
+                'FunctionType': func_type,
+                'Weight': func_pars.Weight
+            }, ignore_index=True)
+    return func_df
+
+
+def add_funcs(plan, func_df):
+    """Add constituent function terms to plan.
+
+    Parameters
+    ----------
+    plan : connect.connect_cpython.PyScriptObject
+        Current treatment plan.
+    func_df : pandas.DataFrame
+        Constituent function specifications.
+
+    Returns
+    -------
+    None.
+
+    """
+    plan_opt = plan.PlanOptimizations[0]
+    plan_opt.ClearConstituentFunctions()
+    for _, row in func_df.iterrows():
+        plan_opt.AddOptimizationFunction(FunctionType=row['FunctionType'],
+                                         RoiName=row['Roi'])
