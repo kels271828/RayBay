@@ -511,7 +511,7 @@ def get_dvh(roi_list):
     return dvh_dict
 
 
-def get_volumes(patient_path):
+def get_volumes(patient_path, filename):
     """Get ROI names and volumes.
 
     Initalize patient goal spreadsheet with `Roi` and `Volume (cm^3)`
@@ -521,6 +521,8 @@ def get_volumes(patient_path):
     ----------
     patient_path : str
         Path to patient folder.
+    filename : str
+        Name of file where results saved.
 
     Returns
     -------
@@ -554,7 +556,7 @@ def get_volumes(patient_path):
         'Volume (cm^3)': n_roi*[np.nan],
         'Volume (%)': n_roi*[np.nan]
     })
-    roi_df.to_csv(patient_path + 'goals.csv', index=False)
+    roi_df.to_csv(patient_path + filename, index=False)
 
 
 def get_funcs(plan):

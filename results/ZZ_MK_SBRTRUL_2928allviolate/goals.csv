@@ -1,0 +1,8 @@
+Roi,RoiVolume (cm^3),Type,GoalCriteria,DoseLevel (cGy),Volume (cm^3),Volume (%)
+Chestwall,355.0979883,,,,,
+D2cm,261.573752,,,3000,,
+Esophagus,10.8001701,,,,,
+Lungs,2387.912738,,,,,
+PTV,32.87349412,,,,,
+Rib,17.30648333,,,,,
+SpinalCanal,14.61919314,,,,,

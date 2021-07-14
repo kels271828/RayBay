@@ -1,0 +1,10 @@
+Roi,RoiVolume (cm^3),Type,GoalCriteria,DoseLevel (cGy),Volume (cm^3),Volume (%)
+PTV_4800,21.97587206,,,,,
+SpinalCanal,44.44500049,,,,,
+Ribs,36.18214001,,,,,
+ChestWall,376.366427,,,,,
+Esophagus,21.3311152,,,,,
+D2CM,230.975901,,,2400,,
+Lungs,3722.252196,,,,,
+Lung_Total-GTV,3719.743321,,,,,
+PTV_5000,Error,,,,,
