@@ -1,6 +1,6 @@
 Roi,RoiVolume (cm^3),Type,GoalCriteria,DoseLevel (cGy),Volume (cm^3),Volume (%)
 Chestwall,737.425651,MaxDvh,AtMost,3000,30,4.068206735
-D2cm,25788.41583,MaxDose,AtMost,?,,
+D2cm,25788.41583,MaxDose,AtMost,2400,,
 Esophagus,28.43512451,MaxDvh,AtMost,1880,5,17.58388643
 Lung_Total-IGTV,3539.808668,MaxDvh,AtMost,1160,1500,42.37517167
 Lung_Total-IGTV,3539.808668,MaxDvh,AtMost,1240,1000,28.25011445
