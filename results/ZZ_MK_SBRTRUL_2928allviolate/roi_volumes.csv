@@ -1,31 +1,31 @@
-Roi,RoiVolume (cm^3)
-A_Aorta,111.9072647
-A_Pulmonary,30.55616814
-Bronchus_PRV20,436.4492843
-Carina,1.673945098
-Chestwall,355.0979883
-D2cm,261.573752
-Esophagus,10.8001701
-External,19111.46636
-GreatVes,147.9071225
-Heart,725.9234015
-Lung_L,1038.78953
-Lung_R,1361.10671
-Lungs,2387.912738
-PTV,32.87349412
-Proximal_Bronchial_Tree,7.221088725
-Rib,17.30648333
-Rind,2165.566841
-SpinalCanal,14.61919314
-Trachea,7.247288235
-V_Venacava_S,6.113230882
-iGTV,11.77515588
-ot,18928.94359
-ring,118.2045417
-Couch Core,6683.654631
-Couch Shell,905.3153289
-Couch Rails,105.6011123
-4800 cGy Prescription,32.94022451
-2400 cGy,156.640998
-2000 cGy max spinal cord dose,238.9748377
-5040 cGy,28.60203235
+Roi,RoiVolume (cm^3),Bayes,Clinical
+A_Aorta,111.9072647,,
+A_Pulmonary,30.55616814,,
+Bronchus_PRV20,436.4492843,,
+Carina,1.673945098,,
+Chestwall,355.0979883,1,1
+D2cm,261.573752,1,1
+Esophagus,10.8001701,1,2
+External,19111.46636,,
+GreatVes,147.9071225,,2
+Heart,725.9234015,,2
+Lung_L,1038.78953,,
+Lung_R,1361.10671,,
+Lungs,2387.912738,2,2
+PTV,32.87349412,2,2
+Proximal_Bronchial_Tree,7.221088725,,2
+Rib,17.30648333,2,2
+Rind,2165.566841,,2
+SpinalCanal,14.61919314,2,2
+Trachea,7.247288235,,2
+V_Venacava_S,6.113230882,,
+iGTV,11.77515588,,
+ot,18928.94359,,
+ring,118.2045417,,
+Couch Core,6683.654631,,
+Couch Shell,905.3153289,,
+Couch Rails,105.6011123,,
+4800 cGy Prescription,32.94022451,,
+2400 cGy,156.640998,,
+2000 cGy max spinal cord dose,238.9748377,,
+5040 cGy,28.60203235,,

@@ -1,10 +1,12 @@
 Roi,RoiVolume (cm^3),Type,GoalCriteria,DoseLevel (cGy),Volume (cm^3),Volume (%)
-PTV_4800,21.97587206,,,,,
-SpinalCanal,44.44500049,,,,,
-Ribs,36.18214001,,,,,
-ChestWall,376.366427,,,,,
-Esophagus,21.3311152,,,,,
-D2CM,230.975901,,,2400,,
-Lungs,3722.252196,,,,,
-Lung_Total-GTV,3719.743321,,,,,
-PTV_5000,Error,,,,,
+ChestWall,376.366427,MaxDvh,AtMost,3000,30,7.97095539
+D2CM,230.975901,MaxDose,AtMost,2400,,
+Esophagus,21.3311152,MaxDvh,AtMost,1880,5,23.43993717
+Lung_Total-GTV,3719.743321,MaxDvh,AtMost,1160,1500,40.32536308
+Lung_Total-GTV,3719.743321,MaxDvh,AtMost,1240,1000,26.88357539
+PTV_4800,21.97587206,MinDvh,AtLeast,4800,,95
+PTV_4800,21.97587206,MaxDose,AtMost,8000,,
+Ribs,36.18214001,MaxDvh,AtMost,3200,1,2.763794512
+Ribs,36.18214001,MaxDose,AtMost,4000,,
+SpinalCanal,44.44500049,MaxDvh,AtMost,1360,1.2,2.699966221
+SpinalCanal,44.44500049,MaxDose,AtMost,2600,,

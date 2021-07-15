@@ -1,29 +1,29 @@
-Roi,RoiVolume (cm^3),Notes
-BronchialTree,19.85166814,
-Bronchus_PRV20,398.5002603,
-Carina,16.83704069,
-ChestWall,1547.508872,"Used, value doesn't match what's in goals.csv"
-Esophagus,25.19694902,"Used, value doesn't match what's in goals.csv"
-GreatVessels,114.475676,
-GTV_ITV,6.764379412,
-Heart,560.615577,
-Lung_L,1323.922783,
-Lung_R,1330.839989,
-Ribs,47.16927304,"Used, value doesn't match what's in goals.csv"
-SpinalCanal,60.55726422,"Used, value doesn't match what's in goals.csv"
-Trachea,23.04959853,
-V_Venacava_S,9.696727451,
-BrachialPlexus,5.056119118,
-PTV,21.45909559,"Used, value doesn't match what's in goals.csv"
-Couch Core,8976.495313,
-Couch Shell,1212.505697,
-Couch Rails,141.6993154,
-External,22831.82037,
-Skin,2439.958924,
-Lung_Total-GTV,2648.683062,"Used, value doesn't match what's in goals.csv"
-D2cm,231.8954127,"Used, value doesn't match what's in goals.csv"
-2400 IDL 50%,112.0014569,
-4800 IDL 100%,23.88845588,
-5040 IDL NT105%,20.333725,
-2203 cGy Max SpCanal IDL,135.1050049,
-External-PTV,22810.52642,
+Roi,RoiVolume (cm^3),Bayes,Clinical
+BronchialTree,19.85166814,,2
+Bronchus_PRV20,398.5002603,,
+Carina,16.83704069,,
+ChestWall,1547.508872,1,1
+Esophagus,25.19694902,1,2
+GreatVessels,114.475676,,2
+GTV_ITV,6.764379412,,
+Heart,560.615577,,2
+Lung_L,1323.922783,,
+Lung_R,1330.839989,,
+Ribs,47.16927304,2,2
+SpinalCanal,60.55726422,2,2
+Trachea,23.04959853,,2
+V_Venacava_S,9.696727451,,
+BrachialPlexus,5.056119118,,2
+PTV,21.45909559,2,2
+Couch Core,8976.495313,,
+Couch Shell,1212.505697,,
+Couch Rails,141.6993154,,
+External,22831.82037,,
+Skin,2439.958924,,2
+Lung_Total-GTV,2648.683062,2,2
+D2cm,231.8954127,1,1
+2400 IDL 50%,112.0014569,,
+4800 IDL 100%,23.88845588,,
+5040 IDL NT105%,20.333725,,
+2203 cGy Max SpCanal IDL,135.1050049,,
+External-PTV,22810.52642,,

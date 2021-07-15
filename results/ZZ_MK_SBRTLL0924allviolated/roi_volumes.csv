@@ -1,32 +1,32 @@
-Roi,RoiVolume (cm^3),
-GTV,20.15344755,
-iGTV,28.14706961,
-PTV,59.3606451,Used
-External,35965.66829,
-Trachea,28.42799657,
-BronchialTree,33.82884265,
-Esophagus,55.18450147,Used
-Heart,894.8357721,
-Lung_L,1300.565247,
-Lung_R,2029.278926,
-SpinalCanal,48.39484706,Used
-Main Bronchi,19.20606078,
-Carina,11.60298725,
-Airway,58.25679314,
-SpinalCanal+5mm,146.7454422,
-GreatVessels,327.9314319,
-Ribs,469.1985432,Used
-Skin,779.2520648,
-ChestWall,2051.421089,
-D2cm,311.8749603,Used
-Couch Core,8464.705682,
-Couch Shell,1174.946131,
-Couch Rails,133.8347532,
-Lung_Total,3330.262308,Used
-Lung_Total-GTV,3330.260652,
-max 3750,11183.53364,
-Max 1750,11219.76145,
-1200cGy opti,362.7525515,
-6454 cGy,Error,
-4800 cGy,48.92283382,
-Cord max dose,2327.687741,
+Roi,RoiVolume (cm^3),Bayes,Clinical
+GTV,20.15344755,,
+iGTV,28.14706961,,
+PTV,59.3606451,2,2
+External,35965.66829,,
+Trachea,28.42799657,,2
+BronchialTree,33.82884265,,2
+Esophagus,55.18450147,1,2
+Heart,894.8357721,,2
+Lung_L,1300.565247,,
+Lung_R,2029.278926,,
+SpinalCanal,48.39484706,2,2
+Main Bronchi,19.20606078,,
+Carina,11.60298725,,
+Airway,58.25679314,,
+SpinalCanal+5mm,146.7454422,,
+GreatVessels,327.9314319,,2
+Ribs,469.1985432,2,2
+Skin,779.2520648,,2
+ChestWall,2051.421089,1,1
+D2cm,311.8749603,1,1
+Couch Core,8464.705682,,
+Couch Shell,1174.946131,,
+Couch Rails,133.8347532,,
+Lung_Total,3330.262308,,
+Lung_Total-GTV,3330.260652,2,4
+max 3750,11183.53364,,
+Max 1750,11219.76145,,
+1200cGy opti,362.7525515,,
+6454 cGy,Error,,
+4800 cGy,48.92283382,,
+Cord max dose,2327.687741,,
