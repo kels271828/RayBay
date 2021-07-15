@@ -16,6 +16,11 @@ import raybay
 
 # Patient
 patient_path = repo_path + 'results/ZZ_MK_LULSBRT4544/'
+#patient_path = repo_path + 'results/ZZ_MK_SBRTLL0924allviolated/'
+#patient_path = repo_path + 'results/ZZ_MK_SBRTLL7289/'
+#patient_path = repo_path + 'results/ZZ_MK_SBRTLLL8973/'
+#patient_path = repo_path + 'results/ZZ_MK_SBRTRL7289/'
+#patient_path = repo_path + 'results/ZZ_MK_SBRTRUL_2928allviolate/'
 
 # Case
 for case in ['approved', 'default', 'bayes']:

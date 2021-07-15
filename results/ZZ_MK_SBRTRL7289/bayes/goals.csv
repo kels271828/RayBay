@@ -6,7 +6,7 @@ Lung_Total-IGTV,MaxDvh,AtMost,1160,42.37517167,1,linear_quadratic
 Lung_Total-IGTV,MaxDvh,AtMost,1240,28.25011445,1,linear_quadratic
 PTV4800,MinDvh,AtLeast,4800,95.0,1,linear_quadratic
 PTV4800,MaxDose,AtMost,8000,,1,linear_quadratic
-Rib,MinDvh,AtMost,3200,0.711912636,1,linear
+Rib,MaxDvh,AtMost,3200,0.711912636,1,linear
 Rib,MaxDose,AtMost,4000,,1,linear
 SpinalCanal,MaxDvh,AtMost,1360,1.650921286,1,linear_quadratic
 SpinalCanal,MaxDose,AtMost,2600,,1,linear_quadratic

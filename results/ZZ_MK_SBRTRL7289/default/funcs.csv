@@ -6,7 +6,7 @@ Lung_Total-IGTV,MaxDvh,1160,42.37517167,,1
 Lung_Total-IGTV,MaxDvh,1240,28.25011445,,1
 PTV4800,MinDvh,4800,95.0,,1
 PTV4800,MaxDose,8000,0.0,,1
-Rib,MinDvh,3200,0.711912636,,1
+Rib,MaxDvh,3200,0.711912636,,1
 Rib,MaxDose,4000,0.0,,1
 SpinalCanal,MaxDvh,1360,1.650921286,,1
 SpinalCanal,MaxDose,2600,0.0,,1

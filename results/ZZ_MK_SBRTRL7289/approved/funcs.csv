@@ -1,1 +1,4 @@
-Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+,Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+0,PTV4800,MinDose,4800.0,0.0,,1.0
+1,Rib,MaxDose,3500.0,0.0,,1000000.0
+2,Rib,MaxDvh,3200.0,1.0,,1000.0

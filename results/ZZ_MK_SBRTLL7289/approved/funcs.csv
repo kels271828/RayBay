@@ -1,1 +1,8 @@
-Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+,Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+0,PTV,MinDvh,4800.0,95.0,,50000.0
+1,Chestwall,MaxDvh,3000.0,10.0,,1.0
+2,Ribs,MaxDose,4000.0,0.0,,5.0
+3,Ribs,MaxDvh,3200.0,1.0,,5.0
+4,ring,MaxDose,3600.0,0.0,,75.0
+5,ot,MaxDose,2000.0,0.0,,10.0
+6,PTV,MinDvh,4320.0,99.0,,50000.0
