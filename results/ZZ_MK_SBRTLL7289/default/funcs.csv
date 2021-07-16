@@ -4,7 +4,7 @@ D2cm,MaxDose,2928,0.0,,1
 Esophagus,MaxDvh,1880,16.29796307,,1
 Lungs,MaxDvh,1160,48.93365963,,1
 Lungs,MaxDvh,1240,32.62243975,,1
-PTV,MinDose,4800,95.0,,1
+PTV,MinDvh,4800,95.0,,1
 PTV,MaxDose,8000,0.0,,1
 Ribs,MaxDvh,3200,1.55870555,,1
 Ribs,MaxDose,4000,0.0,,1

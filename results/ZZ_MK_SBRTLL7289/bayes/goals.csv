@@ -4,7 +4,7 @@ D2cm,MaxDose,AtMost,2928,,1,linear_quadratic
 Esophagus,MaxDvh,AtMost,1880,16.29796307,1,linear_quadratic
 Lungs,MaxDvh,AtMost,1160,48.93365963,1,linear_quadratic
 Lungs,MaxDvh,AtMost,1240,32.62243975,1,linear_quadratic
-PTV,MinDose,AtLeast,4800,95.0,1,linear_quadratic
+PTV,MinDvh,AtLeast,4800,95.0,1,linear_quadratic
 PTV,MaxDose,AtMost,8000,,1,linear_quadratic
 Ribs,MaxDvh,AtMost,3200,1.55870555,1,linear
 Ribs,MaxDose,AtMost,4000,,1,linear
