@@ -331,7 +331,7 @@ def get_dose_range(row):
         Otherwise, return lower and upper limits of DoseLevel.
 
     """
-    if row['Roi'] == 'PTV':
+    if 'PTV' in row['Roi']:
         if row['FunctionType'] == 'MinDvh':
             return row['DoseLevel']
         min_dose = (row['DoseLevel'] + 3*4800)/4
