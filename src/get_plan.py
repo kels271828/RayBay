@@ -39,7 +39,7 @@ result = raybay.RaybayResult(
     case.CaseName,
     plan.Name,
     patient_path + case_path + 'funcs.csv',
-    ('PTV', 4800, 95), # check PTV name
+    ('PTV_4800', 4800, 95),  # check PTV name
     goals=patient_path + case_path + 'goals.csv')
 
 # Add results

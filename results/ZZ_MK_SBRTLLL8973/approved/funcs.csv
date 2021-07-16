@@ -1,1 +1,9 @@
-Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+,Roi,FunctionType,DoseLevel,PercentVolume,EudParameterA,Weight
+0,PTV_4800,MinDose,4800.0,0.0,,750.0
+1,PTV_4800,MaxDose,6500.0,0.0,,50.0
+2,External,"Dose Fall-Off [H]4800.0 cGy [L]2400.0 cGy, Low dose distance 1.5 cm",,,,1.0
+3,MAX 3600,MaxDose,3600.0,0.0,,1.0
+4,MAX 1700,MaxDose,2000.0,0.0,,1.0
+5,D2CM,MaxDose,2250.0,0.0,,150.0
+6,12,MaxDvh,2300.0,15.0,,1.0
+7,LOWER EUD RIBS,MaxEud,3500.0,,1.0,1.0
