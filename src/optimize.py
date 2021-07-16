@@ -562,15 +562,10 @@ def get_volumes(patient_path, filename):
 def get_funcs(plan):
     """Get clinical constituent functions from plan.
 
-    Currently only able to handle MinDose, MaxDose, MinDvh, MaxDvh,
-    and DoseFall-Off function types. Does not extract EudParameter A
-    values from plan.
-
     Parameters
     ----------
     plan : connect.connect_cpython.PyScriptObject
         Current treatment plan.
-
 
     Returns
     -------
@@ -590,11 +585,19 @@ def get_funcs(plan):
     for func in const_funcs:
         func_pars = func.DoseFunctionParameters
         try:
+            func_type = func_pars.FunctionType
+            if 'Eud' in func_type:
+                per_vol = np.nan
+                eud_par = func_pars.EudParameterA
+            else:
+                per_vol = func_pars.PercentVolume
+                eud_par = np.nan
             func_df = func_df.append({
                 'Roi': func.ForRegionOfInterest.Name,
-                'FunctionType': func_pars.FunctionType,
+                'FunctionType': func_type,
                 'DoseLevel': func_pars.DoseLevel,
-                'PercentVolume': func_pars.PercentVolume,
+                'PercentVolume': per_vol,
+                'EudParameterA': eud_par,
                 'Weight': func_pars.Weight
             }, ignore_index=True)
         except:
