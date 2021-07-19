@@ -503,10 +503,11 @@ def get_utility(goal_df, goal_dict, weights=None, shapes=None):
         weights = goal_df['Weight']
     if shapes is None:
         shapes = goal_df['Shape']
-    util_vec = np.zeros(len(goal_dict[0]))
-    for ii, util in enumerate(util_vec):
+    n_util = len(goal_dict[0])
+    util_vec = np.zeros(n_util)
+    for ii in range(n_util):
         for index, row in goal_df.iterrows():
-            util += weights[index]*get_term(
+            util_vec[ii] += weights[index]*get_term(
                 goal_dict[index][ii],
                 row['AcceptanceLevel'],
                 row['Type'], shapes[index])
