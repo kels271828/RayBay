@@ -7,13 +7,18 @@ sys.path.append(repo + 'src\\')
 import optimize
 
 # Patient
-#patient = repo + 'results\\SBRT_lung_minsun\\'
+patient = repo + 'results\\SBRT_lung_minsun\\'
 #patient = repo + 'results\\ZZ_MK_LLungSBRT3778\\'
 #patient = repo + 'results\\ZZ_MK_RLungSBRT4076\\'
 #patient = repo + 'results\\ZZ_MK_RULungSBRT3796\\'
 #patient = repo + 'results\\ZZ_MK_RLSBRT1931\\'
 #patient = repo + 'results\\ZZ_MK_LLLungSBRT2736\\'
-patient = repo + 'results\\ZZ_MK_LULSBRT4544\\'
+#patient = repo + 'results\\ZZ_MK_LULSBRT4544\\'
+#patient = repo + 'results\\ZZ_MK_SBRTLL0924allviolated\\'
+#patient = repo + 'results\\ZZ_MK_SBRTLL7289\\'
+#patient = repo + 'results\\ZZ_MK_SBRTLLL8973\\'
+#patient = repo + 'results\\ZZ_MK_SBRTRL7289\\'
+#patient = repo + 'results\\ZZ_MK_SBRTRUL_2928allviolate\\'
 
 # Case
 case = 'bayes\\'
@@ -30,7 +35,7 @@ with open(log_path, 'w') as fp:
     sys.stdout = fp
     result = optimize.get_plan(
         funcs=patient + case + 'funcs.csv',
-        norm=('PTV', 4800, 95),
+        norm=('PTV', 4800, 95),  # check PTV name
         goals=patient + case + 'goals_linquad.csv',
         solver=solver,
         n_calls=100,
