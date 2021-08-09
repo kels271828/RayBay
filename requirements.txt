@@ -99,7 +99,7 @@ python-jsonrpc-server==0.4.0
 python-language-server==0.36.2
 pythonnet==2.5.1
 pytz==2020.5
-pywin32==300
+pywin32==301
 pywin32-ctypes==0.2.0
 pywinpty==0.5.7
 PyYAML==5.4
