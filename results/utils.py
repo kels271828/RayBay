@@ -91,6 +91,10 @@ def get_log_path(plan_type):
     return log_path.replace('pkl', 'txt')
 
 
+def get_percent_diff(row, value, reference):
+    return 100*(row[value] - row[reference])/row[reference]
+
+
 def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
     """Get index of best utility with based on stopping condition."""
     if plan_type in ['clinical', 'default']:
@@ -101,13 +105,3 @@ def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
         stop_idx = get_stop_idx(util_vec)
         util_vec = util_vec[:stop_idx + 1]
     return np.argmin(util_vec)
-
-
-
-
-
-
-
-
-
-
