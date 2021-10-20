@@ -53,7 +53,7 @@ def get_log_path(plan_type):
 
 
 def get_percent_diff(row, value, reference):
-    return 100*(row[value] - row[reference])/row[reference]
+    return 100*(row[value] - row[reference])/np.abs(row[reference])
 
 
 ### Time Results ###
