@@ -36,6 +36,9 @@ goal_names = [
 ]
 
 
+par_names = goal_names[:5] + goal_names[6:]
+
+
 def get_plan_path(plan_type):
     if plan_type == 'clinical':
         return '/approved/res_approved.pkl'
@@ -60,6 +63,7 @@ def get_percent_diff(row, value, reference):
 
 
 def get_time_df(plan_type, stop=False):
+    """Get planning time for all patients."""
     df = pd.DataFrame({
         'patient': patients,
         'plan_type': len(patients)*[plan_type],
@@ -70,18 +74,12 @@ def get_time_df(plan_type, stop=False):
 
 def get_plan_time(patient, plan_type, stop=False):
     """Get planning time."""
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
     if stop:
-        return get_stop_time(patient, plan_type)
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+        util_vec = plan.opt_result.func_vals
+        ii = get_stop_idx(util_vec)
+        return get_log_time(ii, patient, plan_type)
     return plan.time/3600.0
-
-
-def get_stop_time(patient, plan_type):
-    """Get planning time with stopping condition."""
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
-    util_vec = plan.opt_result.func_vals
-    ii = get_stop_idx(util_vec)
-    return get_log_time(ii, patient, plan_type)
 
 
 def get_stop_idx(util_vec, n=20, m=15, p=1):
@@ -114,6 +112,7 @@ def get_log_time(ii, patient, plan_type):
 
 
 def get_util_df(plan_type, stop=False):
+    """Get utility for all patients."""
     df = pd.DataFrame({
         'patient': patients,
         'plan_type': len(patients)*[plan_type],
@@ -121,24 +120,18 @@ def get_util_df(plan_type, stop=False):
                       for patient in patients]})
     return df
 
+
 def get_plan_util(patient, plan_type, stop=False):
     """Get plan utility."""
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
     if plan_type in ['clinical', 'default']:
-        plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
         ref_plan = np.load(patient + get_plan_path('random'), allow_pickle=True)
         return raybay.get_utility(ref_plan.goal_df, plan.goal_dict)[0]
     if stop:
-        return get_stop_util(patient, plan_type)
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+        ii = get_best_idx(patient, plan_type, stop=True)
+        util_vec = plan.opt_result.func_vals
+        return -util_vec[ii]
     return -plan.opt_result.fun
-
-
-def get_stop_util(patient, plan_type):
-    """Get plan utility with stopping condition."""
-    ii = get_best_idx(patient, plan_type, stop=True)
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
-    util_vec = plan.opt_result.func_vals
-    return -util_vec[ii]
 
 
 def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
@@ -151,3 +144,50 @@ def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
         stop_idx = get_stop_idx(util_vec)
         util_vec = util_vec[:stop_idx + 1]
     return np.argmin(util_vec)
+
+
+### Parameter Results ###
+
+
+def get_pars_df(plan_type, stop=False):
+    """Get plan parameters for all patients."""
+    df = pd.concat([get_plan_pars(patient, plan_type, stop)
+                    for patient in patients])
+    return df
+
+
+def get_plan_pars(patient, plan_type, stop=False):
+    """Get plan parameters."""
+    df = pd.DataFrame({
+        'patient': len(par_names)*[patient],
+        'plan_type': len(par_names)*[plan_type],
+        'par_name': par_names,
+        'par_val': get_par_vals(patient, plan_type, stop)})
+    return df
+
+
+def get_par_vals(patient, plan_type, stop=False):
+    """Get vector of plan parameters."""
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    if stop:
+        ii = get_best_idx(patient, plan_type, stop=True)
+        x_iters = plan.opt_result.x_iters
+        return x_iters[ii]
+    return plan.opt_result.x
+
+
+def get_goal_val(row):
+    plan = np.load(row['patient'] + get_plan_path(row['plan_type']), allow_pickle=True)
+    ii = get_par_idx(row)
+    goal_df = plan.goal_df
+    return goal_df.loc[ii]['AcceptanceLevel']
+
+
+def get_par_idx(row):
+    for ii, par_name in enumerate(par_names):
+        if row['par_name'] == par_name:
+            if ii < 5:
+                return ii
+            if ii >= 5:
+                return ii + 1
+    return -1
