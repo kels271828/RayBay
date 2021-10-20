@@ -1,4 +1,11 @@
+import sys
+
 import numpy as np
+import pandas as pd
+
+sys.path.append('../src')
+import raybay
+
 
 patients = [
     'SBRT_lung_minsun',
@@ -13,7 +20,6 @@ patients = [
     'ZZ_MK_SBRTRUL_2928allviolate'
 ]
 
-plan_types = ['clinical', 'default', 'random', 'bayes']
 
 goal_names = [
     '1_Chestwall_MaxDVH',
@@ -39,13 +45,31 @@ def get_plan_path(plan_type):
         return '/bayes/res_linquad_dummy_minimize.pkl'
     if plan_type == 'bayes':
         return '/bayes/res_linquad_gp_minimize.pkl'
-    raise Exception(f"Invalid plan_type '{plan_type}'.")
+
+
+def get_log_path(plan_type):
+    log_path = get_plan_path(plan_type).replace('res', 'log')
+    return log_path.replace('pkl', 'txt')
+
+
+def get_percent_diff(row, value, reference):
+    return 100*(row[value] - row[reference])/row[reference]
+
+
+### Time Results ###
+
+
+def get_time_df(plan_type, stop=False):
+    df = pd.DataFrame({
+        'patient': patients,
+        'plan_type': len(patients)*[plan_type],
+        'plan_time': [get_plan_time(patient, plan_type, stop)
+                      for patient in patients]})
+    return df
 
 
 def get_plan_time(patient, plan_type, stop=False):
     """Get planning time."""
-    if plan_type in ['clinical', 'default']:
-        raise Exception(f"Time not recorded for {plan_type} plans.")
     if stop:
         return get_stop_time(patient, plan_type)
     plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
@@ -72,7 +96,7 @@ def get_stop_idx(util_vec, n=20, m=15, p=1):
 
 
 def get_log_time(ii, patient, plan_type):
-    """Get planning time used for `ii` iterations."""
+    """Get planning time for `ii` iterations."""
     with open(patient + get_log_path(plan_type)) as f:
         log = f.readlines()
     count = 0
@@ -86,17 +110,31 @@ def get_log_time(ii, patient, plan_type):
     return total_time/3600.0
 
 
-def get_log_path(plan_type):
-    log_path = get_plan_path(plan_type).replace('res', 'log')
-    return log_path.replace('pkl', 'txt')
+### Utility Results ###
 
 
-def get_percent_diff(row, value, reference):
-    return 100*(row[value] - row[reference])/row[reference]
+def get_plan_util(patient, plan_type, stop=False):
+    """Get plan utility."""
+    if plan_type in ['clinical', 'default']:
+        plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+        ref_plan = np.load(patient + get_plan_path('random'), allow_pickle=True)
+        return raybay.get_utility(ref_plan.goal_df, plan.goal_dict)[0]
+    if stop:
+        return get_stop_util(patient, plan_type)
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    return -plan.opt_result.fun
+
+
+def get_stop_util(patient, plan_type):
+    """Get plan utility with stopping condition."""
+    ii = get_best_idx(patient, plan_type, stop=True)
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    util_vec = plan.opt_result.func_vals
+    return -util_vec[ii]
 
 
 def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
-    """Get index of best utility with based on stopping condition."""
+    """Get index of best utility based on stopping condition."""
     if plan_type in ['clinical', 'default']:
         return 0
     plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
