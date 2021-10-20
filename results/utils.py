@@ -113,6 +113,14 @@ def get_log_time(ii, patient, plan_type):
 ### Utility Results ###
 
 
+def get_util_df(plan_type, stop=False):
+    df = pd.DataFrame({
+        'patient': patients,
+        'plan_type': len(patients)*[plan_type],
+        'plan_util': [get_plan_util(patient, plan_type, stop)
+                      for patient in patients]})
+    return df
+
 def get_plan_util(patient, plan_type, stop=False):
     """Get plan utility."""
     if plan_type in ['clinical', 'default']:
