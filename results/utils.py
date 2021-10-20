@@ -39,6 +39,10 @@ goal_names = [
 par_names = goal_names[:5] + goal_names[6:]
 
 
+def get_plan(patient, plan_type):
+    return np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+
+
 def get_plan_path(plan_type):
     if plan_type == 'clinical':
         return '/approved/res_approved.pkl'
@@ -74,7 +78,7 @@ def get_time_df(plan_type, stop=False):
 
 def get_plan_time(patient, plan_type, stop=False):
     """Get planning time."""
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    plan = get_plan(patient, plan_type)
     if stop:
         util_vec = plan.opt_result.func_vals
         ii = get_stop_idx(util_vec)
@@ -123,7 +127,7 @@ def get_util_df(plan_type, stop=False):
 
 def get_plan_util(patient, plan_type, stop=False):
     """Get plan utility."""
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    plan = get_plan(patient, plan_type)
     if plan_type in ['clinical', 'default']:
         ref_plan = np.load(patient + get_plan_path('random'), allow_pickle=True)
         return raybay.get_utility(ref_plan.goal_df, plan.goal_dict)[0]
@@ -138,7 +142,7 @@ def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
     """Get index of best utility based on stopping condition."""
     if plan_type in ['clinical', 'default']:
         return 0
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    plan = get_plan(patient, plan_type)
     util_vec = plan.opt_result.func_vals
     if stop:
         stop_idx = get_stop_idx(util_vec)
@@ -170,7 +174,7 @@ def get_plan_pars(patient, plan_type, stop=False):
 
 def get_par_vals(patient, plan_type, stop=False):
     """Get vector of plan parameters."""
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    plan = get_plan(patient, plan_type)
     if stop:
         ii = get_best_idx(patient, plan_type, stop=True)
         x_iters = plan.opt_result.x_iters
@@ -179,5 +183,5 @@ def get_par_vals(patient, plan_type, stop=False):
 
 
 def get_goal_vals(patient, plan_type):
-    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    plan = get_plan(patient, plan_type)
     return plan.goal_df['AcceptanceLevel'].tolist()
