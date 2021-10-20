@@ -158,11 +158,13 @@ def get_pars_df(plan_type, stop=False):
 
 def get_plan_pars(patient, plan_type, stop=False):
     """Get plan parameters."""
+    goal_vals = get_goal_vals(patient, plan_type)
     df = pd.DataFrame({
         'patient': len(par_names)*[patient],
         'plan_type': len(par_names)*[plan_type],
         'par_name': par_names,
-        'par_val': get_par_vals(patient, plan_type, stop)})
+        'par_val': get_par_vals(patient, plan_type, stop),
+        'goal_val': goal_vals[:5] + goal_vals[6:]})
     return df
 
 
@@ -176,18 +178,6 @@ def get_par_vals(patient, plan_type, stop=False):
     return plan.opt_result.x
 
 
-def get_goal_val(row):
-    plan = np.load(row['patient'] + get_plan_path(row['plan_type']), allow_pickle=True)
-    ii = get_par_idx(row)
-    goal_df = plan.goal_df
-    return goal_df.loc[ii]['AcceptanceLevel']
-
-
-def get_par_idx(row):
-    for ii, par_name in enumerate(par_names):
-        if row['par_name'] == par_name:
-            if ii < 5:
-                return ii
-            if ii >= 5:
-                return ii + 1
-    return -1
+def get_goal_vals(patient, plan_type):
+    plan = np.load(patient + get_plan_path(plan_type), allow_pickle=True)
+    return plan.goal_df['AcceptanceLevel'].tolist()
