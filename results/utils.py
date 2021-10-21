@@ -183,5 +183,36 @@ def get_par_vals(patient, plan_type, stop=False):
 
 
 def get_goal_vals(patient, plan_type):
+    """Get plan clinical goal values."""
     plan = get_plan(patient, plan_type)
     return plan.goal_df['AcceptanceLevel'].tolist()
+
+
+### Dose Results ###
+
+
+def get_dose_df(plan_type, stop=False):
+    """Get plan dose values for all patients."""
+    df = pd.concat([get_plan_dose(patient, plan_type, stop)
+                    for patient in patients])
+    return df
+
+
+def get_plan_dose(patient, plan_type, stop=False):
+    """Get plan dose values."""
+    goal_vals = get_goal_vals(patient, plan_type)
+    df = pd.DataFrame({
+        'patient': len(par_names)*[patient],
+        'plan_type': len(par_names)*[plan_type],
+        'dose_name': par_names,
+        'dose_val': get_dose_vals(patient, plan_type, stop),
+        'goal_val': goal_vals[:5] + goal_vals[6:]})
+    return df
+
+
+def get_dose_vals(patient, plan_type, stop=False):
+    """Get vector of plan dose values."""
+    plan = get_plan(patient, plan_type)
+    ii = get_best_idx(patient, plan_type, stop)
+    dose_vals = [plan.goal_dict[goal][ii] for goal in plan.goal_dict]
+    return dose_vals[:5] + dose_vals[6:]
