@@ -1,7 +1,9 @@
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 sys.path.append('../src')
 import raybay
@@ -216,3 +218,17 @@ def get_dose_vals(patient, plan_type, stop=False):
     ii = get_best_idx(patient, plan_type, stop)
     dose_vals = [plan.goal_dict[goal][ii] for goal in plan.goal_dict]
     return dose_vals[:5] + dose_vals[6:]
+
+
+def heatmap(df, col, col_types, diff_type, label):
+    for patient in patients:
+        df_sub = df[df['patient'] == patient]
+        dose_vals = np.array([df_sub[df_sub[col] == col_type][diff_type].values
+                              for col_type in col_types])
+        fig, ax = plt.subplots(figsize=(dose_vals.shape[1], dose_vals.shape[0]))
+        sns.heatmap(dose_vals, cmap=sns.diverging_palette(220, 20, n=256),
+                    center=0, annot=True, fmt=".2f", ax=ax,
+                    cbar_kws={'label': f"Percent Difference from {label}"})
+        ax.set_xticklabels(par_names, rotation=90)
+        ax.set_yticklabels(col_types, rotation=0)
+        ax.set_title(patient)
