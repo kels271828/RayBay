@@ -74,6 +74,8 @@ def get_time_df(plan_type, stop=False):
         'patient': patients,
         'plan_type': len(patients)*[plan_type],
         'plan_time': [get_plan_time(patient, plan_type, stop)
+                      for patient in patients],
+        'plan_iter': [get_plan_iter(patient, plan_type, stop)
                       for patient in patients]})
     return df
 
@@ -86,6 +88,15 @@ def get_plan_time(patient, plan_type, stop=False):
         ii = get_stop_idx(util_vec)
         return get_log_time(ii, patient, plan_type)
     return plan.time/3600.0
+
+
+def get_plan_iter(patient, plan_type, stop=False):
+    if stop:
+        plan = get_plan(patient, plan_type)
+        util_vec = plan.opt_result.func_vals
+        ii = get_stop_idx(util_vec)
+        return ii + 1
+    return 100
 
 
 def get_stop_idx(util_vec, n=20, m=15, p=1):
