@@ -24,15 +24,15 @@ patients = [
 
 
 goal_names = [
-    '1_Chestwall_MaxDVH',
+    '1_ChestWall_MaxDVH',
     '2_D2cm_MaxDose',
     '3_Esophagus_MaxDVH',
     '4_Lungs_MaxDVH',
     '5_Lungs_MaxDVH',
     '6_PTV_MinDVH',
     '7_PTV_MaxDose',
-    '8_Rib_MaxDVH',
-    '9_Rib_MaxDose',
+    '8_Ribs_MaxDVH',
+    '9_Ribs_MaxDose',
     '10_SpinalCord_MaxDVH',
     '11_SpinalCord_MaxDose'
 ]
