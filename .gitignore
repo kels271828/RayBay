@@ -126,4 +126,9 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
-.pyre/
+pyre/
+
+# Other
+*.png
+*.rtf
+*.swp
