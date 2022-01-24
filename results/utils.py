@@ -1,3 +1,4 @@
+"""Functions for analyzing results."""
 import sys
 
 import matplotlib.pyplot as plt
@@ -91,6 +92,8 @@ def get_plan_time(patient, plan_type, stop=False):
 
 
 def get_plan_iter(patient, plan_type, stop=False):
+    if plan_type in ['clinical', 'default']:
+        return np.nan
     if stop:
         plan = get_plan(patient, plan_type)
         util_vec = plan.opt_result.func_vals
@@ -151,7 +154,7 @@ def get_plan_util(patient, plan_type, stop=False):
     return -plan.opt_result.fun
 
 
-def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
+def get_best_idx(patient, plan_type, stop=False):
     """Get index of best utility based on stopping condition."""
     if plan_type in ['clinical', 'default']:
         return 0
@@ -161,6 +164,19 @@ def get_best_idx(patient, plan_type, stop=False, n=20, m=15, p=1):
         stop_idx = get_stop_idx(util_vec)
         util_vec = util_vec[:stop_idx + 1]
     return np.argmin(util_vec)
+
+
+### Iteration Results ###
+
+
+def get_iter_df(plan_type, stop=False):
+    """Get iteration counts for all patients."""
+    df = pd.DataFrame({
+        'patient': patients,
+        'plan_type': len(patients)*[plan_type],
+        'plan_iter': [get_plan_iter(patient, plan_type, stop)
+                      for patient in patients]})
+    return df
 
 
 ### Parameter Results ###
@@ -236,7 +252,7 @@ def heatmap(df, col, col_types, diff_type, label):
         df_sub = df[df['patient'] == patient]
         dose_vals = np.array([df_sub[df_sub[col] == col_type][diff_type].values
                               for col_type in col_types])
-        fig, ax = plt.subplots(figsize=(dose_vals.shape[1], dose_vals.shape[0]))
+        _, ax = plt.subplots(figsize=(dose_vals.shape[1], dose_vals.shape[0]))
         sns.heatmap(dose_vals, cmap=sns.diverging_palette(220, 20, n=256),
                     center=0, annot=True, fmt=".2f", ax=ax,
                     cbar_kws={'label': f"Percent Difference from {label}"})
