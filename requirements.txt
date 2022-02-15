@@ -35,7 +35,7 @@ immutables==0.14
 importlib-metadata==3.3.0
 intervaltree==3.1.0
 ipykernel==5.4.2
-ipython==7.16.1
+ipython==7.16.3
 ipython-genutils==0.2.0
 isort==5.7.0
 jedi==0.17.2
